@@ -1,0 +1,82 @@
+import { useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useSession } from '../../context/SessionContext.jsx'
+
+function DotsLoader() {
+  return (
+    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+      {[0, 1, 2].map(i => (
+        <div key={i} style={{
+          width: 8, height: 8, borderRadius: '50%', background: '#c8e6c0',
+          animation: `wrdot 1.2s ease-in-out ${i * 0.2}s infinite`,
+        }} />
+      ))}
+      <style>{`
+        @keyframes wrdot {
+          0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+          40%            { opacity: 1;   transform: scale(1); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+export default function WaitingRoom() {
+  const { code } = useParams()
+  const navigate = useNavigate()
+  const { participantGroup, currentStep } = useSession()
+
+  useEffect(() => {
+    if (currentStep === 2) {
+      navigate(`/session/${code}/calculator`, { replace: true })
+    }
+  }, [currentStep, code, navigate])
+
+  return (
+    <div style={{
+      minHeight: 'calc(100vh - 52px)',
+      background: '#ffffff',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '2rem',
+      textAlign: 'center',
+    }}>
+      <div style={{
+        fontWeight: 900, fontSize: '1rem', letterSpacing: '0.1em',
+        textTransform: 'uppercase', color: '#2d5a27', marginBottom: '2.5rem',
+      }}>
+        CO2 SPRINT *
+      </div>
+
+      <div style={{ fontSize: '3.5rem', marginBottom: '1.5rem', lineHeight: 1 }}>🌿</div>
+
+      <h1 style={{
+        fontWeight: 900, fontSize: '1.35rem', textTransform: 'uppercase',
+        marginBottom: '0.75rem', color: '#1a1a1a', letterSpacing: '0.02em',
+      }}>
+        Esperando al facilitador...
+      </h1>
+
+      <p style={{
+        fontSize: '0.88rem', color: '#888',
+        maxWidth: 320, lineHeight: 1.65, marginBottom: '2rem', margin: '0 0 2rem',
+      }}>
+        El taller comenzará en breve. Mantén esta pantalla abierta.
+      </p>
+
+      {participantGroup && (
+        <div style={{
+          background: '#f0f7ee', border: '1.5px solid #c8e6c0', borderRadius: 999,
+          padding: '0.45rem 1.25rem', fontSize: '0.8rem', fontWeight: 700,
+          color: '#2d5a27', letterSpacing: '0.04em', marginBottom: '2.5rem',
+        }}>
+          Estás en el {participantGroup}
+        </div>
+      )}
+
+      <DotsLoader />
+    </div>
+  )
+}

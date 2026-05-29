@@ -1,0 +1,221 @@
+import { useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSession } from '../../context/SessionContext.jsx'
+import api from '../../utils/api.js'
+
+const s = {
+  page: {
+    flex: 1,
+    background: '#f5f5f0',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '2rem 1rem',
+    minHeight: 'calc(100vh - 60px)',
+  },
+  card: {
+    background: '#fff',
+    width: '100%',
+    maxWidth: '390px',
+    borderRadius: '12px',
+    padding: '2.5rem 2rem',
+  },
+  logo: {
+    fontWeight: 900,
+    fontSize: '1.6rem',
+    letterSpacing: '-0.02em',
+    marginBottom: '0.3rem',
+    textTransform: 'uppercase',
+  },
+  asterisk: { color: '#2d5a27' },
+  tagline: {
+    fontSize: '0.75rem',
+    color: '#999',
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+    marginBottom: '2.5rem',
+  },
+  field: { marginBottom: '1.8rem' },
+  label: {
+    display: 'block',
+    fontSize: '0.72rem',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.1em',
+    color: '#666',
+    marginBottom: '0.5rem',
+  },
+  hint: {
+    fontSize: '0.68rem',
+    color: '#bbb',
+    marginTop: '0.35rem',
+    lineHeight: 1.5,
+  },
+  input: {
+    width: '100%',
+    border: 'none',
+    borderBottom: '1px solid #e0e0d8',
+    padding: '0.6rem 0',
+    fontSize: '1.1rem',
+    background: 'transparent',
+    outline: 'none',
+    letterSpacing: '0.05em',
+    fontWeight: 700,
+  },
+  groupRow: {
+    display: 'flex',
+    gap: '0.5rem',
+    flexWrap: 'wrap',
+  },
+  chip: (active) => ({
+    padding: '0.45rem 1rem',
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    letterSpacing: '0.06em',
+    borderRadius: '999px',
+    background: active ? '#2d5a27' : '#f0f0f0',
+    color: active ? '#fff' : '#666',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  }),
+  btn: {
+    width: '100%',
+    background: '#2d5a27',
+    color: '#fff',
+    padding: '1rem',
+    fontSize: '0.9rem',
+    letterSpacing: '0.1em',
+    borderRadius: '2px',
+    marginTop: '0.5rem',
+  },
+  error: {
+    fontSize: '0.78rem',
+    color: '#cc4444',
+    marginTop: '0.35rem',
+  },
+  fieldError: {
+    borderBottom: '1px solid #cc4444',
+  },
+}
+
+export default function JoinSession() {
+  const [searchParams] = useSearchParams()
+  const [code, setCode]       = useState(() => searchParams.get('code') || '')
+  const [name, setName]       = useState('')
+  const [nameError, setNameError] = useState('')
+  const [group, setGroup]     = useState('')
+  const [groups, setGroups]   = useState([])
+  const [codeError, setCodeError] = useState('')
+  const [groupError, setGroupError] = useState('')
+  const { joinSession } = useSession()
+  const navigate = useNavigate()
+
+  // Fetch session groups when code is complete
+  useEffect(() => {
+    const clean = code.replace('-', '')
+    if (clean.length < 7) { setGroups([]); return }
+    api.get(`/api/sessions/${code}/info`)
+      .then(res => {
+        setGroups(res.data.groups || [])
+        setCodeError('')
+      })
+      .catch(() => {
+        setGroups([])
+        setCodeError('Sesión no encontrada')
+      })
+  }, [code])
+
+  function formatCode(val) {
+    const clean = val.toUpperCase().replace(/[^A-Z0-9]/g, '')
+    if (clean.length <= 3) return clean
+    return clean.slice(0, 3) + '-' + clean.slice(3, 7)
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault()
+    let valid = true
+
+    if (!code || code.length < 7) {
+      setCodeError('Ingresa un código válido (ej: ECO-4872)')
+      valid = false
+    }
+    if (!name.trim()) {
+      setNameError('Por favor introduce tu nombre o alias')
+      valid = false
+    }
+    if (!group) {
+      setGroupError('Selecciona un grupo')
+      valid = false
+    }
+    if (!valid) return
+
+    joinSession(code, name.trim(), group)
+    navigate(`/session/${code}/waiting`)
+  }
+
+  return (
+    <div style={s.page}>
+      <div style={s.card}>
+        <div style={s.logo}>
+          CO2 Sprint <span style={s.asterisk}>*</span>
+        </div>
+        <p style={s.tagline}>Calculadora de huella de carbono</p>
+
+        <form onSubmit={handleSubmit}>
+          <div style={s.field}>
+            <label style={s.label} htmlFor="code">Código de sesión</label>
+            <input
+              id="code"
+              style={{ ...s.input, ...(codeError ? s.fieldError : {}) }}
+              type="text"
+              value={code}
+              onChange={e => { setCode(formatCode(e.target.value)); setCodeError('') }}
+              placeholder="ECO-4872"
+              maxLength={8}
+            />
+            {codeError && <div style={s.error}>{codeError}</div>}
+          </div>
+
+          <div style={s.field}>
+            <label style={s.label} htmlFor="name">Tu nombre o alias</label>
+            <input
+              id="name"
+              style={{ ...s.input, ...(nameError ? s.fieldError : {}) }}
+              type="text"
+              value={name}
+              onChange={e => { setName(e.target.value); setNameError('') }}
+              placeholder="ej. María, M.García, Participante 7..."
+              maxLength={40}
+            />
+            {nameError
+              ? <div style={s.error}>{nameError}</div>
+              : <div style={s.hint}>Solo visible para ti en tus resultados y para el facilitador en el ranking.</div>
+            }
+          </div>
+
+          {groups.length > 0 && (
+            <div style={s.field}>
+              <label style={s.label}>Tu grupo</label>
+              <div style={s.groupRow}>
+                {groups.map(g => (
+                  <button
+                    key={g}
+                    type="button"
+                    style={s.chip(group === g)}
+                    onClick={() => { setGroup(g); setGroupError('') }}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
+              {groupError && <div style={{ ...s.error, marginTop: '0.5rem' }}>{groupError}</div>}
+            </div>
+          )}
+
+          <button style={s.btn} type="submit">Unirme →</button>
+        </form>
+      </div>
+    </div>
+  )
+}
