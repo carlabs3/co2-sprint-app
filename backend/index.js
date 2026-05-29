@@ -43,8 +43,10 @@ httpServer.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`)
 })
 
+const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGODB_URL
+
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(MONGODB_URI)
   .then(async () => {
     console.log('MongoDB connected')
     await seedAdmin()
