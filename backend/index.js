@@ -14,15 +14,27 @@ import User from './src/models/User.js'
 
 dotenv.config()
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'https://co2-sprint-app.vercel.app',
+  process.env.FRONTEND_URL
+].filter(Boolean)
+
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  origin: allowedOrigins,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 }
 
 const app = express()
 const httpServer = createServer(app)
 const io = new Server(httpServer, {
-  cors: corsOptions,
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
 })
 
 app.use(cors(corsOptions))
