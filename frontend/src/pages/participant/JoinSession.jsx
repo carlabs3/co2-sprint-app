@@ -101,7 +101,8 @@ const s = {
 
 export default function JoinSession() {
   const [searchParams] = useSearchParams()
-  const [code, setCode]       = useState(() => searchParams.get('code') || '')
+  const codeFromUrl = searchParams.get('code')
+  const [code, setCode]       = useState('')
   const [name, setName]       = useState('')
   const [nameError, setNameError] = useState('')
   const [group, setGroup]     = useState('')
@@ -110,6 +111,10 @@ export default function JoinSession() {
   const [groupError, setGroupError] = useState('')
   const { joinSession } = useSession()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (codeFromUrl) setCode(codeFromUrl.toUpperCase())
+  }, [codeFromUrl])
 
   // Fetch session groups when code is complete
   useEffect(() => {

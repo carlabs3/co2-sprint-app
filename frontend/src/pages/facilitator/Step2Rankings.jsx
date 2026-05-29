@@ -330,8 +330,9 @@ export default function Step2Rankings() {
   const [ranking, setRanking]         = useState([])
   const [groups, setGroups]           = useState([])
   const [totalJoined, setTotalJoined] = useState(0)
-  const [showRanking, setShowRanking] = useState(false)
-  const [revealed, setRevealed]       = useState(false)
+  const [showRanking, setShowRanking]         = useState(false)
+  const [revealed, setRevealed]               = useState(false)
+  const [calculatorStarted, setCalculatorStarted] = useState(false)
 
   const joinUrl = `${window.location.origin}/join?code=${code}`
 
@@ -375,6 +376,12 @@ export default function Step2Rankings() {
     }
   }, [code])
 
+  async function handleStartCalculator() {
+    setCalculatorStarted(true)
+    socket.emit('step:change', { sessionCode: code, step: 2 })
+    try { await api.patch(`/api/sessions/${code}/step`, { step: 2 }) } catch {}
+  }
+
   async function handleReveal() {
     setRevealed(true)
     setShowRanking(true)
@@ -412,6 +419,16 @@ export default function Step2Rankings() {
       </div>
 
       <div style={{ width: '100%', borderTop: '1px solid #e0e0d8' }} />
+
+      {!revealed && (
+        <button
+          onClick={calculatorStarted ? undefined : handleStartCalculator}
+          disabled={calculatorStarted}
+          style={{ width: '100%', background: calculatorStarted ? '#eaf3de' : '#1a3d16', color: calculatorStarted ? '#2d5a27' : '#fff', border: calculatorStarted ? '1px solid #c8e6c0' : 'none', padding: '0.85rem', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: calculatorStarted ? 'default' : 'pointer' }}
+        >
+          {calculatorStarted ? '✓ Calculadora activa' : 'Iniciar calculadora'}
+        </button>
+      )}
 
       <button
         onClick={revealed ? undefined : handleReveal}

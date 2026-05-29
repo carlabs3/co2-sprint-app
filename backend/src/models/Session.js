@@ -6,6 +6,7 @@ const sessionSchema = new Schema({
   name: { type: String, default: '' },
   groups: [String],
   status: { type: String, enum: ['waiting', 'active', 'closed'], default: 'waiting' },
+  currentStep: { type: Number, default: 1 },
   resultsRevealed: { type: Boolean, default: false },
 }, { timestamps: true })
 

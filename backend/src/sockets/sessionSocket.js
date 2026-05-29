@@ -35,14 +35,21 @@ export function registerSocketHandlers(io) {
         const count = await Participant.countDocuments({ sessionCode: code })
         io.to(code).emit('participant:joined', { count })
 
-        // If session is already active, let this participant know immediately
-        const session = await Session.findOne({ code }, 'status')
-        if (session?.status === 'active') {
-          socket.emit('step:change', { step: 2 })
+        // If calculator already started, send current step immediately
+        const session = await Session.findOne({ code }, 'status currentStep')
+        if (session?.currentStep > 1) {
+          socket.emit('step:change', { step: session.currentStep })
         }
       } catch {
         socket.emit('error', { message: 'Error al unirse a la sesión' })
       }
+    })
+
+    socket.on('step:change', async ({ sessionCode, step }) => {
+      try {
+        await Session.findOneAndUpdate({ code: sessionCode }, { currentStep: step })
+        io.to(sessionCode).emit('step:change', { step })
+      } catch {}
     })
 
     socket.on('results:reveal', ({ sessionCode }) => {

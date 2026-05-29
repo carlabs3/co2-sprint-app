@@ -93,6 +93,21 @@ export default function sessionsRouter(io) {
     }
   })
 
+  router.patch('/:code/step', async (req, res) => {
+    try {
+      const { step } = req.body
+      const session = await Session.findOneAndUpdate(
+        { code: req.params.code, facilitatorId: req.user.id },
+        { currentStep: step },
+        { new: true }
+      )
+      if (!session) return res.status(404).json({ error: 'Sesión no encontrada' })
+      res.json({ ok: true })
+    } catch {
+      res.status(500).json({ error: 'Error al actualizar step' })
+    }
+  })
+
   router.delete('/:code', async (req, res) => {
     try {
       const session = await Session.findOneAndUpdate(
