@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 function formatCode(val) {
   const clean = val.toUpperCase().replace(/[^A-Z0-9]/g, '')
@@ -9,8 +9,14 @@ function formatCode(val) {
 
 export default function Home() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const codeFromUrl = searchParams.get('code')
   const [code, setCode]   = useState('')
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (codeFromUrl) setCode(formatCode(codeFromUrl))
+  }, [codeFromUrl])
 
   function handleCodeChange(e) {
     setCode(formatCode(e.target.value))

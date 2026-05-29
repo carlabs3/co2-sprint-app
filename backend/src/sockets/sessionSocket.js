@@ -19,8 +19,12 @@ const AREA_KEY_MAP = {
 
 export function registerSocketHandlers(io) {
   io.on('connection', (socket) => {
-    socket.on('facilitator:join', ({ code }) => {
+    socket.on('facilitator:join', async ({ code }) => {
       socket.join(code)
+      try {
+        const count = await Participant.countDocuments({ sessionCode: code })
+        socket.emit('participant:joined', { count })
+      } catch {}
     })
 
     socket.on('session:join', async ({ code, name, group }) => {

@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useSession } from '../../context/SessionContext.jsx'
+import { socket } from '../../utils/socket.js'
 
 function DotsLoader() {
   return (
@@ -31,6 +32,13 @@ export default function WaitingRoom() {
       navigate(`/session/${code}/calculator`, { replace: true })
     }
   }, [currentStep, code, navigate])
+
+  useEffect(() => {
+    socket.on('results:revealed', () => {
+      navigate(`/session/${code}/results`, { replace: true })
+    })
+    return () => socket.off('results:revealed')
+  }, [code, navigate])
 
   return (
     <div style={{

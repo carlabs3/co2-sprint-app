@@ -334,7 +334,7 @@ export default function Step2Rankings() {
   const [revealed, setRevealed]               = useState(false)
   const [calculatorStarted, setCalculatorStarted] = useState(false)
 
-  const joinUrl = `${window.location.origin}/join?code=${code}`
+  const joinUrl = `${window.location.origin}/?code=${code}`
 
   useEffect(() => {
     api.get(`/api/results/${code}/ranking`)
@@ -420,27 +420,31 @@ export default function Step2Rankings() {
 
       <div style={{ width: '100%', borderTop: '1px solid #e0e0d8' }} />
 
-      {!revealed && (
+      {!calculatorStarted && !revealed && (
         <button
-          onClick={calculatorStarted ? undefined : handleStartCalculator}
-          disabled={calculatorStarted}
-          style={{ width: '100%', background: calculatorStarted ? '#eaf3de' : '#1a3d16', color: calculatorStarted ? '#2d5a27' : '#fff', border: calculatorStarted ? '1px solid #c8e6c0' : 'none', padding: '0.85rem', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: calculatorStarted ? 'default' : 'pointer' }}
+          onClick={handleStartCalculator}
+          style={{ width: '100%', background: '#1a3d16', color: '#fff', border: 'none', padding: '0.85rem', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: 'pointer' }}
         >
-          {calculatorStarted ? '✓ Calculadora activa' : 'Iniciar calculadora'}
+          Iniciar calculadora
+        </button>
+      )}
+      {calculatorStarted && (
+        <button
+          disabled
+          style={{ width: '100%', background: '#eaf3de', color: '#2d5a27', border: '1px solid #c8e6c0', padding: '0.85rem', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: 'default' }}
+        >
+          ✓ Calculadora activa
         </button>
       )}
 
-      <button
-        onClick={revealed ? undefined : handleReveal}
-        disabled={revealed}
-        style={{ width: '100%', background: revealed ? '#eaf3de' : '#2d5a27', color: revealed ? '#2d5a27' : '#fff', border: revealed ? '1px solid #c8e6c0' : 'none', padding: '0.85rem', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: revealed ? 'default' : 'pointer' }}
-      >
-        {revealed ? '✓ Resultados revelados' : 'Revelar resultados'}
-      </button>
-      {!revealed && (
-        <div style={{ fontSize: '0.68rem', color: '#bbb', textAlign: 'center', letterSpacing: '0.03em', lineHeight: 1.5 }}>
-          Los participantes verán su huella al pulsar
-        </div>
+      {calculatorStarted && (
+        <button
+          onClick={revealed ? undefined : handleReveal}
+          disabled={revealed}
+          style={{ width: '100%', background: revealed ? '#eaf3de' : '#2d5a27', color: revealed ? '#2d5a27' : '#fff', border: revealed ? '1px solid #c8e6c0' : 'none', padding: '0.85rem', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: revealed ? 'default' : 'pointer' }}
+        >
+          {revealed ? '✓ Resultados revelados' : `Revelar resultados (${completed} completados)`}
+        </button>
       )}
 
       <button onClick={handleClose} style={{ width: '100%', background: 'transparent', color: '#cc4444', border: '1px solid #e0e0d8', padding: '0.75rem', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', marginTop: 'auto', cursor: 'pointer' }}>
@@ -453,44 +457,20 @@ export default function Step2Rankings() {
   if (!showRanking) return (
     <div style={{ flex: 1, display: 'flex', background: '#ffffff', minHeight: 'calc(100vh - 52px)' }}>
       {sidebar}
-      <div style={{ flex: 1, padding: '2.5rem', overflow: 'auto' }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <div style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 6vw, 4rem)', lineHeight: 1, color: '#1a1a1a' }}>
-            {total === 0 ? '–' : `${completed} / ${total}`}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2.5rem' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: 900, fontSize: 'clamp(5rem, 12vw, 9rem)', lineHeight: 1, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
+            {total === 0 ? '–' : `${completed}/${total}`}
           </div>
-          <div style={{ fontSize: '0.78rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '0.4rem' }}>
-            {total === 0 ? 'Esperando participantes...' : 'han completado la calculadora'}
+          <div style={{ fontSize: '0.85rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '0.75rem' }}>
+            {total === 0 ? 'Esperando participantes...' : completed === total && total > 0 ? 'Todos han completado' : 'han completado la calculadora'}
           </div>
           {total > 0 && (
-            <div style={{ marginTop: '1.25rem', height: 6, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden', maxWidth: 480 }}>
+            <div style={{ marginTop: '1.5rem', height: 6, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden', width: 260, margin: '1.5rem auto 0' }}>
               <div style={{ height: '100%', width: `${progressPct}%`, background: completed >= total ? '#2d5a27' : '#7db87a', borderRadius: 3, transition: 'width 0.5s ease' }} />
             </div>
           )}
         </div>
-
-        {ranking.length > 0 && (
-          <div>
-            <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '0.75rem' }}>Completados</div>
-            {ranking.map((p, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', padding: '0.75rem 1rem', borderBottom: '1px solid #f5f5f0', gap: '1rem' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.88rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{p.name || 'Anónimo'}</div>
-                  <div style={{ fontSize: '0.72rem', color: '#bbb', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{p.group}</div>
-                </div>
-                <span style={{ background: CATEGORY_BG[p.category] || '#f5f5f0', color: CATEGORY_COLORS[p.category] || '#888', padding: '0.2rem 0.65rem', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '999px' }}>
-                  {CATEGORY_LABELS[p.category]}
-                </span>
-                <span style={{ fontWeight: 900, fontSize: '1.05rem' }}>{Number(p.tons).toFixed(1)} t</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {ranking.length === 0 && (
-          <div style={{ textAlign: 'center', color: '#bbb', padding: '4rem 2rem', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Esperando que los participantes completen la calculadora...
-          </div>
-        )}
       </div>
     </div>
   )
