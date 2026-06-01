@@ -19,22 +19,23 @@ const CATEGORY_CONFIG = {
 
 const AREA_LABELS = {
   transport:   'Transporte',
-  energy:      'Energía',
+  energy:      'Hogar',
   food:        'Alimentación',
   consumption: 'Consumo',
-  waste:       'Residuos',
+  waste:       'Huella Digital',
 }
 
 function getCategory(tons) {
-  if (tons < 2) return 'bajo'
-  if (tons < 4) return 'medio'
-  if (tons < 6) return 'alto'
+  if (tons < 4)  return 'bajo'
+  if (tons < 7)  return 'medio'
+  if (tons < 10) return 'alto'
   return 'muy alto'
 }
 
 const MOCK_RESULT = {
-  carbonTons: 6.4,
-  areas: { transport: 2.4, energy: 1.6, food: 1.3, consumption: 0.7, waste: 0.4 },
+  carbonTons: 7.2,
+  areas: { transport: 2.2, energy: 1.1, food: 1.9, consumption: 0.4, waste: 1.6 },
+  answers: {},
 }
 
 // ── helpers ────────────────────────────────────────────────────────────────
@@ -346,25 +347,24 @@ export default function Step2Results() {
                 <div style={{ maxHeight: isExp ? '600px' : '0', overflow: 'hidden', transition: 'max-height 0.3s ease' }}>
                   <div style={{ paddingBottom: '0.85rem' }}>
                     {areaData.questions.map(q => {
-                      const selectedVal = answers?.[q.key]
-                      const areaContrib = val > 0 && selectedVal != null ? Math.round((selectedVal / val) * 100) : null
+                      const rawSel = answers?.[q.id]
                       return (
-                        <div key={q.key} style={{ marginTop: '0.85rem' }}>
-                          <div style={{ fontSize: '0.72rem', color: '#888', marginBottom: '0.4rem', lineHeight: 1.45 }}>{q.text}</div>
+                        <div key={q.id} style={{ marginTop: '0.85rem' }}>
+                          <div style={{ fontSize: '0.72rem', color: '#888', marginBottom: '0.4rem', lineHeight: 1.45 }}>
+                            {q.text}
+                            {q.type === 'multi' && <span style={{ color: '#ccc', fontStyle: 'italic' }}> · selección múltiple</span>}
+                          </div>
                           {q.options.map(opt => {
-                            const isSel = selectedVal != null && Math.abs(opt.value - selectedVal) < 0.001
+                            const isSel = q.type === 'single'
+                              ? rawSel === opt.value
+                              : Array.isArray(rawSel) && rawSel.includes(opt.value)
+                            const dimmed = q.type === 'single' && rawSel !== undefined && !isSel
                             return (
-                              <div key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.2rem', opacity: selectedVal != null && !isSel ? 0.3 : 1 }}>
+                              <div key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.2rem', opacity: dimmed ? 0.3 : 1 }}>
                                 <span style={{ fontSize: '0.62rem', color: isSel ? areaData.areaColor : 'transparent', fontWeight: 700, minWidth: 11, flexShrink: 0 }}>✓</span>
-                                <span style={{ fontSize: '0.72rem', minWidth: 148, flexShrink: 0, fontWeight: isSel ? 700 : 400, color: isSel ? '#1a1a1a' : '#999' }}>
-                                  {opt.emoji} {opt.label}
+                                <span style={{ fontSize: '0.72rem', fontWeight: isSel ? 700 : 400, color: isSel ? '#1a1a1a' : '#999', flex: 1 }}>
+                                  {opt.label}
                                 </span>
-                                <div style={{ flex: 1, height: 4, background: '#f5f5f0', borderRadius: 2, overflow: 'hidden' }}>
-                                  <div style={{ height: '100%', width: isSel && val > 0 ? `${Math.min((opt.value / val) * 100, 100)}%` : '0%', background: areaData.areaColor, borderRadius: 2, transition: 'width 0.4s ease' }} />
-                                </div>
-                                {isSel && areaContrib != null && (
-                                  <span style={{ fontSize: '0.62rem', color: '#aaa', minWidth: 64, textAlign: 'right', flexShrink: 0 }}>{areaContrib}% del área</span>
-                                )}
                               </div>
                             )
                           })}
@@ -376,6 +376,22 @@ export default function Step2Results() {
               </div>
             )
           })}
+        </div>
+
+        {/* ── public services card ── */}
+        <div style={{ background: '#f0f7ee', border: '1px solid #c8e6c0', borderRadius: 8, padding: '1rem 1.25rem', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+            <span style={{ fontSize: '0.95rem' }}>🏛️</span>
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#2d5a27' }}>
+              Servicios públicos — 1,5 t CO₂/año (fijo)
+            </span>
+          </div>
+          <p style={{ fontSize: '0.72rem', color: '#555', margin: 0, lineHeight: 1.65 }}>
+            Una parte de tu huella proviene de los servicios que usamos colectivamente: sanidad, educación,
+            infraestructuras, administración y defensa. Este coste —estimado en{' '}
+            <strong>1.500 kg CO₂/año por persona</strong> en España— se reparte de forma igualitaria entre
+            toda la ciudadanía y no depende de tus hábitos individuales.
+          </p>
         </div>
 
         {/* ── middle row: spain + percentile ── */}

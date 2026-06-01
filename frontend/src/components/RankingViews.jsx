@@ -8,9 +8,9 @@ import { AREA_QUESTIONS } from '../utils/answerLabels.js'
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 export function getCategory(tons) {
-  if (tons < 2) return 'bajo'
-  if (tons < 4) return 'medio'
-  if (tons < 6) return 'alto'
+  if (tons < 4)  return 'bajo'
+  if (tons < 7)  return 'medio'
+  if (tons < 10) return 'alto'
   return 'muy alto'
 }
 
@@ -52,34 +52,44 @@ function buildHistogram(values, extendForSpain = false) {
 }
 
 function getBarColor(floor) {
-  if (floor < 3) return '#eaf3de'
-  if (floor < 6) return '#fff8e0'
-  if (floor < 9) return '#fff0e0'
+  if (floor < 4)  return '#eaf3de'
+  if (floor < 7)  return '#fff8e0'
+  if (floor < 10) return '#fff0e0'
   return '#fce8e8'
 }
 
 function getAnswerDistribution(ranking, areaId) {
-  const areaIdx = AREA_QUESTIONS.findIndex(a => a.areaId === areaId)
-  if (areaIdx < 0) return []
-  const area = AREA_QUESTIONS[areaIdx]
+  const areaData = AREA_QUESTIONS.find(a => a.areaId === areaId)
+  if (!areaData) return []
 
-  return area.questions.map(q => {
+  return areaData.questions.map(q => {
     const counts = {}
     let total = 0
+
     for (const p of ranking) {
-      const selectedVal = p.answers?.[q.key]
-      if (selectedVal !== undefined) {
-        const matched = q.options.find(o => Math.abs(o.value - selectedVal) < 0.001)
-        if (matched) {
-          counts[matched.label] = (counts[matched.label] || 0) + 1
+      const raw = p.answers?.[q.id]
+      if (q.type === 'single') {
+        if (raw !== undefined) {
+          const matched = q.options.find(o => o.value === raw)
+          if (matched) counts[matched.label] = (counts[matched.label] || 0) + 1
           total++
         }
+      } else {
+        const selected = Array.isArray(raw) ? raw : []
+        for (const opt of q.options) {
+          if (selected.includes(opt.value)) {
+            counts[opt.label] = (counts[opt.label] || 0) + 1
+          }
+        }
+        total++
       }
     }
+
+    const base = q.type === 'multi' ? Math.max(ranking.length, 1) : Math.max(total, 1)
     const distribution = q.options.map(opt => ({
       ...opt,
       count: counts[opt.label] || 0,
-      pct: total > 0 ? Math.round(((counts[opt.label] || 0) / total) * 100) : 0,
+      pct: Math.round(((counts[opt.label] || 0) / base) * 100),
     }))
     const maxCount = Math.max(...distribution.map(d => d.count), 1)
     return { question: q, distribution, total, maxCount }
@@ -99,17 +109,17 @@ function getMostFrequent(values) {
 // ── constants ─────────────────────────────────────────────────────────────────
 
 export const HISTOGRAM_TABS = [
-  { id: 'total',       label: 'Total',          color: '#2d5a27' },
-  { id: 'transport',   label: '🚗 Transporte',   color: '#4a90d9' },
-  { id: 'energy',      label: '⚡ Energía',       color: '#e8a020' },
-  { id: 'food',        label: '🥗 Alimentación', color: '#5aab5a' },
-  { id: 'consumption', label: '🛍 Consumo',       color: '#b07a30' },
-  { id: 'waste',       label: '♻️ Residuos',     color: '#7a7aaa' },
+  { id: 'total',       label: 'Total',            color: '#2d5a27' },
+  { id: 'transport',   label: '🚗 Transporte',     color: '#4a90d9' },
+  { id: 'energy',      label: '🏠 Hogar',          color: '#e8a020' },
+  { id: 'food',        label: '🥗 Alimentación',   color: '#5aab5a' },
+  { id: 'consumption', label: '🛍 Consumo',         color: '#b07a30' },
+  { id: 'waste',       label: '📱 Huella Digital', color: '#7a7aaa' },
 ]
 
 export const SPAIN_AVERAGES = {
-  total: 7.2, transport: 1.8, energy: 1.6,
-  food: 1.4, consumption: 1.2, waste: 0.8,
+  total: 7.2, transport: 2.0, energy: 1.0,
+  food: 2.0, consumption: 0.7, waste: 1.5,
 }
 
 export const AREA_COLORS = {
@@ -118,8 +128,8 @@ export const AREA_COLORS = {
 }
 
 export const AREA_LABELS = {
-  transport: 'Transporte', energy: 'Energía', food: 'Alimentación',
-  consumption: 'Consumo', waste: 'Residuos',
+  transport: 'Transporte', energy: 'Hogar', food: 'Alimentación',
+  consumption: 'Consumo', waste: 'Huella Digital',
 }
 
 export const CATEGORY_COLORS = { bajo: '#3b6d11', medio: '#2d5a27', alto: '#b07a30', 'muy alto': '#cc4444' }
@@ -300,17 +310,21 @@ export function DistributionView({ ranking }) {
               Distribución de respuestas
             </div>
             {dist.map(({ question, distribution, total: qTotal, maxCount }) => (
-              <div key={question.key} style={{ background: '#fff', border: '1px solid #f0f0ee', borderRadius: 12, padding: '1.5rem', marginBottom: '1rem' }}>
-                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#333', marginBottom: '1rem', lineHeight: 1.4 }}>
+              <div key={question.id} style={{ background: '#fff', border: '1px solid #f0f0ee', borderRadius: 12, padding: '1.5rem', marginBottom: '1rem' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#333', marginBottom: '0.25rem', lineHeight: 1.4 }}>
                   {question.text}
                 </div>
+                {question.type === 'multi' && (
+                  <div style={{ fontSize: '0.65rem', color: '#bbb', marginBottom: '0.85rem' }}>Selección múltiple · % sobre {ranking.length} participantes</div>
+                )}
+                {question.type === 'single' && <div style={{ marginBottom: '0.85rem' }} />}
                 {distribution.map(opt => {
                   const isMost = opt.count > 0 && opt.count === maxCount
                   return (
-                    <div key={opt.label} style={{ marginBottom: '0.7rem' }}>
+                    <div key={opt.value} style={{ marginBottom: '0.7rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                         <span style={{ fontSize: '0.72rem', fontWeight: isMost ? 700 : 400, color: isMost ? '#1a1a1a' : '#777' }}>
-                          {opt.emoji} {opt.label}
+                          {opt.label}
                         </span>
                         <span style={{ fontSize: '0.72rem', fontWeight: isMost ? 700 : 400, color: isMost ? tab.color : '#aaa' }}>
                           {opt.pct}%
@@ -322,7 +336,7 @@ export function DistributionView({ ranking }) {
                     </div>
                   )
                 })}
-                {qTotal < ranking.length && (
+                {question.type === 'single' && qTotal < ranking.length && (
                   <div style={{ fontSize: '0.65rem', color: '#ccc', marginTop: '0.5rem' }}>
                     {qTotal} de {ranking.length} respondieron
                   </div>
