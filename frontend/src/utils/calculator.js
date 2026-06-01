@@ -66,9 +66,9 @@ function sum(key, vals) {
 export function calculator(answers) {
   // ── Transporte ──────────────────────────────────────────────────────────────
   const carKg      = get('car', answers.car) * (MAP.electricCar[answers.electricCar] ?? 1.0)
-  const flightsKg  = (answers.flightShort  ? 600  : 0)
-                   + (answers.flightMedium ? 1500 : 0)
-                   + (answers.flightLong   ? 3500 : 0)
+  const flightsKg  = (answers.flights?.includes('flightShort')  ? 600  : 0)
+                   + (answers.flights?.includes('flightMedium') ? 1500 : 0)
+                   + (answers.flights?.includes('flightLong')   ? 3500 : 0)
   const transportKg = carKg + flightsKg
     + get('train', answers.train)
     + get('moto', answers.moto)

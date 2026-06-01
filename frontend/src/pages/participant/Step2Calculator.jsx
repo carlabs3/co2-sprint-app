@@ -145,14 +145,18 @@ export default function Step2Calculator() {
     return () => socket.off('results:revealed')
   }, [code, navigate])
 
+  function isSkipped(q) {
+    return q.id === 'electricCar' && answers.car === '1e'
+  }
+
   const area     = AREAS[areaIndex]
   const question = area.questions[questionIndex]
   const isFirst  = areaIndex === 0 && questionIndex === 0
   const isLast   = areaIndex === AREAS.length - 1 && questionIndex === area.questions.length - 1
-  const canNext  = question.type === 'multi' || answers[question.id] !== undefined
+  const canNext  = isSkipped(question) || question.type === 'multi' || answers[question.id] !== undefined
 
   function isAreaDone(ai) {
-    return AREAS[ai].questions.every(q => q.type === 'multi' || answers[q.id] !== undefined)
+    return AREAS[ai].questions.every(q => isSkipped(q) || q.type === 'multi' || answers[q.id] !== undefined)
   }
 
   function getAreaStatus(ai) {
@@ -166,12 +170,20 @@ export default function Step2Calculator() {
   }
 
   function handleToggle(questionId, value) {
+    const q = AREAS.flatMap(a => a.questions).find(q => q.id === questionId)
+    const noneVal = q?.noneValue
     setAnswers(prev => {
       const current = Array.isArray(prev[questionId]) ? prev[questionId] : []
-      const updated = current.includes(value)
-        ? current.filter(v => v !== value)
-        : [...current, value]
-      return { ...prev, [questionId]: updated }
+      if (current.includes(value)) {
+        return { ...prev, [questionId]: current.filter(v => v !== value) }
+      }
+      if (noneVal && value === noneVal) {
+        return { ...prev, [questionId]: [noneVal] }
+      }
+      if (noneVal) {
+        return { ...prev, [questionId]: [...current.filter(v => v !== noneVal), value] }
+      }
+      return { ...prev, [questionId]: [...current, value] }
     })
   }
 
@@ -193,23 +205,28 @@ export default function Step2Calculator() {
       setSubmitted(true)
       return
     }
-    if (questionIndex < area.questions.length - 1) {
-      setQuestionIndex(q => q + 1)
-    } else {
-      setAreaIndex(a => a + 1)
-      setQuestionIndex(0)
+    let nextQ = questionIndex + 1
+    let nextA = areaIndex
+    if (nextQ >= AREAS[nextA].questions.length) { nextA++; nextQ = 0 }
+    while (nextA < AREAS.length && isSkipped(AREAS[nextA].questions[nextQ])) {
+      nextQ++
+      if (nextQ >= AREAS[nextA].questions.length) { nextA++; nextQ = 0 }
     }
+    setAreaIndex(nextA)
+    setQuestionIndex(nextQ)
   }
 
   function handlePrev() {
     if (isFirst) return
-    if (questionIndex > 0) {
-      setQuestionIndex(q => q - 1)
-    } else {
-      const prevAi = areaIndex - 1
-      setAreaIndex(prevAi)
-      setQuestionIndex(AREAS[prevAi].questions.length - 1)
+    let prevQ = questionIndex - 1
+    let prevA = areaIndex
+    if (prevQ < 0) { prevA--; prevQ = AREAS[prevA].questions.length - 1 }
+    while (prevA >= 0 && isSkipped(AREAS[prevA].questions[prevQ])) {
+      prevQ--
+      if (prevQ < 0) { prevA--; if (prevA >= 0) prevQ = AREAS[prevA].questions.length - 1 }
     }
+    setAreaIndex(prevA)
+    setQuestionIndex(prevQ)
   }
 
   function handleAreaClick(ai) {
@@ -229,6 +246,7 @@ export default function Step2Calculator() {
     return (
       <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
         {a.questions.map((q, qi) => {
+          if (isSkipped(q)) return null
           const done   = q.type === 'multi' || answers[q.id] !== undefined
           const active = aIdx === areaIndex && qi === activeQIdx
           return (
