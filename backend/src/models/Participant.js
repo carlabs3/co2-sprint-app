@@ -2,7 +2,6 @@ import { Schema, model } from 'mongoose'
 
 const participantSchema = new Schema({
   sessionCode: { type: String, required: true },
-  name: { type: String, default: 'Anónimo' },
   group: { type: String, required: true },
   age:    { type: String, default: '' },
   gender: { type: String, default: '' },

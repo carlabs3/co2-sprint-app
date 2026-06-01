@@ -7,11 +7,9 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
-function getCategory(tons) {
-  if (tons < 2) return 'bajo'
-  if (tons < 4) return 'medio'
-  if (tons < 6) return 'alto'
-  return 'muy alto'
+const AREA_LABELS = {
+  transport: 'Transporte', energy: 'Energía', food: 'Alimentación',
+  consumption: 'Consumo', waste: 'Residuos',
 }
 
 const STATUS_LABEL = { waiting: 'En espera', active: 'Activa', closed: 'Cerrada' }
@@ -76,27 +74,10 @@ export default function FacilitatorDashboard() {
   const [loading, setLoading]   = useState(true)
 
   useEffect(() => {
-    async function load() {
-      try {
-        const { data } = await api.get('/api/sessions')
-        const enriched = await Promise.all(
-          data.map(async s => {
-            try {
-              const r = await api.get(`/api/results/${s.code}/ranking`)
-              return { ...s, resultCount: r.data.length }
-            } catch {
-              return { ...s, resultCount: 0 }
-            }
-          })
-        )
-        setSessions(enriched)
-      } catch {
-        setSessions([])
-      } finally {
-        setLoading(false)
-      }
-    }
-    load()
+    api.get('/api/sessions')
+      .then(({ data }) => setSessions(data))
+      .catch(() => setSessions([]))
+      .finally(() => setLoading(false))
   }, [])
 
   async function handleDelete(code) {
@@ -144,7 +125,6 @@ export default function FacilitatorDashboard() {
                 )}
                 <div style={s.cardCode}>{session.code}</div>
                 <div style={s.cardMeta}>{formatDate(session.createdAt)}</div>
-                <div style={s.cardMeta}>{session.resultCount} resultado{session.resultCount !== 1 ? 's' : ''}</div>
 
                 {session.groups?.length > 0 && (
                   <div style={s.groupsRow}>
@@ -157,6 +137,35 @@ export default function FacilitatorDashboard() {
                 <div style={s.badge(session.status)}>
                   {STATUS_LABEL[session.status] || session.status}
                 </div>
+
+                {/* Summary block for sessions with revealed results */}
+                {session.summary && (() => {
+                  const sm = session.summary
+                  const topArea = sm.byArea
+                    ? Object.entries(sm.byArea).sort((a, b) => b[1] - a[1])[0]
+                    : null
+                  return (
+                    <div style={{ background: '#f5f5f0', borderRadius: 8, padding: '0.9rem 1rem', marginBottom: '1rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '0.35rem' }}>
+                        <span style={{ fontWeight: 900, fontSize: '1.7rem', lineHeight: 1, color: '#1a1a1a' }}>
+                          {sm.averageCarbonTons?.toFixed(1)}
+                        </span>
+                        <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                          t CO₂/año media
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#666', marginBottom: topArea ? '0.4rem' : 0 }}>
+                        {sm.totalParticipants} participante{sm.totalParticipants !== 1 ? 's' : ''}
+                        {' · '}min {sm.minCarbonTons?.toFixed(1)} t · máx {sm.maxCarbonTons?.toFixed(1)} t
+                      </div>
+                      {topArea && (
+                        <div style={{ fontSize: '0.68rem', color: '#888' }}>
+                          Área mayor: <strong style={{ color: '#1a1a1a' }}>{AREA_LABELS[topArea[0]] || topArea[0]}</strong> ({topArea[1].toFixed(1)} t)
+                        </div>
+                      )}
+                    </div>
+                  )
+                })()}
 
                 <div style={s.cardActions}>
                   <Link to={`/session/${session.code}/rankings`} style={{ flex: 1 }}>

@@ -17,6 +17,10 @@ const AREA_KEY_MAP = {
   residuos:     'waste',
 }
 
+// In-memory name store: participantId (string) -> display name
+// Names are never written to DB, only used for live ranking display
+const participantNames = new Map()
+
 export function registerSocketHandlers(io) {
   io.on('connection', (socket) => {
     socket.on('facilitator:join', async ({ code }) => {
@@ -29,19 +33,24 @@ export function registerSocketHandlers(io) {
 
     socket.on('session:join', async ({ code, name, group, age, gender }) => {
       try {
-        await Participant.create({
-          sessionCode: code,
-          name: name || 'Anónimo',
-          group,
-          age:    age    || '',
-          gender: gender || '',
-          socketId: socket.id,
-        })
+        // Store name in socket memory only — never written to DB
+        socket.data.name = name || 'Anónimo'
+        socket.data.group = group
+        socket.data.sessionCode = code
+
+        const participant = await Participant.findOneAndUpdate(
+          { socketId: socket.id },
+          { sessionCode: code, group, age: age || '', gender: gender || '', socketId: socket.id },
+          { upsert: true, new: true }
+        )
+        if (participant?._id) {
+          participantNames.set(participant._id.toString(), socket.data.name)
+        }
+
         socket.join(code)
         const count = await Participant.countDocuments({ sessionCode: code })
         io.to(code).emit('participant:joined', { count })
 
-        // If calculator already started, send current step immediately
         const session = await Session.findOne({ code }, 'status currentStep')
         if (session?.currentStep > 1) {
           socket.emit('step:change', { step: session.currentStep })
@@ -62,11 +71,15 @@ export function registerSocketHandlers(io) {
       io.to(sessionCode).emit('results:revealed')
     })
 
-    socket.on('footprint:submit', async ({ sessionCode, group, carbonTons, areas, answers, name }) => {
+    socket.on('footprint:submit', async ({ sessionCode, group, carbonTons, areas, answers }) => {
       try {
-        const participant =
-          await Participant.findOne({ socketId: socket.id }) ||
-          await Participant.findOne({ sessionCode, group, name })
+        const participant = await Participant.findOne({ socketId: socket.id }) ||
+          await Participant.findOne({ sessionCode, group })
+
+        if (participant?._id && socket.data.name) {
+          participantNames.set(participant._id.toString(), socket.data.name)
+        }
+
         const category = getCategory(carbonTons)
         const mappedAreas = Object.fromEntries(
           Object.entries(areas || {}).map(([k, v]) => [AREA_KEY_MAP[k] ?? k, v])
@@ -81,12 +94,10 @@ export function registerSocketHandlers(io) {
           answers: answers || {},
         })
 
-        const results = await FootprintResult.find({ sessionCode })
-          .populate('participantId', 'name')
-          .sort({ carbonTons: 1 })
+        const results = await FootprintResult.find({ sessionCode }).sort({ carbonTons: 1 })
 
         const individual = results.map(r => ({
-          name: r.participantId?.name || 'Anónimo',
+          name: participantNames.get(r.participantId?.toString()) || 'Anónimo',
           group: r.group,
           tons: r.carbonTons,
           category: r.category,

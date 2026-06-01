@@ -8,6 +8,22 @@ const sessionSchema = new Schema({
   status: { type: String, enum: ['waiting', 'active', 'closed'], default: 'waiting' },
   currentStep: { type: Number, default: 1 },
   resultsRevealed: { type: Boolean, default: false },
+  summary: {
+    totalParticipants: Number,
+    averageCarbonTons: Number,
+    medianCarbonTons:  Number,
+    minCarbonTons:     Number,
+    maxCarbonTons:     Number,
+    byArea: {
+      transport:   Number,
+      energy:      Number,
+      food:        Number,
+      consumption: Number,
+      waste:       Number,
+    },
+    byGroup: [{ group: String, average: Number, count: Number }],
+    calculatedAt: Date,
+  },
 }, { timestamps: true })
 
 export default model('Session', sessionSchema)

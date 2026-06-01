@@ -150,7 +150,6 @@ router.post('/send-email', async (req, res) => {
 router.get('/:code', authMiddleware, async (req, res) => {
   try {
     const results = await FootprintResult.find({ sessionCode: req.params.code })
-      .populate('participantId', 'name group')
     res.json(results)
   } catch {
     res.status(500).json({ error: 'Error al obtener resultados' })

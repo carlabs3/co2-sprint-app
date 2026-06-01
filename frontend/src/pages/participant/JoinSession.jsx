@@ -197,9 +197,28 @@ export default function JoinSession() {
             />
             {nameError
               ? <div style={s.error}>{nameError}</div>
-              : <div style={s.hint}>Solo visible para ti en tus resultados y para el facilitador en el ranking.</div>
+              : <div style={s.hint}>Solo visible en el ranking en vivo. No se guarda en ninguna base de datos.</div>
             }
           </div>
+
+          {groups.length > 0 && (
+            <div style={s.field}>
+              <label style={s.label}>Tu grupo</label>
+              <div style={s.groupRow}>
+                {groups.map(g => (
+                  <button
+                    key={g}
+                    type="button"
+                    style={s.chip(group === g)}
+                    onClick={() => { setGroup(g); setGroupError('') }}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
+              {groupError && <div style={{ ...s.error, marginTop: '0.5rem' }}>{groupError}</div>}
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.8rem' }}>
             <div style={{ flex: 1 }}>
@@ -232,24 +251,11 @@ export default function JoinSession() {
             </div>
           </div>
 
-          {groups.length > 0 && (
-            <div style={s.field}>
-              <label style={s.label}>Tu grupo</label>
-              <div style={s.groupRow}>
-                {groups.map(g => (
-                  <button
-                    key={g}
-                    type="button"
-                    style={s.chip(group === g)}
-                    onClick={() => { setGroup(g); setGroupError('') }}
-                  >
-                    {g}
-                  </button>
-                ))}
-              </div>
-              {groupError && <div style={{ ...s.error, marginTop: '0.5rem' }}>{groupError}</div>}
-            </div>
-          )}
+          <p style={{ fontSize: '11px', color: '#888', lineHeight: 1.5, marginBottom: '16px', marginTop: 0 }}>
+            Los datos de edad, género y huella de carbono se recogen de forma anónima
+            para los resultados del taller. No se asocian a ningún nombre ni se comparten
+            con terceros.
+          </p>
 
           <button style={s.btn} type="submit">Unirme →</button>
         </form>
