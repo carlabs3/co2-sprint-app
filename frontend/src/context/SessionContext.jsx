@@ -19,6 +19,8 @@ export function SessionProvider({ children }) {
   const [sessionCode,      setSessionCode]      = useState(saved.sessionCode      || null)
   const [participantName,  setParticipantName]  = useState(saved.participantName  || '')
   const [participantGroup, setParticipantGroup] = useState(saved.participantGroup || '')
+  const [participantAge,   setParticipantAge]   = useState(saved.participantAge   || '')
+  const [participantGender,setParticipantGender]= useState(saved.participantGender|| '')
   const [currentStep,      setCurrentStep]      = useState(1)
   const [sessionClosed,    setSessionClosed]    = useState(false)
 
@@ -44,15 +46,20 @@ export function SessionProvider({ children }) {
     }
   }, [])
 
-  function joinSession(code, name, group) {
+  function joinSession(code, name, group, age, gender) {
     setSessionCode(code)
     setParticipantName(name)
     setParticipantGroup(group)
+    setParticipantAge(age || '')
+    setParticipantGender(gender || '')
     setSessionClosed(false)
 
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ sessionCode: code, participantName: name, participantGroup: group }))
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      sessionCode: code, participantName: name, participantGroup: group,
+      participantAge: age || '', participantGender: gender || '',
+    }))
 
-    socket.emit('session:join', { code, name, group })
+    socket.emit('session:join', { code, name, group, age, gender })
   }
 
   function clearSession() {
@@ -69,6 +76,8 @@ export function SessionProvider({ children }) {
       currentStep,
       participantName,
       participantGroup,
+      participantAge,
+      participantGender,
       sessionClosed,
       joinSession,
       clearSession,

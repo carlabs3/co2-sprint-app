@@ -105,6 +105,8 @@ export default function JoinSession() {
   const [code, setCode]       = useState('')
   const [name, setName]       = useState('')
   const [nameError, setNameError] = useState('')
+  const [age, setAge]         = useState('')
+  const [gender, setGender]   = useState('')
   const [group, setGroup]     = useState('')
   const [groups, setGroups]   = useState([])
   const [codeError, setCodeError] = useState('')
@@ -155,7 +157,7 @@ export default function JoinSession() {
     }
     if (!valid) return
 
-    joinSession(code, name.trim(), group)
+    joinSession(code, name.trim(), group, age, gender)
     navigate(`/session/${code}/waiting`)
   }
 
@@ -197,6 +199,37 @@ export default function JoinSession() {
               ? <div style={s.error}>{nameError}</div>
               : <div style={s.hint}>Solo visible para ti en tus resultados y para el facilitador en el ranking.</div>
             }
+          </div>
+
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.8rem' }}>
+            <div style={{ flex: 1 }}>
+              <label style={s.label} htmlFor="age">Edad <span style={{ color: '#bbb', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(opcional)</span></label>
+              <select
+                id="age"
+                value={age}
+                onChange={e => setAge(e.target.value)}
+                style={{ ...s.input, color: age ? '#1a1a1a' : '#aaa', appearance: 'none', paddingRight: '1rem' }}
+              >
+                <option value="">—</option>
+                {['< 20', '20-29', '30-39', '40-49', '50-59', '60+'].map(r => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={s.label} htmlFor="gender">Género <span style={{ color: '#bbb', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(opcional)</span></label>
+              <select
+                id="gender"
+                value={gender}
+                onChange={e => setGender(e.target.value)}
+                style={{ ...s.input, color: gender ? '#1a1a1a' : '#aaa', appearance: 'none', paddingRight: '1rem' }}
+              >
+                <option value="">—</option>
+                {['Mujer', 'Hombre', 'No binario', 'Prefiero no decirlo'].map(g => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {groups.length > 0 && (

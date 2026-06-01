@@ -267,7 +267,7 @@ export default function Step2Calculator() {
     if (!canNext) return
     if (isLast) {
       const areaResults = buildAreaResults()
-      const result = { carbonTons: totalCO2, areas: areaResults }
+      const result = { carbonTons: totalCO2, areas: areaResults, answers }
       socket.emit('footprint:submit', {
         sessionCode: code,
         group: participantGroup,
@@ -330,7 +330,7 @@ export default function Step2Calculator() {
 
   function handleViewPartial() {
     const areaResults = buildAreaResults()
-    navigate(`/session/${code}/results`, { state: { carbonTons: totalCO2, areas: areaResults } })
+    navigate(`/session/${code}/results`, { state: { carbonTons: totalCO2, areas: areaResults, answers } })
   }
 
   // ── submitted waiting screen ─────────────────────────────────────────────────

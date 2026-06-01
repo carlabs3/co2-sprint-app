@@ -7,6 +7,7 @@ import {
 } from 'recharts'
 import api from '../../utils/api.js'
 import { socket } from '../../utils/socket.js'
+import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -59,6 +60,34 @@ function getBarColor(floor) {
   if (floor < 6) return '#fff8e0'
   if (floor < 9) return '#fff0e0'
   return '#fce8e8'
+}
+
+function getAnswerDistribution(ranking, areaId) {
+  const areaIdx = AREA_QUESTIONS.findIndex(a => a.areaId === areaId)
+  if (areaIdx < 0) return []
+  const area = AREA_QUESTIONS[areaIdx]
+
+  return area.questions.map(q => {
+    const counts = {}
+    let total = 0
+    for (const p of ranking) {
+      const selectedVal = p.answers?.[q.key]
+      if (selectedVal !== undefined) {
+        const matched = q.options.find(o => Math.abs(o.value - selectedVal) < 0.001)
+        if (matched) {
+          counts[matched.label] = (counts[matched.label] || 0) + 1
+          total++
+        }
+      }
+    }
+    const distribution = q.options.map(opt => ({
+      ...opt,
+      count: counts[opt.label] || 0,
+      pct: total > 0 ? Math.round(((counts[opt.label] || 0) / total) * 100) : 0,
+    }))
+    const maxCount = Math.max(...distribution.map(d => d.count), 1)
+    return { question: q, distribution, total, maxCount }
+  })
 }
 
 function getMostFrequent(values) {
@@ -257,7 +286,7 @@ function DistributionView({ ranking }) {
 
       {/* ── Section 3: Area breakdown ── */}
       {areaTotal > 0 && (
-        <div style={{ background: '#fff', border: '1px solid #f0f0ee', borderRadius: 12, padding: '1.5rem' }}>
+        <div style={{ background: '#fff', border: '1px solid #f0f0ee', borderRadius: 12, padding: '1.5rem', marginBottom: '1.25rem' }}>
           <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '1rem' }}>
             Media del grupo por áreas
           </div>
@@ -285,6 +314,49 @@ function DistributionView({ ranking }) {
           </div>
         </div>
       )}
+
+      {/* ── Section 4: Answer distribution (area tabs only) ── */}
+      {activeTab !== 'total' && (() => {
+        const dist = getAnswerDistribution(ranking, activeTab)
+        if (!dist.length) return null
+        return (
+          <div>
+            <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '1rem' }}>
+              Distribución de respuestas
+            </div>
+            {dist.map(({ question, distribution, total: qTotal, maxCount }) => (
+              <div key={question.key} style={{ background: '#fff', border: '1px solid #f0f0ee', borderRadius: 12, padding: '1.5rem', marginBottom: '1rem' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#333', marginBottom: '1rem', lineHeight: 1.4 }}>
+                  {question.text}
+                </div>
+                {distribution.map(opt => {
+                  const isMost = opt.count > 0 && opt.count === maxCount
+                  return (
+                    <div key={opt.label} style={{ marginBottom: '0.7rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: isMost ? 700 : 400, color: isMost ? '#1a1a1a' : '#777' }}>
+                          {opt.emoji} {opt.label}
+                        </span>
+                        <span style={{ fontSize: '0.72rem', fontWeight: isMost ? 700 : 400, color: isMost ? tab.color : '#aaa' }}>
+                          {opt.pct}%
+                        </span>
+                      </div>
+                      <div style={{ height: 6, background: '#f0f0ee', borderRadius: 3, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${opt.pct}%`, background: isMost ? tab.color : '#d8d8d4', borderRadius: 3, transition: 'width 0.5s ease' }} />
+                      </div>
+                    </div>
+                  )
+                })}
+                {qTotal < ranking.length && (
+                  <div style={{ fontSize: '0.65rem', color: '#ccc', marginTop: '0.5rem' }}>
+                    {qTotal} de {ranking.length} respondieron
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )
+      })()}
     </div>
   )
 }
@@ -345,6 +417,7 @@ export default function Step2Rankings() {
           tons: r.carbonTons,
           category: r.category,
           areas: r.areas || {},
+          answers: r.answers || {},
         }))
         setRanking(items)
         setGroups(computeGroups(items))
@@ -356,7 +429,9 @@ export default function Step2Rankings() {
 
     socket.on('ranking:update', data => {
       if (data.individual) {
-        const sorted = [...data.individual].sort((a, b) => a.tons - b.tons)
+        const sorted = [...data.individual]
+          .map(r => ({ ...r, answers: r.answers || {} }))
+          .sort((a, b) => a.tons - b.tons)
         setRanking(sorted)
         setGroups(computeGroups(sorted))
       }

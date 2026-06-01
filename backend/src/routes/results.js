@@ -161,7 +161,7 @@ router.get('/:code', authMiddleware, async (req, res) => {
 router.get('/:code/ranking', async (req, res) => {
   try {
     const results = await FootprintResult.find({ sessionCode: req.params.code })
-      .select('group carbonTons category areas -_id')
+      .select('group carbonTons category areas answers -_id')
       .sort({ carbonTons: 1 })
     res.json(results)
   } catch {

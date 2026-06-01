@@ -5,6 +5,7 @@ import { useSession } from '../../context/SessionContext.jsx'
 import SessionClosedBanner from '../../components/SessionClosedBanner.jsx'
 import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
+import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
 
 const SPAIN_AVG = 7.2
 const BAR_MAX_H = 120
@@ -124,12 +125,17 @@ export default function Step2Results() {
   const { code }  = useParams()
   const { participantGroup } = useSession()
   const data = (location.state?.carbonTons != null) ? location.state : MOCK_RESULT
-  const { carbonTons, areas } = data
+  const { carbonTons, areas, answers } = data
 
   const [revealed,      setRevealed]      = useState(false)
   const [sessionResults, setSessionResults] = useState(null)
   const [emailInput,  setEmailInput]  = useState('')
   const [emailStatus, setEmailStatus] = useState('idle')
+  const [expandedArea, setExpandedArea] = useState(null)
+
+  function toggleArea(id) {
+    setExpandedArea(prev => prev === id ? null : id)
+  }
 
   useEffect(() => {
     // Check if results were already revealed (page reload after reveal)
@@ -317,27 +323,63 @@ export default function Step2Results() {
       {/* ═══ CONTENT ═══════════════════════════════════════════ */}
       <div style={{ maxWidth: 880, margin: '0 auto', padding: '1.25rem 1.25rem 2.5rem' }}>
 
-        {/* ── middle row: areas + spain ── */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
-
-          {/* Areas */}
-          <div style={{ flex: '1 1 240px', background: '#fff', borderRadius: 8, padding: '1.25rem 1.5rem', minWidth: 0 }}>
-            <CardTitle>Desglose por áreas</CardTitle>
-            {Object.entries(areas).map(([key, val]) => (
-              <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem' }}>
-                <Square size={7} opacity={0.6} />
-                <span style={{ width: 90, fontSize: '0.78rem', color: '#444', flexShrink: 0 }}>
-                  {AREA_LABELS[key] || key}
-                </span>
-                <div style={{ flex: 1, height: 5, background: '#f0f0f0', borderRadius: 2, overflow: 'hidden', position: 'relative' }}>
-                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${val / maxArea * 100}%`, background: '#3d6e37', borderRadius: 2 }} />
+        {/* ── expandable areas ── */}
+        <div style={{ background: '#fff', borderRadius: 8, padding: '1.25rem 1.5rem', marginBottom: '1rem' }}>
+          <CardTitle>Desglose por áreas</CardTitle>
+          {AREA_QUESTIONS.map((areaData, aIdx) => {
+            const val = areas[areaData.areaId] ?? 0
+            const isExp = expandedArea === areaData.areaId
+            return (
+              <div key={areaData.areaId} style={{ borderBottom: aIdx < AREA_QUESTIONS.length - 1 ? '1px solid #f5f5f0' : 'none' }}>
+                <button
+                  onClick={() => toggleArea(areaData.areaId)}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                >
+                  <span style={{ fontSize: '1rem', lineHeight: 1 }}>{areaData.areaEmoji}</span>
+                  <span style={{ flex: 1, fontSize: '0.82rem', fontWeight: 600, color: '#333' }}>{areaData.areaLabel}</span>
+                  <div style={{ width: 68, height: 5, background: '#f0f0f0', borderRadius: 2, overflow: 'hidden', flexShrink: 0 }}>
+                    <div style={{ height: '100%', width: `${maxArea > 0 ? (val / maxArea) * 100 : 0}%`, background: areaData.areaColor, borderRadius: 2 }} />
+                  </div>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 900, width: 36, textAlign: 'right', flexShrink: 0 }}>{val.toFixed(1)} t</span>
+                  <span style={{ fontSize: '0.55rem', color: '#bbb', flexShrink: 0, display: 'inline-block', transform: isExp ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', marginLeft: 2 }}>▼</span>
+                </button>
+                <div style={{ maxHeight: isExp ? '600px' : '0', overflow: 'hidden', transition: 'max-height 0.3s ease' }}>
+                  <div style={{ paddingBottom: '0.85rem' }}>
+                    {areaData.questions.map(q => {
+                      const selectedVal = answers?.[q.key]
+                      const areaContrib = val > 0 && selectedVal != null ? Math.round((selectedVal / val) * 100) : null
+                      return (
+                        <div key={q.key} style={{ marginTop: '0.85rem' }}>
+                          <div style={{ fontSize: '0.72rem', color: '#888', marginBottom: '0.4rem', lineHeight: 1.45 }}>{q.text}</div>
+                          {q.options.map(opt => {
+                            const isSel = selectedVal != null && Math.abs(opt.value - selectedVal) < 0.001
+                            return (
+                              <div key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.2rem', opacity: selectedVal != null && !isSel ? 0.3 : 1 }}>
+                                <span style={{ fontSize: '0.62rem', color: isSel ? areaData.areaColor : 'transparent', fontWeight: 700, minWidth: 11, flexShrink: 0 }}>✓</span>
+                                <span style={{ fontSize: '0.72rem', minWidth: 148, flexShrink: 0, fontWeight: isSel ? 700 : 400, color: isSel ? '#1a1a1a' : '#999' }}>
+                                  {opt.emoji} {opt.label}
+                                </span>
+                                <div style={{ flex: 1, height: 4, background: '#f5f5f0', borderRadius: 2, overflow: 'hidden' }}>
+                                  <div style={{ height: '100%', width: isSel && val > 0 ? `${Math.min((opt.value / val) * 100, 100)}%` : '0%', background: areaData.areaColor, borderRadius: 2, transition: 'width 0.4s ease' }} />
+                                </div>
+                                {isSel && areaContrib != null && (
+                                  <span style={{ fontSize: '0.62rem', color: '#aaa', minWidth: 64, textAlign: 'right', flexShrink: 0 }}>{areaContrib}% del área</span>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
-                <span style={{ fontSize: '0.78rem', fontWeight: 700, width: 34, textAlign: 'right', flexShrink: 0 }}>
-                  {val.toFixed(1)} t
-                </span>
               </div>
-            ))}
-          </div>
+            )
+          })}
+        </div>
+
+        {/* ── middle row: spain + percentile ── */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
 
           {/* Spain comparison */}
           <div style={{ flex: '1 1 240px', background: '#fff', borderRadius: 8, padding: '1.25rem 1.5rem', minWidth: 0 }}>

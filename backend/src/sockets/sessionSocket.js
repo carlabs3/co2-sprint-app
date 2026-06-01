@@ -27,12 +27,14 @@ export function registerSocketHandlers(io) {
       } catch {}
     })
 
-    socket.on('session:join', async ({ code, name, group }) => {
+    socket.on('session:join', async ({ code, name, group, age, gender }) => {
       try {
         await Participant.create({
           sessionCode: code,
           name: name || 'Anónimo',
           group,
+          age:    age    || '',
+          gender: gender || '',
           socketId: socket.id,
         })
         socket.join(code)
@@ -89,6 +91,7 @@ export function registerSocketHandlers(io) {
           tons: r.carbonTons,
           category: r.category,
           areas: r.areas || {},
+          answers: r.answers || {},
         }))
 
         io.to(sessionCode).emit('ranking:update', { individual })
