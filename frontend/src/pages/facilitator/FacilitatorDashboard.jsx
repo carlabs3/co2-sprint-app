@@ -168,9 +168,14 @@ export default function FacilitatorDashboard() {
                 })()}
 
                 <div style={s.cardActions}>
-                  <Link to={`/session/${session.code}/rankings`} style={{ flex: 1 }}>
+                  <Link
+                    to={session.status === 'closed'
+                      ? `/session/${session.code}/stats`
+                      : `/session/${session.code}/rankings`}
+                    style={{ flex: 1 }}
+                  >
                     <button style={{ ...s.btnOpen, width: '100%' }}>
-                      {session.status === 'closed' ? 'Ver Rankings' : 'Abrir Sesión'}
+                      {session.status === 'closed' ? 'Ver resultados' : 'Abrir sesión'}
                     </button>
                   </Link>
                   <button style={s.btnDelete} onClick={() => handleDelete(session.code)}>
