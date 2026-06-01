@@ -12,13 +12,13 @@ export default function Step2Rankings() {
   const { code } = useParams()
   const navigate = useNavigate()
 
-  const [view, setView]               = useState('individual')
-  const [ranking, setRanking]         = useState([])
-  const [groups, setGroups]           = useState([])
-  const [totalJoined, setTotalJoined] = useState(0)
-  const [showRanking, setShowRanking]         = useState(false)
-  const [revealed, setRevealed]               = useState(false)
+  const [view, setView]                         = useState('individual')
+  const [ranking, setRanking]                   = useState([])
+  const [groups, setGroups]                     = useState([])
+  const [totalJoined, setTotalJoined]           = useState(0)
   const [calculatorStarted, setCalculatorStarted] = useState(false)
+  const [showRanking, setShowRanking]           = useState(false)
+  const [revealed, setRevealed]                 = useState(false)
 
   const joinUrl = `${window.location.origin}/?code=${code}`
 
@@ -88,54 +88,91 @@ export default function Step2Rankings() {
   const total       = Math.max(totalJoined, completed)
   const progressPct = total > 0 ? Math.round((completed / total) * 100) : 0
 
-  // ── Sidebar ──────────────────────────────────────────────────────────────────
-  const sidebar = (
-    <div style={{ width: '300px', flexShrink: 0, borderRight: '1px solid #e0e0d8', padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-      <div style={{ padding: '14px', background: '#fff', border: '1px solid #e0e0d8', borderRadius: '8px' }}>
-        <QRCodeSVG value={joinUrl} size={196} fgColor="#2d5a27" bgColor="#ffffff" level="M" />
+  // ── Phase 0: before calculator started — fullscreen QR ───────────────────────
+  if (!calculatorStarted) return (
+    <div style={{
+      flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', minHeight: 'calc(100vh - 52px)',
+      background: '#fff', gap: '1.5rem', padding: '2.5rem 2rem', textAlign: 'center',
+    }}>
+      <div style={{ padding: '16px', background: '#fff', border: '1px solid #e0e0d8', borderRadius: '12px' }}>
+        <QRCodeSVG value={joinUrl} size={220} fgColor="#2d5a27" bgColor="#ffffff" level="M" />
       </div>
-      <div style={{ fontWeight: 900, fontSize: '1.8rem', letterSpacing: '0.1em', color: '#2d5a27' }}>{code}</div>
-      <div style={{ fontSize: '0.68rem', color: '#bbb', textAlign: 'center', letterSpacing: '0.04em', wordBreak: 'break-all' }}>{joinUrl}</div>
+
+      <div style={{ fontWeight: 900, fontSize: 'clamp(2rem, 6vw, 3.5rem)', letterSpacing: '0.1em', color: '#2d5a27', lineHeight: 1 }}>
+        {code}
+      </div>
+
+      <div style={{ fontSize: '0.72rem', color: '#bbb', letterSpacing: '0.04em', wordBreak: 'break-all', maxWidth: 320 }}>
+        {joinUrl}
+      </div>
+
+      <div style={{ marginTop: '0.5rem' }}>
+        <div style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 8vw, 4rem)', lineHeight: 1, color: '#1a1a1a' }}>
+          {totalJoined}
+        </div>
+        <div style={{ fontSize: '0.75rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '0.5rem' }}>
+          participante{totalJoined !== 1 ? 's' : ''} conectado{totalJoined !== 1 ? 's' : ''}
+        </div>
+      </div>
+
+      <button
+        onClick={handleStartCalculator}
+        style={{
+          background: '#2d5a27', color: '#fff', border: 'none',
+          padding: '1rem 2.5rem', fontSize: '0.88rem', fontWeight: 700,
+          letterSpacing: '0.12em', textTransform: 'uppercase',
+          borderRadius: '4px', cursor: 'pointer', marginTop: '0.5rem',
+        }}
+      >
+        Iniciar calculadora →
+      </button>
+    </div>
+  )
+
+  // ── Sidebar (phases 1 & 2) ────────────────────────────────────────────────────
+  const sidebar = (
+    <div style={{ width: '280px', flexShrink: 0, borderRight: '1px solid #e0e0d8', padding: '2rem 1.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+      <div style={{ padding: '10px', background: '#fff', border: '1px solid #e0e0d8', borderRadius: '8px' }}>
+        <QRCodeSVG value={joinUrl} size={160} fgColor="#2d5a27" bgColor="#ffffff" level="M" />
+      </div>
+      <div style={{ fontWeight: 900, fontSize: '1.5rem', letterSpacing: '0.1em', color: '#2d5a27' }}>{code}</div>
+      <div style={{ fontSize: '0.62rem', color: '#bbb', textAlign: 'center', letterSpacing: '0.04em', wordBreak: 'break-all' }}>{joinUrl}</div>
 
       <div style={{ width: '100%', borderTop: '1px solid #e0e0d8' }} />
 
-      <div style={{ background: '#f5f5f0', padding: '1rem 1.5rem', textAlign: 'center', width: '100%', borderRadius: '8px' }}>
-        <div style={{ fontWeight: 900, fontSize: '2.5rem', lineHeight: 1, color: '#1a1a1a' }}>{total === 0 ? '0/0' : `${completed}/${total}`}</div>
-        <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '0.3rem' }}>Completados</div>
+      <div style={{ background: '#f5f5f0', padding: '0.85rem 1.25rem', textAlign: 'center', width: '100%', borderRadius: '8px' }}>
+        <div style={{ fontWeight: 900, fontSize: '2.2rem', lineHeight: 1, color: '#1a1a1a' }}>{total === 0 ? '0/0' : `${completed}/${total}`}</div>
+        <div style={{ fontSize: '0.68rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '0.3rem' }}>Completados</div>
       </div>
-      <div style={{ width: '100%', height: 6, background: '#e0e0d8', borderRadius: 3, overflow: 'hidden' }}>
+      <div style={{ width: '100%', height: 5, background: '#e0e0d8', borderRadius: 3, overflow: 'hidden' }}>
         <div style={{ height: '100%', width: `${progressPct}%`, background: completed > 0 && completed >= total ? '#2d5a27' : '#7db87a', borderRadius: 3, transition: 'width 0.5s ease' }} />
       </div>
 
       <div style={{ width: '100%', borderTop: '1px solid #e0e0d8' }} />
 
-      {!calculatorStarted && !revealed && (
-        <button onClick={handleStartCalculator} style={{ width: '100%', background: '#1a3d16', color: '#fff', border: 'none', padding: '0.85rem', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: 'pointer' }}>
-          Iniciar calculadora
-        </button>
-      )}
-      {calculatorStarted && (
-        <button disabled style={{ width: '100%', background: '#eaf3de', color: '#2d5a27', border: '1px solid #c8e6c0', padding: '0.85rem', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: 'default' }}>
-          ✓ Calculadora activa
-        </button>
-      )}
-      {calculatorStarted && (
-        <button
-          onClick={revealed ? undefined : handleReveal}
-          disabled={revealed}
-          style={{ width: '100%', background: revealed ? '#eaf3de' : '#2d5a27', color: revealed ? '#2d5a27' : '#fff', border: revealed ? '1px solid #c8e6c0' : 'none', padding: '0.85rem', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: revealed ? 'default' : 'pointer' }}
-        >
-          {revealed ? '✓ Resultados revelados' : `Revelar resultados (${completed} completados)`}
-        </button>
-      )}
+      <button
+        disabled
+        style={{ width: '100%', background: '#eaf3de', color: '#2d5a27', border: '1px solid #c8e6c0', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: 'default' }}
+      >
+        ✓ Calculadora activa
+      </button>
 
-      <button onClick={handleClose} style={{ width: '100%', background: 'transparent', color: '#cc4444', border: '1px solid #e0e0d8', padding: '0.75rem', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', marginTop: 'auto', cursor: 'pointer' }}>
+      <button
+        onClick={revealed ? undefined : handleReveal}
+        disabled={revealed}
+        style={{ width: '100%', background: revealed ? '#eaf3de' : '#2d5a27', color: revealed ? '#2d5a27' : '#fff', border: revealed ? '1px solid #c8e6c0' : 'none', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: revealed ? 'default' : 'pointer' }}
+      >
+        {revealed ? '✓ Resultados revelados' : `Revelar resultados (${completed})`}
+      </button>
+
+      <button onClick={handleClose} style={{ width: '100%', background: 'transparent', color: '#cc4444', border: '1px solid #e0e0d8', padding: '0.7rem', fontSize: '0.72rem', letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', marginTop: 'auto', cursor: 'pointer' }}>
         Cerrar sesión
       </button>
     </div>
   )
 
-  // ── Phase 1: waiting ─────────────────────────────────────────────────────────
+  // ── Phase 1: calculator active, waiting for results ───────────────────────────
   if (!showRanking) return (
     <div style={{ flex: 1, display: 'flex', background: '#ffffff', minHeight: 'calc(100vh - 52px)' }}>
       {sidebar}
@@ -145,10 +182,10 @@ export default function Step2Rankings() {
             {total === 0 ? '–' : `${completed}/${total}`}
           </div>
           <div style={{ fontSize: '0.85rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '0.75rem' }}>
-            {total === 0 ? 'Esperando participantes...' : completed === total && total > 0 ? 'Todos han completado' : 'han completado la calculadora'}
+            {total === 0 ? 'Esperando respuestas...' : completed === total && total > 0 ? 'Todos han completado' : 'han completado la calculadora'}
           </div>
           {total > 0 && (
-            <div style={{ marginTop: '1.5rem', height: 6, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden', width: 260, margin: '1.5rem auto 0' }}>
+            <div style={{ height: 6, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden', width: 260, margin: '1.5rem auto 0' }}>
               <div style={{ height: '100%', width: `${progressPct}%`, background: completed >= total ? '#2d5a27' : '#7db87a', borderRadius: 3, transition: 'width 0.5s ease' }} />
             </div>
           )}
@@ -157,7 +194,7 @@ export default function Step2Rankings() {
     </div>
   )
 
-  // ── Phase 2: ranking revealed ─────────────────────────────────────────────────
+  // ── Phase 2: results revealed ─────────────────────────────────────────────────
   return (
     <div style={{ flex: 1, display: 'flex', background: '#ffffff', minHeight: 'calc(100vh - 52px)' }}>
       {sidebar}

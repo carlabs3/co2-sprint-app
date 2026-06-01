@@ -81,12 +81,12 @@ export default function FacilitatorDashboard() {
   }, [])
 
   async function handleDelete(code) {
-    if (!confirm('¿Eliminar esta sesión? Los datos se conservarán de forma anónima.')) return
+    if (!confirm('¿Eliminar esta sesión del panel? Los datos se conservarán en la base de datos.')) return
     try {
-      await api.delete(`/api/sessions/${code}`)
+      await api.patch(`/api/sessions/${code}/delete`)
       setSessions(prev => prev.filter(s => s.code !== code))
     } catch {
-      alert('Error al cerrar la sesión')
+      alert('Error al eliminar la sesión')
     }
   }
 

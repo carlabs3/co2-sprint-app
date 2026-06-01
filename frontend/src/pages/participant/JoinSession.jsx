@@ -3,6 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSession } from '../../context/SessionContext.jsx'
 import api from '../../utils/api.js'
 
+const AGE_RANGES = ['< 20', '20-29', '30-39', '40-49', '50-59', '60+', 'Prefiero no decirlo']
+const GENDERS    = ['Mujer', 'Hombre', 'No binario', 'Prefiero no decirlo']
+
 const s = {
   page: {
     flex: 1,
@@ -62,6 +65,19 @@ const s = {
     letterSpacing: '0.05em',
     fontWeight: 700,
   },
+  select: {
+    width: '100%',
+    border: 'none',
+    borderBottom: '1px solid #e0e0d8',
+    padding: '0.6rem 0',
+    fontSize: '1rem',
+    background: 'transparent',
+    outline: 'none',
+    letterSpacing: '0.03em',
+    fontWeight: 700,
+    appearance: 'none',
+    paddingRight: '1rem',
+  },
   groupRow: {
     display: 'flex',
     gap: '0.5rem',
@@ -102,15 +118,18 @@ const s = {
 export default function JoinSession() {
   const [searchParams] = useSearchParams()
   const codeFromUrl = searchParams.get('code')
-  const [code, setCode]       = useState('')
-  const [name, setName]       = useState('')
-  const [nameError, setNameError] = useState('')
-  const [age, setAge]         = useState('')
-  const [gender, setGender]   = useState('')
-  const [group, setGroup]     = useState('')
-  const [groups, setGroups]   = useState([])
-  const [codeError, setCodeError] = useState('')
-  const [groupError, setGroupError] = useState('')
+
+  const [code,        setCode]        = useState('')
+  const [name,        setName]        = useState('')
+  const [age,         setAge]         = useState('')
+  const [gender,      setGender]      = useState('')
+  const [group,       setGroup]       = useState('')
+  const [groups,      setGroups]      = useState([])
+  const [codeError,   setCodeError]   = useState('')
+  const [ageError,    setAgeError]    = useState('')
+  const [genderError, setGenderError] = useState('')
+  const [groupError,  setGroupError]  = useState('')
+
   const { joinSession } = useSession()
   const navigate = useNavigate()
 
@@ -118,19 +137,12 @@ export default function JoinSession() {
     if (codeFromUrl) setCode(codeFromUrl.toUpperCase())
   }, [codeFromUrl])
 
-  // Fetch session groups when code is complete
   useEffect(() => {
     const clean = code.replace('-', '')
     if (clean.length < 7) { setGroups([]); return }
     api.get(`/api/sessions/${code}/info`)
-      .then(res => {
-        setGroups(res.data.groups || [])
-        setCodeError('')
-      })
-      .catch(() => {
-        setGroups([])
-        setCodeError('Sesión no encontrada')
-      })
+      .then(res => { setGroups(res.data.groups || []); setCodeError('') })
+      .catch(() => { setGroups([]); setCodeError('Sesión no encontrada') })
   }, [code])
 
   function formatCode(val) {
@@ -147,8 +159,12 @@ export default function JoinSession() {
       setCodeError('Ingresa un código válido (ej: ECO-4872)')
       valid = false
     }
-    if (!name.trim()) {
-      setNameError('Por favor introduce tu nombre o alias')
+    if (!age) {
+      setAgeError('Selecciona tu rango de edad')
+      valid = false
+    }
+    if (!gender) {
+      setGenderError('Selecciona una opción')
       valid = false
     }
     if (!group) {
@@ -157,7 +173,7 @@ export default function JoinSession() {
     }
     if (!valid) return
 
-    joinSession(code, name.trim(), group, age, gender)
+    joinSession(code, name.trim() || 'Anónimo', group, age, gender)
     navigate(`/session/${code}/waiting`)
   }
 
@@ -170,6 +186,8 @@ export default function JoinSession() {
         <p style={s.tagline}>Calculadora de huella de carbono</p>
 
         <form onSubmit={handleSubmit}>
+
+          {/* Código */}
           <div style={s.field}>
             <label style={s.label} htmlFor="code">Código de sesión</label>
             <input
@@ -184,23 +202,25 @@ export default function JoinSession() {
             {codeError && <div style={s.error}>{codeError}</div>}
           </div>
 
+          {/* Nombre (opcional) */}
           <div style={s.field}>
-            <label style={s.label} htmlFor="name">Tu nombre o alias</label>
+            <label style={s.label} htmlFor="name">
+              Tu nombre o alias{' '}
+              <span style={{ color: '#bbb', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(opcional)</span>
+            </label>
             <input
               id="name"
-              style={{ ...s.input, ...(nameError ? s.fieldError : {}) }}
+              style={s.input}
               type="text"
               value={name}
-              onChange={e => { setName(e.target.value); setNameError('') }}
+              onChange={e => setName(e.target.value)}
               placeholder="ej. María, M.García, Participante 7..."
               maxLength={40}
             />
-            {nameError
-              ? <div style={s.error}>{nameError}</div>
-              : <div style={s.hint}>Solo visible en el ranking en vivo. No se guarda en ninguna base de datos.</div>
-            }
+            <div style={s.hint}>Solo visible en el ranking en vivo. No se guarda en ninguna base de datos.</div>
           </div>
 
+          {/* Grupo */}
           {groups.length > 0 && (
             <div style={s.field}>
               <label style={s.label}>Tu grupo</label>
@@ -220,34 +240,33 @@ export default function JoinSession() {
             </div>
           )}
 
+          {/* Edad + Género */}
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.8rem' }}>
             <div style={{ flex: 1 }}>
-              <label style={s.label} htmlFor="age">Edad <span style={{ color: '#bbb', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(opcional)</span></label>
+              <label style={s.label} htmlFor="age">Edad</label>
               <select
                 id="age"
                 value={age}
-                onChange={e => setAge(e.target.value)}
-                style={{ ...s.input, color: age ? '#1a1a1a' : '#aaa', appearance: 'none', paddingRight: '1rem' }}
+                onChange={e => { setAge(e.target.value); setAgeError('') }}
+                style={{ ...s.select, color: age ? '#1a1a1a' : '#aaa', ...(ageError ? s.fieldError : {}) }}
               >
                 <option value="">—</option>
-                {['< 20', '20-29', '30-39', '40-49', '50-59', '60+'].map(r => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
+                {AGE_RANGES.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
+              {ageError && <div style={s.error}>{ageError}</div>}
             </div>
             <div style={{ flex: 1 }}>
-              <label style={s.label} htmlFor="gender">Género <span style={{ color: '#bbb', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(opcional)</span></label>
+              <label style={s.label} htmlFor="gender">Género</label>
               <select
                 id="gender"
                 value={gender}
-                onChange={e => setGender(e.target.value)}
-                style={{ ...s.input, color: gender ? '#1a1a1a' : '#aaa', appearance: 'none', paddingRight: '1rem' }}
+                onChange={e => { setGender(e.target.value); setGenderError('') }}
+                style={{ ...s.select, color: gender ? '#1a1a1a' : '#aaa', ...(genderError ? s.fieldError : {}) }}
               >
                 <option value="">—</option>
-                {['Mujer', 'Hombre', 'No binario', 'Prefiero no decirlo'].map(g => (
-                  <option key={g} value={g}>{g}</option>
-                ))}
+                {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
               </select>
+              {genderError && <div style={s.error}>{genderError}</div>}
             </div>
           </div>
 

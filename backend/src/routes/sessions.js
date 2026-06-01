@@ -147,11 +147,23 @@ export default function sessionsRouter(io) {
     try {
       const session = await Session.findOneAndUpdate(
         { code: req.params.code, facilitatorId: req.user.id },
-        { deleted: true, deletedAt: new Date(), status: 'closed' },
+        { status: 'closed' },
         { new: true }
       )
       if (!session) return res.status(404).json({ error: 'Sesión no encontrada' })
       io.to(req.params.code).emit('session:closed')
+      res.json({ ok: true })
+    } catch {
+      res.status(500).json({ error: 'Error al cerrar sesión' })
+    }
+  })
+
+  router.patch('/:code/delete', async (req, res) => {
+    try {
+      await Session.findOneAndUpdate(
+        { code: req.params.code, facilitatorId: req.user.id },
+        { deleted: true, deletedAt: new Date() }
+      )
       res.json({ ok: true })
     } catch {
       res.status(500).json({ error: 'Error al eliminar sesión' })
