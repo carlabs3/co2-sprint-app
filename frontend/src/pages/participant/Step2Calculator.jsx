@@ -274,6 +274,7 @@ export default function Step2Calculator() {
         name: participantName,
         carbonTons: totalCO2,
         areas: areaResults,
+        answers,
         category: getCategory(totalCO2),
       })
       submittedResultRef.current = result

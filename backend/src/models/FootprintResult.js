@@ -13,6 +13,7 @@ const footprintResultSchema = new Schema({
     waste: Number,
   },
   category: { type: String, enum: ['bajo', 'medio', 'alto', 'muy alto'] },
+  answers:  { type: Schema.Types.Mixed },
 }, { timestamps: true })
 
 export default model('FootprintResult', footprintResultSchema)

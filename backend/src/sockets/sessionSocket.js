@@ -60,9 +60,11 @@ export function registerSocketHandlers(io) {
       io.to(sessionCode).emit('results:revealed')
     })
 
-    socket.on('footprint:submit', async ({ sessionCode, group, carbonTons, areas }) => {
+    socket.on('footprint:submit', async ({ sessionCode, group, carbonTons, areas, answers, name }) => {
       try {
-        const participant = await Participant.findOne({ socketId: socket.id })
+        const participant =
+          await Participant.findOne({ socketId: socket.id }) ||
+          await Participant.findOne({ sessionCode, group, name })
         const category = getCategory(carbonTons)
         const mappedAreas = Object.fromEntries(
           Object.entries(areas || {}).map(([k, v]) => [AREA_KEY_MAP[k] ?? k, v])
@@ -74,6 +76,7 @@ export function registerSocketHandlers(io) {
           carbonTons,
           areas: mappedAreas,
           category,
+          answers: answers || {},
         })
 
         const results = await FootprintResult.find({ sessionCode })
