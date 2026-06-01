@@ -1,120 +1,14 @@
 import { Router } from 'express'
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 import { authMiddleware } from '../middleware/authMiddleware.js'
 import FootprintResult from '../models/FootprintResult.js'
 
 const router = Router()
 
-const SPAIN_AVG = 7.2
-
-const CATEGORY_CONFIG = {
-  bajo:       { label: 'Bajo',     color: '#7d9e7a', bg: '#f0f7ef', range: 'Menos de 2 t/año' },
-  medio:      { label: 'Medio',    color: '#5a8a57', bg: '#edf5ec', range: '2–4 t/año' },
-  alto:       { label: 'Alto',     color: '#b07a30', bg: '#faf3e8', range: '4–6 t/año' },
-  'muy alto': { label: 'Muy alto', color: '#cc4444', bg: '#fdf0f0', range: 'Más de 6 t/año' },
-}
-
-const AREA_LABELS = {
-  transport:   'Transporte',
-  energy:      'Energía',
-  food:        'Alimentación',
-  consumption: 'Consumo',
-  waste:       'Residuos',
-}
-
-let _transporter = null
-function getTransporter() {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return null
-  if (!_transporter) {
-    _transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-      port: Number(process.env.EMAIL_PORT) || 587,
-      secure: false,
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-    })
-  }
-  return _transporter
-}
-
-function buildEmailHtml({ carbonTons, category, areas, date }) {
-  const cfg = CATEGORY_CONFIG[category] || CATEGORY_CONFIG['medio']
-
-  const diffPct = Math.abs(Math.round(((carbonTons - SPAIN_AVG) / SPAIN_AVG) * 100))
-  const isBelow = carbonTons < SPAIN_AVG
-  const diffText = isBelow
-    ? `Estás un ${diffPct}% por debajo de la media española (${SPAIN_AVG} t CO₂/año)`
-    : `Estás un ${diffPct}% por encima de la media española (${SPAIN_AVG} t CO₂/año)`
-  const diffColor = isBelow ? '#5a8a57' : '#b07a30'
-
-  const areasRows = Object.entries(areas || {})
-    .filter(([, v]) => v > 0)
-    .map(([key, val]) => `
-      <tr>
-        <td style="padding:0.5rem 0;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a1a;border-bottom:1px solid #f0f0f0;">
-          ${AREA_LABELS[key] || key}
-        </td>
-        <td style="padding:0.5rem 0;text-align:right;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;">
-          ${Number(val).toFixed(1)} t
-        </td>
-      </tr>`)
-    .join('')
-
-  return `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f5f5f0;font-family:Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f0;padding:32px 16px;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;max-width:560px;width:100%;">
-
-        <!-- Header -->
-        <tr><td style="padding:32px 32px 16px;border-top:4px solid #2d5a27;">
-          <p style="margin:0;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.12em;color:#2d5a27;">CO2 SPRINT *</p>
-          <p style="margin:4px 0 0;font-size:12px;color:#999;text-transform:uppercase;letter-spacing:0.08em;">Tu huella de carbono · ${date}</p>
-        </td></tr>
-
-        <!-- Hero -->
-        <tr><td style="padding:0 32px 24px;">
-          <div style="background:${cfg.bg};padding:32px;text-align:center;">
-            <div style="font-size:64px;font-weight:900;color:#1a1a1a;line-height:1;">${Number(carbonTons).toFixed(1)}</div>
-            <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.1em;color:#666;margin:6px 0 12px;">t CO₂ / año</div>
-            <span style="background:${cfg.color};color:#fff;padding:6px 16px;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;">${cfg.label}</span>
-            <p style="margin:8px 0 0;font-size:12px;color:#999;text-transform:uppercase;letter-spacing:0.05em;">${cfg.range}</p>
-          </div>
-        </td></tr>
-
-        <!-- Desglose por área -->
-        <tr><td style="padding:0 32px 24px;border-top:2px solid #f0f0f0;">
-          <p style="margin:24px 0 12px;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:0.08em;color:#666;">Desglose por área</p>
-          <table width="100%" cellpadding="0" cellspacing="0">
-            ${areasRows}
-          </table>
-        </td></tr>
-
-        <!-- Comparativa con España -->
-        <tr><td style="padding:0 32px 24px;border-top:2px solid #f0f0f0;">
-          <p style="margin:24px 0 8px;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:0.08em;color:#666;">Comparativa con España</p>
-          <p style="margin:0;font-size:14px;font-weight:700;color:${diffColor};">${diffText}</p>
-          <p style="margin:6px 0 0;font-size:11px;color:#bbb;">Fuente: Ministerio para la Transición Ecológica, 2023</p>
-        </td></tr>
-
-        <!-- Footer -->
-        <tr><td style="padding:20px 32px;background:#f5f5f0;border-top:2px solid #f0f0f0;">
-          <p style="margin:0;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#999;">
-            Este email fue generado automáticamente durante el taller CO2 Sprint.
-          </p>
-        </td></tr>
-
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`
-}
 
 // Enviar resultados por email — público
 router.post('/send-email', async (req, res) => {
-  const { email, carbonTons, category, areas, sessionCode } = req.body
+  const { email, carbonTons, category, areas } = req.body
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ error: 'Email no válido' })
@@ -122,22 +16,56 @@ router.post('/send-email', async (req, res) => {
   if (carbonTons == null || !category) {
     return res.status(400).json({ error: 'Faltan datos del resultado' })
   }
-
-  const transport = getTransporter()
-  if (!transport) {
+  if (!process.env.RESEND_API_KEY) {
     return res.status(503).json({ error: 'Servicio de email no configurado' })
   }
 
-  const date = new Date().toLocaleDateString('es-ES', {
-    year: 'numeric', month: 'long', day: 'numeric',
-  })
-
   try {
-    await transport.sendMail({
-      from: `"CO2 Sprint" <${process.env.EMAIL_USER}>`,
+    const resend = new Resend(process.env.RESEND_API_KEY)
+    await resend.emails.send({
+      from: 'CO2 Sprint <onboarding@resend.dev>',
       to: email,
       subject: `Tu huella de carbono — ${Number(carbonTons).toFixed(1)} t CO₂/año`,
-      html: buildEmailHtml({ carbonTons, category, areas, date }),
+      html: `
+        <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+          <h1 style="color: #2d5a27; font-size: 28px; margin-bottom: 8px;">Tu huella de carbono</h1>
+          <p style="color: #666; margin-bottom: 32px;">Resultado del taller CO2 Sprint</p>
+
+          <div style="background: #2d5a27; border-radius: 12px; padding: 32px; text-align: center; margin-bottom: 24px;">
+            <p style="color: #c8e6c0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px;">Tu huella total</p>
+            <h2 style="color: #fff; font-size: 52px; font-weight: 700; margin: 0;">${Number(carbonTons).toFixed(1)} t <span style="font-size: 20px; color: #c8e6c0;">CO₂/año</span></h2>
+            <span style="background: rgba(255,255,255,0.15); color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 13px; display: inline-block; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.08em;">${category}</span>
+          </div>
+
+          <h3 style="color: #1a1a1a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;">Desglose por áreas</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #f0f0f0;">
+              <td style="padding: 10px 0; color: #555;">🚗 Transporte</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.transport || 0).toFixed(1)} t</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f0f0f0;">
+              <td style="padding: 10px 0; color: #555;">⚡ Energía</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.energy || 0).toFixed(1)} t</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f0f0f0;">
+              <td style="padding: 10px 0; color: #555;">🥗 Alimentación</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.food || 0).toFixed(1)} t</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f0f0f0;">
+              <td style="padding: 10px 0; color: #555;">🛍️ Consumo</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.consumption || 0).toFixed(1)} t</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 0; color: #555;">♻️ Residuos</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.waste || 0).toFixed(1)} t</td>
+            </tr>
+          </table>
+
+          <p style="color: #aaa; font-size: 11px; margin-top: 32px; text-align: center;">
+            CO2 Sprint · Taller de huella de carbono
+          </p>
+        </div>
+      `,
     })
     res.json({ ok: true })
   } catch (err) {
