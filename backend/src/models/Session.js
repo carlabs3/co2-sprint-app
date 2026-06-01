@@ -8,6 +8,8 @@ const sessionSchema = new Schema({
   status: { type: String, enum: ['waiting', 'active', 'closed'], default: 'waiting' },
   currentStep: { type: Number, default: 1 },
   resultsRevealed: { type: Boolean, default: false },
+  deleted:   { type: Boolean, default: false },
+  deletedAt: { type: Date,    default: null },
   summary: {
     totalParticipants: Number,
     averageCarbonTons: Number,

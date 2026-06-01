@@ -46,7 +46,7 @@ export default function sessionsRouter(io) {
 
   router.get('/', async (req, res) => {
     try {
-      const sessions = await Session.find({ facilitatorId: req.user.id }).sort({ createdAt: -1 })
+      const sessions = await Session.find({ facilitatorId: req.user.id, deleted: { $ne: true } }).sort({ createdAt: -1 })
       res.json(sessions)
     } catch {
       res.status(500).json({ error: 'Error al obtener sesiones' })
@@ -55,7 +55,7 @@ export default function sessionsRouter(io) {
 
   router.get('/:code', async (req, res) => {
     try {
-      const session = await Session.findOne({ code: req.params.code, facilitatorId: req.user.id })
+      const session = await Session.findOne({ code: req.params.code, facilitatorId: req.user.id, deleted: { $ne: true } })
       if (!session) return res.status(404).json({ error: 'Sesión no encontrada' })
       res.json(session)
     } catch {
@@ -147,14 +147,14 @@ export default function sessionsRouter(io) {
     try {
       const session = await Session.findOneAndUpdate(
         { code: req.params.code, facilitatorId: req.user.id },
-        { status: 'closed' },
+        { deleted: true, deletedAt: new Date(), status: 'closed' },
         { new: true }
       )
       if (!session) return res.status(404).json({ error: 'Sesión no encontrada' })
       io.to(req.params.code).emit('session:closed')
-      res.json({ message: 'Sesión cerrada', session })
+      res.json({ ok: true })
     } catch {
-      res.status(500).json({ error: 'Error al cerrar sesión' })
+      res.status(500).json({ error: 'Error al eliminar sesión' })
     }
   })
 

@@ -81,7 +81,7 @@ export default function FacilitatorDashboard() {
   }, [])
 
   async function handleDelete(code) {
-    if (!confirm('¿Cerrar esta sesión? No podrán unirse nuevos participantes.')) return
+    if (!confirm('¿Eliminar esta sesión? Los datos se conservarán de forma anónima.')) return
     try {
       await api.delete(`/api/sessions/${code}`)
       setSessions(prev => prev.filter(s => s.code !== code))
