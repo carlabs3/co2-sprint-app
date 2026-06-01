@@ -1,75 +1,112 @@
 export const PUBLIC_SERVICES_KG = 1500 // kgCO2e/año, fijo para España
 
+// Valores de referencia por respuesta (kgCO2e/año)
 const MAP = {
-  car:             { none: 0, low: 700, med: 1800, high: 3800, electric: 450 },
-  moto:            { no: 0, little: 150, daily: 650 },
-  publicTransport: { walk_bike: 0, public: 200, mixed: 350, car_only: 600 },
-  flights:         { national: 350, european: 750, long_haul: 2500 },
-  homeType:        { flat_small: 500, flat_large: 950, house: 1800 },
-  heating:         { none: 0, gas: 1300, oil: 1750, electric: 820, heatpump: 380 },
-  hasAC:           { no: 0, little: 180, yes: 460 },
-  renewable:       { yes: 0.60, partial: 0.82, no: 1.0 },
-  householdSize:   { '1': 1, '2': 2, '3': 3, '4+': 4 },
-  homeHabits:      { led: -90, short_shower: -75, cold_wash: -55, thermostat: -95 },
-  diet:            { vegan: 1150, veggie: 1500, flexi: 2100, omni: 2700, meat: 3400 },
-  localFood:       { always: -190, sometimes: -75, never: 0 },
-  foodWaste:       { none: 0, little: 140, some: 330, lot: 580 },
-  bottledWater:    { no: 0, sometimes: 45, always: 155 },
-  foodHabits:      { organic: -95, no_plastic: -55, compost: -75, meal_plan: -95 },
-  clothes:         { none: 50, few: 190, many: 430, lots: 780 },
-  electronics:     { phone: 80, laptop: 340, tv: 280, wearable: 50 },
-  appliances:      { fridge: 135, washer: 95, oven: 80, small: 75 },
-  hygiene:         { low: 45, med: 115, high: 240 },
-  smoking:         { no: 0, little: 95, yes: 340 },
-  pets:            { dog_large: 720, dog_small: 330, cat: 280, other: 95 },
-  videoCalls:      { none: 0, few: 14, some: 38, lots: 85 },
-  streaming:       { none: 0, low: 19, med: 52, high: 105 },
-  socialMedia:     { low: 9, med: 28, high: 70 },
+  // Transporte — coche (km base antes de factor combustible)
+  car:           { '1a': 500, '1b': 1200, '1c': 2500, '1d': 4000, '1e': 0 },
+  // Factor por tipo de combustible (multiplica km coche)
+  electricCar:   { 'a': 0.15, 'b': 0.5, 'c': 0.75, 'd': 0.9, 'e': 1.0 },
+  // Tren larga distancia
+  train:         { '3a': 80, '3b': 40, '3c': 15, '3d': 0 },
+  // Moto
+  moto:          { '4a': 50, '4b': 250, '4c': 650, '4d': 0 },
+  // Movilidad urbana
+  urbanMobility: { '5a': 0, '5b': 100, '5c': 300, '5d': 500, '5e': 750 },
+
+  // Hogar — tamaño y tipo
+  homeType:    { '25a': 400, '25b': 750, '25c': 1200 },
+  // Calefacción (por hogar, antes de dividir por personas)
+  heating:     { '26a': 50, '26b': 1000, '26c': 700, '26d': 2200, '26e': 200, '26f': 250 },
+  // Factor renovables (reduce el total hogar)
+  renewable:   { 'a': 0.40, 'b': 0.70, 'c': 1.0 },
+  // Aire acondicionado
+  hasAC:       { 'no': 0, 'yes': 460 },
+  // Divisor por personas en el hogar
+  householdSize: { '1': 1, '2': 2, '3': 3, '4+': 4 },
+  // Hábitos hogar (reducciones, multi)
+  homeHabits:  { closeWindows: -40, thermostat19: -80, ledBulbs: -60, ecoPrograms: -50 },
+
+  // Alimentación
+  milkType:     { 'a': 200, 'b': 30, 'c': 0 },
+  hotDrinks:    { '7a': 180, '7b': 160, '7c': 20, '7d': 0 },
+  lunch:        { '9a': 300, '9b': 400, '9c': 500, '9d': 700, '9e': 900, '9f': 1300 },
+  dinner:       { '10a': 300, '10b': 400, '10c': 500, '10d': 700, '10e': 900, '10f': 1300 },
+  bottledWater: { '13a': 200, '13b': 80, '13c': 0 },
+  // Hábitos alimentarios (reducciones, multi)
+  foodHabits:   { localFood: -80, composting: -60, noFoodWaste: -120, organic: -90, noPlastic: -50 },
+
+  // Consumo — ropa
+  clothes:     { '15a': 80, '15b': 200, '15c': 380, '15d': 550, '15e': 730, '15f': 900, '15g': 30 },
+  // Dispositivos electrónicos comprados (multi)
+  electronics: { '16a': 350, '16b': 80, '16c': 280, '16d': 100, '16e': 150, '16f': 50, '16g': 80, '16h': 60, '16i': 0 },
+  // Electrodomésticos comprados (multi)
+  appliances:  { '19a': 180, '19b': 120, '19c': 100, '19d': 90, '19e': 80, '19f': 50, '19g': 60, '19h': 100, '19i': 0 },
+  // Mascotas (multi, kgCO2e anual)
+  pets:        { bigDog: 720, smallDog: 330, cat: 280, rabbit: 100, bird: 80 },
+  // Higiene y limpieza
+  hygiene:     { '22a': 30, '22b': 100, '22c': 250 },
+  // Tabaco
+  smoking:     { '23a': 0, '23b': 80, '23c': 180, '23d': 300, '23e': 480 },
+
+  // Digital
+  videoCalls:  { none: 0, less1h: 8, '1to2h': 20, more2h: 50 },
+  streaming:   { none: 0, less1h: 12, '1to4h': 35, more4h: 80 },
+  socialMedia: { less1h: 7, '1to2h': 18, more2h: 40 },
 }
 
-function single(key, val) {
+function get(key, val) {
   return MAP[key]?.[val] ?? 0
 }
 
-function multi(key, vals) {
+function sum(key, vals) {
   const arr = Array.isArray(vals) ? vals : []
-  return arr.reduce((sum, v) => sum + (MAP[key]?.[v] ?? 0), 0)
+  return arr.reduce((s, v) => s + (MAP[key]?.[v] ?? 0), 0)
 }
 
 export function calculator(answers) {
-  const transportKg =
-    single('car', answers.car) +
-    single('moto', answers.moto) +
-    single('publicTransport', answers.publicTransport) +
-    multi('flights', answers.flights)
+  // ── Transporte ──────────────────────────────────────────────────────────────
+  const carKg      = get('car', answers.car) * (MAP.electricCar[answers.electricCar] ?? 1.0)
+  const flightsKg  = (answers.flightShort  ? 600  : 0)
+                   + (answers.flightMedium ? 1500 : 0)
+                   + (answers.flightLong   ? 3500 : 0)
+  const transportKg = carKg + flightsKg
+    + get('train', answers.train)
+    + get('moto', answers.moto)
+    + get('urbanMobility', answers.urbanMobility)
 
-  const div = MAP.householdSize[answers.householdSize] ?? 2
-  const rf  = MAP.renewable[answers.renewable] ?? 1.0
-  const housingBase = single('homeType', answers.homeType) + single('heating', answers.heating) + single('hasAC', answers.hasAC)
-  const housingKg   = Math.max(0, (housingBase / div) * rf + multi('homeHabits', answers.homeHabits))
+  // ── Hogar ───────────────────────────────────────────────────────────────────
+  const div       = MAP.householdSize[answers.householdSize] ?? 2
+  const rf        = MAP.renewable[answers.renewable] ?? 1.0
+  const homeBase  = get('homeType', answers.homeType) + get('heating', answers.heating) + get('hasAC', answers.hasAC)
+  const housingKg = Math.max(0, (homeBase / div) * rf + sum('homeHabits', answers.homeHabits))
 
+  // ── Alimentación ────────────────────────────────────────────────────────────
   const foodKg = Math.max(0,
-    single('diet', answers.diet) +
-    single('localFood', answers.localFood) +
-    single('foodWaste', answers.foodWaste) +
-    single('bottledWater', answers.bottledWater) +
-    multi('foodHabits', answers.foodHabits)
+    get('milkType', answers.milkType) +
+    get('hotDrinks', answers.hotDrinks) +
+    get('lunch', answers.lunch) +
+    get('dinner', answers.dinner) +
+    get('bottledWater', answers.bottledWater) +
+    sum('foodHabits', answers.foodHabits)
   )
 
+  // ── Consumo ─────────────────────────────────────────────────────────────────
   const consumptionKg =
-    single('clothes', answers.clothes) +
-    multi('electronics', answers.electronics) +
-    multi('appliances', answers.appliances) +
-    single('hygiene', answers.hygiene) +
-    single('smoking', answers.smoking) +
-    multi('pets', answers.pets)
+    get('clothes', answers.clothes) +
+    sum('electronics', answers.electronics) +
+    sum('appliances', answers.appliances) +
+    sum('pets', answers.pets) +
+    get('hygiene', answers.hygiene) +
+    get('smoking', answers.smoking)
 
+  // ── Huella digital + servicios públicos ────────────────────────────────────
   const digitalKg =
-    single('videoCalls', answers.videoCalls) +
-    single('streaming', answers.streaming) +
-    single('socialMedia', answers.socialMedia) +
+    get('videoCalls', answers.videoCalls) +
+    get('streaming', answers.streaming) +
+    get('socialMedia', answers.socialMedia) +
     PUBLIC_SERVICES_KG
 
+  // ── Totales ─────────────────────────────────────────────────────────────────
   const totalKg    = transportKg + housingKg + foodKg + consumptionKg + digitalKg
   const carbonTons = parseFloat((totalKg / 1000).toFixed(2))
 
