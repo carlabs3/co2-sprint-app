@@ -178,12 +178,32 @@ export default function Step2Calculator() {
   const [submitted, setSubmitted]         = useState(false)
   const [isMobile, setIsMobile]           = useState(() => window.innerWidth <= 768)
   const submittedResultRef                = useRef(null)
+  const STORAGE_KEY                       = `co2sprint_progress_${code}`
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth <= 768)
     window.addEventListener('resize', handler)
     return () => window.removeEventListener('resize', handler)
   }, [])
+
+  // Restore progress on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (!saved) return
+    try {
+      const { answers: a, areaIndex: ai, questionIndex: qi } = JSON.parse(saved)
+      setAnswers(a || {})
+      setAreaIndex(ai || 0)
+      setQuestionIndex(qi || 0)
+    } catch {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Save progress on every change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers, areaIndex, questionIndex }))
+  }, [answers, areaIndex, questionIndex]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     socket.on('results:revealed', () => {
@@ -241,6 +261,7 @@ export default function Step2Calculator() {
       const calcResult = calculator(answers)
       const state = { ...calcResult, answers }
       submittedResultRef.current = state
+      localStorage.removeItem(STORAGE_KEY)
       socket.emit('footprint:submit', {
         sessionCode: code,
         group: participantGroup,

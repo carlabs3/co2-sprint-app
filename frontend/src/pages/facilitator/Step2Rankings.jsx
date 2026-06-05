@@ -51,7 +51,7 @@ export default function Step2Rankings() {
       }
     })
 
-    socket.on('participant:joined', data => setTotalJoined(data.count))
+    socket.on('participant:joined', data => setTotalJoined(data.total ?? data.count ?? 0))
 
     socket.on('results:revealed', () => {
       setRevealed(true)

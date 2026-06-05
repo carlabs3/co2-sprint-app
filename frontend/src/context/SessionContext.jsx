@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { socket } from '../utils/socket.js'
+import api from '../utils/api.js'
 
 const SessionContext = createContext(null)
 
@@ -16,6 +17,37 @@ export function SessionProvider({ children }) {
     socket.connect()
     socket.on('step:change', ({ step }) => setCurrentStep(step))
     socket.on('session:closed', () => setSessionClosed(true))
+
+    // Try to restore participant session from localStorage
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('co2sprint_participant_'))
+    if (keys.length > 0) {
+      const key = keys[keys.length - 1]
+      try {
+        const saved = JSON.parse(localStorage.getItem(key))
+        api.get(`/api/sessions/${saved.code}/info`)
+          .then(res => {
+            if (res.data.status === 'active') {
+              setSessionCode(saved.code)
+              setParticipantName(saved.name || '')
+              setParticipantGroup(saved.group || '')
+              setParticipantAge(saved.age || '')
+              setParticipantGender(saved.gender || '')
+              socket.emit('session:join', {
+                code:   saved.code,
+                name:   saved.name,
+                group:  saved.group,
+                age:    saved.age,
+                gender: saved.gender,
+              })
+            } else {
+              localStorage.removeItem(key)
+            }
+          })
+          .catch(() => localStorage.removeItem(key))
+      } catch {
+        localStorage.removeItem(key)
+      }
+    }
 
     return () => {
       socket.off('step:change')
@@ -35,6 +67,10 @@ export function SessionProvider({ children }) {
   }
 
   function clearSession() {
+    // Clear participant and progress keys from localStorage
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('co2sprint_participant_') || k.startsWith('co2sprint_progress_'))
+      .forEach(k => localStorage.removeItem(k))
     setSessionCode(null)
     setParticipantName('')
     setParticipantGroup('')

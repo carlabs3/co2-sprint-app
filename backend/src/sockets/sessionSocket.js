@@ -1,5 +1,3 @@
-
-
 import Participant from '../models/Participant.js'
 import FootprintResult from '../models/FootprintResult.js'
 import Session from '../models/Session.js'
@@ -20,22 +18,24 @@ const AREA_KEY_MAP = {
 }
 
 // In-memory name store: participantId (string) -> display name
-// Names are never written to DB, only used for live ranking display
 const participantNames = new Map()
+
+// Unique participant tracker: code -> Map(uniqueKey -> { name, group, socketId })
+const sessionParticipants = new Map()
 
 export function registerSocketHandlers(io) {
   io.on('connection', (socket) => {
     socket.on('facilitator:join', async ({ code }) => {
       socket.join(code)
       try {
-        const count = await Participant.countDocuments({ sessionCode: code })
-        socket.emit('participant:joined', { count })
+        const mapSize = sessionParticipants.get(code)?.size ?? 0
+        const total = mapSize > 0 ? mapSize : await Participant.countDocuments({ sessionCode: code })
+        socket.emit('participant:joined', { total })
       } catch {}
     })
 
     socket.on('session:join', async ({ code, name, group, age, gender }) => {
       try {
-        // Store name in socket memory only — never written to DB
         socket.data.name = name || 'Anónimo'
         socket.data.group = group
         socket.data.sessionCode = code
@@ -49,9 +49,14 @@ export function registerSocketHandlers(io) {
           participantNames.set(participant._id.toString(), socket.data.name)
         }
 
+        // Track unique participant by group+name (reconnects reuse the same slot)
+        const uniqueKey = `${group}_${name || socket.id}`
+        if (!sessionParticipants.has(code)) sessionParticipants.set(code, new Map())
+        sessionParticipants.get(code).set(uniqueKey, { name, group, socketId: socket.id })
+        const totalUnique = sessionParticipants.get(code).size
+
         socket.join(code)
-        const count = await Participant.countDocuments({ sessionCode: code })
-        io.to(code).emit('participant:joined', { count })
+        io.to(code).emit('participant:joined', { total: totalUnique, name, group })
 
         const session = await Session.findOne({ code }, 'status currentStep resultsRevealed deleted')
         if (session) {
@@ -97,15 +102,25 @@ export function registerSocketHandlers(io) {
         const mappedAreas = Object.fromEntries(
           Object.entries(areas || {}).map(([k, v]) => [AREA_KEY_MAP[k] ?? k, v])
         )
-        await FootprintResult.create({
-          sessionCode,
-          participantId: participant?._id,
-          group,
-          carbonTons,
-          areas: mappedAreas,
-          category,
-          answers: answers || {},
-        })
+
+        if (participant?._id) {
+          const existing = await FootprintResult.findOne({ sessionCode, participantId: participant._id })
+          if (existing) {
+            await FootprintResult.findByIdAndUpdate(existing._id, {
+              carbonTons, areas: mappedAreas, answers: answers || {}, category,
+            })
+          } else {
+            await FootprintResult.create({
+              sessionCode, participantId: participant._id, group,
+              carbonTons, areas: mappedAreas, category, answers: answers || {},
+            })
+          }
+        } else {
+          await FootprintResult.create({
+            sessionCode, participantId: null, group,
+            carbonTons, areas: mappedAreas, category, answers: answers || {},
+          })
+        }
 
         const results = await FootprintResult.find({ sessionCode }).sort({ carbonTons: 1 })
 
@@ -126,6 +141,13 @@ export function registerSocketHandlers(io) {
 
     socket.on('disconnect', async () => {
       await Participant.findOneAndUpdate({ socketId: socket.id }, { socketId: null }).catch(() => {})
+
+      // Mark disconnected but keep in unique count so it doesn't drop
+      sessionParticipants.forEach(participants => {
+        participants.forEach(p => {
+          if (p.socketId === socket.id) p.socketId = null
+        })
+      })
     })
   })
 }

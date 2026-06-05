@@ -177,7 +177,12 @@ export default function JoinSession() {
     }
     if (!valid) return
 
-    joinSession(code, name.trim() || 'Anónimo', group, age, gender)
+    const resolvedName = name.trim() || 'Anónimo'
+    localStorage.setItem(`co2sprint_participant_${code}`, JSON.stringify({
+      code, name: resolvedName, group, age, gender,
+      joinedAt: new Date().toISOString(),
+    }))
+    joinSession(code, resolvedName, group, age, gender)
     navigate(`/session/${code}/waiting`)
   }
 
