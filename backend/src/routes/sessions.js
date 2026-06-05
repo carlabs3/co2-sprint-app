@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { authMiddleware } from '../middleware/authMiddleware.js'
 import Session from '../models/Session.js'
 import FootprintResult from '../models/FootprintResult.js'
+import Participant from '../models/Participant.js'
 import TeamActions from '../models/TeamActions.js'
 import { ACTIONS } from '../utils/actions.js'
 import { generateCode } from '../utils/generateCode.js'
@@ -113,7 +114,7 @@ export default function sessionsRouter(io) {
 
   router.get('/', async (req, res) => {
     try {
-      const sessions = await Session.find({ facilitatorId: req.user.id, deleted: { $ne: true } }).sort({ createdAt: -1 })
+      const sessions = await Session.find({ facilitatorId: req.user.id }).sort({ createdAt: -1 })
       res.json(sessions)
     } catch {
       res.status(500).json({ error: 'Error al obtener sesiones' })
@@ -122,7 +123,7 @@ export default function sessionsRouter(io) {
 
   router.get('/:code', async (req, res) => {
     try {
-      const session = await Session.findOne({ code: req.params.code, facilitatorId: req.user.id, deleted: { $ne: true } })
+      const session = await Session.findOne({ code: req.params.code, facilitatorId: req.user.id })
       if (!session) return res.status(404).json({ error: 'Sesión no encontrada' })
       res.json(session)
     } catch {
@@ -212,25 +213,20 @@ export default function sessionsRouter(io) {
 
   router.delete('/:code', async (req, res) => {
     try {
-      const session = await Session.findOneAndUpdate(
-        { code: req.params.code, facilitatorId: req.user.id },
-        { status: 'closed' },
-        { new: true }
-      )
+      const { code } = req.params
+      const session = await Session.findOne({ code, facilitatorId: req.user.id })
       if (!session) return res.status(404).json({ error: 'Sesión no encontrada' })
-      io.to(req.params.code).emit('session:closed')
-      res.json({ ok: true })
-    } catch {
-      res.status(500).json({ error: 'Error al cerrar sesión' })
-    }
-  })
 
-  router.patch('/:code/delete', async (req, res) => {
-    try {
-      await Session.findOneAndUpdate(
-        { code: req.params.code, facilitatorId: req.user.id },
-        { deleted: true, deletedAt: new Date() }
-      )
+      // Notify participants before deleting
+      io.to(code).emit('session:closed')
+
+      await Promise.all([
+        Session.deleteOne({ code }),
+        FootprintResult.deleteMany({ sessionCode: code }),
+        Participant.deleteMany({ sessionCode: code }),
+        TeamActions.deleteMany({ sessionCode: code }),
+      ])
+
       res.json({ ok: true })
     } catch {
       res.status(500).json({ error: 'Error al eliminar sesión' })

@@ -10,8 +10,6 @@ const sessionSchema = new Schema({
   resultsRevealed: { type: Boolean, default: false },
   step3Revealed:   { type: Boolean, default: false },
   winnersRevealed: { type: Boolean, default: false },
-  deleted:   { type: Boolean, default: false },
-  deletedAt: { type: Date,    default: null },
   summary: {
     totalParticipants: Number,
     averageCarbonTons: Number,

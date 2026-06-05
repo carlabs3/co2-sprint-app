@@ -81,9 +81,9 @@ export default function FacilitatorDashboard() {
   }, [])
 
   async function handleDelete(code) {
-    if (!confirm('¿Eliminar esta sesión del panel? Los datos se conservarán en la base de datos.')) return
+    if (!confirm('¿Eliminar esta sesión? Se borrarán todos los datos permanentemente. Esta acción no se puede deshacer.')) return
     try {
-      await api.patch(`/api/sessions/${code}/delete`)
+      await api.delete(`/api/sessions/${code}`)
       setSessions(prev => prev.filter(s => s.code !== code))
     } catch {
       alert('Error al eliminar la sesión')

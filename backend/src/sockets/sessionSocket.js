@@ -64,13 +64,13 @@ export function registerSocketHandlers(io) {
 
         io.to(code).emit('participant:joined', { total: totalUnique, name, group })
 
-        const session = await Session.findOne({ code }, 'status currentStep resultsRevealed step3Revealed winnersRevealed deleted')
+        const session = await Session.findOne({ code }, 'status currentStep resultsRevealed step3Revealed winnersRevealed')
         if (session) {
           if (session.currentStep >= 2) socket.emit('step:change', { step: session.currentStep })
           if (session.resultsRevealed)  socket.emit('results:revealed')
           if (session.step3Revealed)    socket.emit('step3:revealed')
           if (session.winnersRevealed)  socket.emit('winners:revealed')
-          if (session.status === 'closed' || session.deleted) socket.emit('session:closed')
+          if (session.status === 'closed') socket.emit('session:closed')
         }
       } catch {
         socket.emit('error', { message: 'Error al unirse a la sesión' })
@@ -84,7 +84,7 @@ export function registerSocketHandlers(io) {
         socket.data.isTeamScreen = true
 
         const [session, results] = await Promise.all([
-          Session.findOne({ code }, 'status currentStep resultsRevealed step3Revealed winnersRevealed deleted'),
+          Session.findOne({ code }, 'status currentStep resultsRevealed step3Revealed winnersRevealed'),
           FootprintResult.find({ sessionCode: code }),
         ])
 
