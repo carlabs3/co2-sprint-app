@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useSession } from '../../context/SessionContext.jsx'
 import { socket } from '../../utils/socket.js'
+import api from '../../utils/api.js'
 
 function DotsLoader() {
   return (
@@ -29,7 +30,9 @@ export default function WaitingRoom() {
 
   useEffect(() => {
     function onStepChange({ step }) {
+      console.log('[WaitingRoom] step:change received', step)
       if (step >= 2) navigate(`/session/${code}/calculator`, { replace: true })
+      if (step >= 3) navigate(`/session/${code}/calculator`, { replace: true })
     }
     function onResultsRevealed() {
       navigate(`/session/${code}/results`, { replace: true })
@@ -42,10 +45,26 @@ export default function WaitingRoom() {
     socket.on('results:revealed', onResultsRevealed)
     socket.on('session:closed', onSessionClosed)
 
+    // Polling fallback: if the socket event was missed, detect via API every 3 s
+    const poll = setInterval(async () => {
+      try {
+        const res = await api.get(`/api/sessions/${code}/info`)
+        const { currentStep, resultsRevealed, status } = res.data
+        if (resultsRevealed) {
+          navigate(`/session/${code}/results`, { replace: true })
+        } else if (currentStep >= 2) {
+          navigate(`/session/${code}/calculator`, { replace: true })
+        } else if (status === 'closed') {
+          navigate('/', { replace: true })
+        }
+      } catch {}
+    }, 3000)
+
     return () => {
       socket.off('step:change', onStepChange)
       socket.off('results:revealed', onResultsRevealed)
       socket.off('session:closed', onSessionClosed)
+      clearInterval(poll)
     }
   }, [code, navigate])
 

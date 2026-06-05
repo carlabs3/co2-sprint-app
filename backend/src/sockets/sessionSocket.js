@@ -42,6 +42,11 @@ export function registerSocketHandlers(io) {
         socket.data.group = group
         socket.data.sessionCode = code
 
+        // Join the room IMMEDIATELY before any async DB operations
+        // so the socket receives broadcasts (step:change etc.) without race conditions
+        socket.join(code)
+        console.log(`[socket] ${socket.id} joined room ${code} (group: ${group})`)
+
         const participant = await Participant.findOneAndUpdate(
           { socketId: socket.id },
           { sessionCode: code, group, age: age || '', gender: gender || '', socketId: socket.id },
@@ -57,7 +62,6 @@ export function registerSocketHandlers(io) {
         sessionParticipants.get(code).set(uniqueKey, { name, group, socketId: socket.id })
         const totalUnique = sessionParticipants.get(code).size
 
-        socket.join(code)
         io.to(code).emit('participant:joined', { total: totalUnique, name, group })
 
         const session = await Session.findOne({ code }, 'status currentStep resultsRevealed step3Revealed winnersRevealed deleted')

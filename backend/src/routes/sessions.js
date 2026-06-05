@@ -14,14 +14,17 @@ export default function sessionsRouter(io) {
   // Public: info needed by join/waiting screens (groups, name, status, resultsRevealed)
   router.get('/:code/info', async (req, res) => {
     try {
-      const session = await Session.findOne({ code: req.params.code }, 'code name groups status resultsRevealed')
+      const session = await Session.findOne({ code: req.params.code }, 'code name groups status currentStep resultsRevealed step3Revealed winnersRevealed')
       if (!session) return res.status(404).json({ error: 'Sesión no encontrada' })
       res.json({
-        code: session.code,
-        name: session.name,
-        groups: session.groups,
-        status: session.status,
+        code:            session.code,
+        name:            session.name,
+        groups:          session.groups,
+        status:          session.status,
+        currentStep:     session.currentStep,
         resultsRevealed: session.resultsRevealed,
+        step3Revealed:   session.step3Revealed,
+        winnersRevealed: session.winnersRevealed,
       })
     } catch {
       res.status(500).json({ error: 'Error al obtener sesión' })
