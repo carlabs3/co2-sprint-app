@@ -75,6 +75,43 @@ export function registerSocketHandlers(io) {
       }
     })
 
+    socket.on('team:join', async ({ code, group }) => {
+      try {
+        socket.join(code)
+        socket.data.teamGroup = group
+        socket.data.isTeamScreen = true
+
+        const [session, results] = await Promise.all([
+          Session.findOne({ code }, 'status currentStep resultsRevealed deleted'),
+          FootprintResult.find({ sessionCode: code }),
+        ])
+
+        if (session?.currentStep >= 2) {
+          socket.emit('step:change', { step: session.currentStep })
+        }
+        if (session?.resultsRevealed) {
+          socket.emit('results:revealed')
+        }
+        if (session?.status === 'closed' || session?.deleted) {
+          socket.emit('session:closed')
+        }
+
+        if (results.length > 0) {
+          const individual = results.map(r => ({
+            name:     participantNames.get(r.participantId?.toString()) || 'Anónimo',
+            group:    r.group,
+            tons:     r.carbonTons,
+            category: r.category,
+            areas:    r.areas || {},
+            answers:  r.answers || {},
+          }))
+          socket.emit('ranking:update', { individual })
+        }
+      } catch {
+        socket.emit('error', { message: 'Error al unirse como equipo' })
+      }
+    })
+
     socket.on('step:change', async ({ sessionCode, step }) => {
       try {
         await Session.findOneAndUpdate({ code: sessionCode }, { currentStep: step })

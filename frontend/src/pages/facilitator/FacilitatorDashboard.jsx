@@ -167,6 +167,35 @@ export default function FacilitatorDashboard() {
                   )
                 })()}
 
+                {/* Team URLs — visible for waiting/active sessions with groups */}
+                {session.status !== 'closed' && session.groups?.length > 0 && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#bbb', marginBottom: '0.5rem' }}>
+                      Pantallas de equipo
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      {session.groups.map(group => {
+                        const slug = group.toLowerCase().replace(/\s+/g, '-')
+                        const url  = `${window.location.origin}/team/${session.code}/${encodeURIComponent(slug)}`
+                        return (
+                          <div key={group} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#555', minWidth: 60, flexShrink: 0 }}>{group}</span>
+                            <code style={{ flex: 1, fontSize: '0.62rem', color: '#aaa', background: '#f5f5f0', padding: '2px 6px', borderRadius: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                              /team/{session.code}/{slug}
+                            </code>
+                            <button
+                              onClick={() => navigator.clipboard.writeText(url)}
+                              style={{ fontSize: '0.65rem', color: '#2d5a27', background: 'transparent', border: '1px solid #c8e6c0', borderRadius: 3, padding: '2px 7px', cursor: 'pointer', flexShrink: 0 }}
+                            >
+                              Copiar
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 <div style={s.cardActions}>
                   <Link
                     to={session.status === 'closed'

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import axios from 'axios'
+import { PieChart, Pie, Cell } from 'recharts'
 import { useSession } from '../../context/SessionContext.jsx'
 import SessionClosedBanner from '../../components/SessionClosedBanner.jsx'
 import { socket } from '../../utils/socket.js'
@@ -23,6 +24,14 @@ const AREA_LABELS = {
   food:        'Alimentación',
   consumption: 'Consumo',
   waste:       'Huella Digital',
+}
+
+const AREA_COLORS = {
+  transport:   '#4a90d9',
+  energy:      '#e8a020',
+  food:        '#5aab5a',
+  consumption: '#b07a30',
+  waste:       '#7a7aaa',
 }
 
 function getCategory(tons) {
@@ -323,6 +332,42 @@ export default function Step2Results() {
 
       {/* ═══ CONTENT ═══════════════════════════════════════════ */}
       <div style={{ maxWidth: 880, margin: '0 auto', padding: '1.25rem 1.25rem 2.5rem' }}>
+
+        {/* ── area donut chart ── */}
+        {(() => {
+          const pieData = AREA_QUESTIONS
+            .map(a => ({ name: AREA_LABELS[a.areaId] || a.areaLabel, value: areas[a.areaId] ?? 0, color: AREA_COLORS[a.areaId] || '#ccc' }))
+            .filter(d => d.value > 0.001)
+          const total = pieData.reduce((s, d) => s + d.value, 0)
+          return (
+            <div style={{ background: '#fff', borderRadius: 8, padding: '1.25rem 1.5rem', marginBottom: '1rem' }}>
+              <CardTitle>Distribución por áreas</CardTitle>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <PieChart width={160} height={160}>
+                    <Pie data={pieData} cx={80} cy={80} innerRadius={46} outerRadius={72} dataKey="value" paddingAngle={2} startAngle={90} endAngle={-270}>
+                      {pieData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                    </Pie>
+                  </PieChart>
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                    <span style={{ fontWeight: 900, fontSize: '1.2rem', lineHeight: 1, color: '#1a1a1a' }}>{carbonTons.toFixed(1)}</span>
+                    <span style={{ fontSize: '0.58rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em' }}>t CO₂</span>
+                  </div>
+                </div>
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                  {pieData.map(d => (
+                    <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{ width: 9, height: 9, background: d.color, borderRadius: 2, flexShrink: 0 }} />
+                      <span style={{ fontSize: '0.75rem', color: '#555', flex: 1 }}>{d.name}</span>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1a1a1a' }}>{d.value.toFixed(1)} t</span>
+                      <span style={{ fontSize: '0.68rem', color: '#bbb', minWidth: 30, textAlign: 'right' }}>{total > 0 ? Math.round((d.value / total) * 100) : 0}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
 
         {/* ── expandable areas ── */}
         <div style={{ background: '#fff', borderRadius: 8, padding: '1.25rem 1.5rem', marginBottom: '1rem' }}>
