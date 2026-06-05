@@ -41,6 +41,54 @@ function DotsLoader() {
   )
 }
 
+const homeTypeLabels = {
+  '25a': 'piso pequeño (~45 m²)',
+  '25b': 'piso mediano (~120 m²)',
+  '25c': 'casa grande (más de 180 m²)',
+}
+
+function NightsInput({ question, answers, onChange }) {
+  const handleChange = (value, delta) => {
+    const current = answers[value] || 0
+    const newVal = Math.max(0, current + delta)
+    onChange({ ...answers, [value]: newVal })
+  }
+
+  const totalNights = question.options.reduce((sum, opt) => sum + (answers[opt.value] || 0), 0)
+
+  return (
+    <div>
+      {question.options.map(opt => (
+        <div key={opt.value} style={{
+          display: 'flex', alignItems: 'center', gap: '10px',
+          padding: '10px 12px', borderRadius: '10px', marginBottom: '6px',
+          border: `1.5px solid ${(answers[opt.value] || 0) > 0 ? 'var(--area-color)' : '#ebebeb'}`,
+          background: (answers[opt.value] || 0) > 0 ? 'var(--area-bg)' : '#fafafa',
+        }}>
+          <span style={{ fontSize: '18px', width: '24px', textAlign: 'center' }}>{opt.emoji}</span>
+          <span style={{ flex: 1, fontSize: '12px', fontWeight: 500, color: '#1a1a1a' }}>{opt.label}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button onClick={() => handleChange(opt.value, -1)}
+              style={{ width: '26px', height: '26px', borderRadius: '50%', border: '1.5px solid var(--area-color)', background: 'transparent', color: 'var(--area-color)', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+            <span style={{ fontSize: '15px', fontWeight: 700, width: '24px', textAlign: 'center' }}>
+              {answers[opt.value] || 0}
+            </span>
+            <button onClick={() => handleChange(opt.value, 1)}
+              style={{ width: '26px', height: '26px', borderRadius: '50%', border: '1.5px solid var(--area-color)', background: 'transparent', color: 'var(--area-color)', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+          </div>
+          <span style={{ fontSize: '10px', color: '#aaa', width: '32px' }}>noches</span>
+        </div>
+      ))}
+      {totalNights > 0 && (
+        <div style={{ background: '#f5f5f0', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '11px', color: '#888' }}>Total noches</span>
+          <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a' }}>{totalNights} noches</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
   if (question.type === 'multi') {
     const selected = Array.isArray(answers[question.id]) ? answers[question.id] : []
@@ -153,10 +201,10 @@ export default function Step2Calculator() {
   const question = area.questions[questionIndex]
   const isFirst  = areaIndex === 0 && questionIndex === 0
   const isLast   = areaIndex === AREAS.length - 1 && questionIndex === area.questions.length - 1
-  const canNext  = isSkipped(question) || question.type === 'multi' || answers[question.id] !== undefined
+  const canNext  = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || answers[question.id] !== undefined
 
   function isAreaDone(ai) {
-    return AREAS[ai].questions.every(q => isSkipped(q) || q.type === 'multi' || answers[q.id] !== undefined)
+    return AREAS[ai].questions.every(q => isSkipped(q) || q.type === 'multi' || q.type === 'nights' || answers[q.id] !== undefined)
   }
 
   function getAreaStatus(ai) {
@@ -247,7 +295,7 @@ export default function Step2Calculator() {
       <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
         {a.questions.map((q, qi) => {
           if (isSkipped(q)) return null
-          const done   = q.type === 'multi' || answers[q.id] !== undefined
+          const done   = q.type === 'multi' || q.type === 'nights' || answers[q.id] !== undefined
           const active = aIdx === areaIndex && qi === activeQIdx
           return (
             <div key={qi} style={{
@@ -356,6 +404,11 @@ export default function Step2Calculator() {
             <p style={{ fontSize: 17, fontWeight: 500, maxWidth: 560, lineHeight: 1.55, color: '#1a1a1a', margin: 0 }}>
               {question.text}
             </p>
+            {question.id === 'heating' && (
+              <p style={{ fontSize: 13, color: area.color, margin: '4px 0 0', fontWeight: 500 }}>
+                {`Para tu ${homeTypeLabels[answers.homeType] || 'vivienda'}, ¿qué sistema de calefacción tienes?`}
+              </p>
+            )}
             {question.info && (
               <p style={{ fontSize: 12, color: '#aaa', margin: '6px 0 0', fontStyle: 'italic' }}>{question.info}</p>
             )}
@@ -363,10 +416,16 @@ export default function Step2Calculator() {
 
           {/* Options */}
           <div style={{ padding: '0 28px', maxWidth: 640 }}>
-            <OptionList
-              question={question} area={area} answers={answers}
-              onSelect={handleSelect} onToggle={handleToggle} compact={false}
-            />
+            {question.type === 'nights' ? (
+              <div style={{ '--area-color': area.color, '--area-bg': area.bg }}>
+                <NightsInput question={question} answers={answers} onChange={setAnswers} />
+              </div>
+            ) : (
+              <OptionList
+                question={question} area={area} answers={answers}
+                onSelect={handleSelect} onToggle={handleToggle} compact={false}
+              />
+            )}
           </div>
 
           {/* Footer */}
@@ -455,6 +514,11 @@ export default function Step2Calculator() {
           <p style={{ fontSize: 15, fontWeight: 500, lineHeight: 1.55, color: '#1a1a1a', margin: 0 }}>
             {question.text}
           </p>
+          {question.id === 'heating' && (
+            <p style={{ fontSize: 12, color: area.color, margin: '4px 0 0', fontWeight: 500 }}>
+              {`Para tu ${homeTypeLabels[answers.homeType] || 'vivienda'}, ¿qué sistema de calefacción tienes?`}
+            </p>
+          )}
           {question.info && (
             <p style={{ fontSize: 11, color: '#aaa', margin: '5px 0 0', fontStyle: 'italic' }}>{question.info}</p>
           )}
@@ -462,10 +526,16 @@ export default function Step2Calculator() {
 
         {/* Options */}
         <div style={{ padding: '0 16px', flex: 1, overflowY: 'auto' }}>
-          <OptionList
-            question={question} area={area} answers={answers}
-            onSelect={handleSelect} onToggle={handleToggle} compact={true}
-          />
+          {question.type === 'nights' ? (
+            <div style={{ '--area-color': area.color, '--area-bg': area.bg }}>
+              <NightsInput question={question} answers={answers} onChange={setAnswers} />
+            </div>
+          ) : (
+            <OptionList
+              question={question} area={area} answers={answers}
+              onSelect={handleSelect} onToggle={handleToggle} compact={true}
+            />
+          )}
         </div>
 
         {/* Footer */}

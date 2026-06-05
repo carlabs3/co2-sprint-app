@@ -130,8 +130,12 @@ export default function JoinSession() {
   const [genderError, setGenderError] = useState('')
   const [groupError,  setGroupError]  = useState('')
 
-  const { joinSession } = useSession()
+  const { joinSession, clearSession } = useSession()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    clearSession()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (codeFromUrl) setCode(codeFromUrl.toUpperCase())

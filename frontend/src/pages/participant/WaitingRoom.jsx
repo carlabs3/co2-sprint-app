@@ -25,19 +25,28 @@ function DotsLoader() {
 export default function WaitingRoom() {
   const { code } = useParams()
   const navigate = useNavigate()
-  const { participantGroup, currentStep } = useSession()
+  const { participantGroup } = useSession()
 
   useEffect(() => {
-    if (currentStep === 2) {
-      navigate(`/session/${code}/calculator`, { replace: true })
+    function onStepChange({ step }) {
+      if (step >= 2) navigate(`/session/${code}/calculator`, { replace: true })
     }
-  }, [currentStep, code, navigate])
-
-  useEffect(() => {
-    socket.on('results:revealed', () => {
+    function onResultsRevealed() {
       navigate(`/session/${code}/results`, { replace: true })
-    })
-    return () => socket.off('results:revealed')
+    }
+    function onSessionClosed() {
+      navigate('/', { replace: true })
+    }
+
+    socket.on('step:change', onStepChange)
+    socket.on('results:revealed', onResultsRevealed)
+    socket.on('session:closed', onSessionClosed)
+
+    return () => {
+      socket.off('step:change', onStepChange)
+      socket.off('results:revealed', onResultsRevealed)
+      socket.off('session:closed', onSessionClosed)
+    }
   }, [code, navigate])
 
   return (

@@ -152,6 +152,20 @@ export const AREA_QUESTIONS = [
           { value: 'none',         label: 'Ninguno de estos hábitos' },
         ],
       },
+      {
+        id: 'vacationNights',
+        question: 'Cuando te vas de vacaciones, ¿cuántas noches sueles pasar en cada tipo de alojamiento?',
+        text: 'Cuando te vas de vacaciones, ¿cuántas noches sueles pasar en cada tipo de alojamiento?',
+        info: 'Piensa en un año típico. Puedes dejar en 0 los que no uses.',
+        type: 'nights',
+        options: [
+          { value: 'hotelNights',   label: 'Hotel',                     emoji: '🏨' },
+          { value: 'hostelNights',  label: 'Albergue / hostel',         emoji: '🛏️' },
+          { value: 'campingNights', label: 'Camping',                   emoji: '⛺' },
+          { value: 'airbnbNights',  label: 'Apartamento turístico',     emoji: '🏠' },
+          { value: 'friendsNights', label: 'Casa de amigos / familia',  emoji: '👨‍👩‍👧' },
+        ],
+      },
     ],
   },
   {

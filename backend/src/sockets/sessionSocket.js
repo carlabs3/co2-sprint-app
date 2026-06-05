@@ -1,3 +1,5 @@
+
+
 import Participant from '../models/Participant.js'
 import FootprintResult from '../models/FootprintResult.js'
 import Session from '../models/Session.js'
@@ -51,9 +53,17 @@ export function registerSocketHandlers(io) {
         const count = await Participant.countDocuments({ sessionCode: code })
         io.to(code).emit('participant:joined', { count })
 
-        const session = await Session.findOne({ code }, 'status currentStep')
-        if (session?.currentStep > 1) {
-          socket.emit('step:change', { step: session.currentStep })
+        const session = await Session.findOne({ code }, 'status currentStep resultsRevealed deleted')
+        if (session) {
+          if (session.currentStep >= 2) {
+            socket.emit('step:change', { step: session.currentStep })
+          }
+          if (session.resultsRevealed) {
+            socket.emit('results:revealed')
+          }
+          if (session.status === 'closed' || session.deleted) {
+            socket.emit('session:closed')
+          }
         }
       } catch {
         socket.emit('error', { message: 'Error al unirse a la sesión' })
@@ -67,7 +77,10 @@ export function registerSocketHandlers(io) {
       } catch {}
     })
 
-    socket.on('results:reveal', ({ sessionCode }) => {
+    socket.on('results:reveal', async ({ sessionCode }) => {
+      try {
+        await Session.findOneAndUpdate({ code: sessionCode }, { resultsRevealed: true })
+      } catch {}
       io.to(sessionCode).emit('results:revealed')
     })
 

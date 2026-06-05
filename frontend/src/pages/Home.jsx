@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSession } from '../context/SessionContext.jsx'
 
 function formatCode(val) {
   const clean = val.toUpperCase().replace(/[^A-Z0-9]/g, '')
@@ -13,6 +14,11 @@ export default function Home() {
   const codeFromUrl = searchParams.get('code')
   const [code, setCode]   = useState('')
   const [error, setError] = useState('')
+  const { clearSession } = useSession()
+
+  useEffect(() => {
+    clearSession()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (codeFromUrl) setCode(formatCode(codeFromUrl))

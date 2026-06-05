@@ -79,6 +79,10 @@ export function calculator(answers) {
   const rf        = MAP.renewable[answers.renewable] ?? 1.0
   const homeBase  = get('homeType', answers.homeType) + get('heating', answers.heating) + get('hasAC', answers.hasAC)
   const housingKg = Math.max(0, (homeBase / div) * rf + sum('homeHabits', answers.homeHabits))
+    + (answers.hotelNights   || 0) * 8
+    + (answers.hostelNights  || 0) * 1
+    + (answers.campingNights || 0) * 1
+    + (answers.airbnbNights  || 0) * 5
 
   // ── Alimentación ────────────────────────────────────────────────────────────
   const foodKg = Math.max(0,
