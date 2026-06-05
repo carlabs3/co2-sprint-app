@@ -1,6 +1,8 @@
 import Participant from '../models/Participant.js'
 import FootprintResult from '../models/FootprintResult.js'
 import Session from '../models/Session.js'
+import TeamActions from '../models/TeamActions.js'
+import { ACTIONS } from '../utils/actions.js'
 
 function getCategory(carbonTons) {
   if (carbonTons < 2) return 'bajo'
@@ -58,17 +60,13 @@ export function registerSocketHandlers(io) {
         socket.join(code)
         io.to(code).emit('participant:joined', { total: totalUnique, name, group })
 
-        const session = await Session.findOne({ code }, 'status currentStep resultsRevealed deleted')
+        const session = await Session.findOne({ code }, 'status currentStep resultsRevealed step3Revealed winnersRevealed deleted')
         if (session) {
-          if (session.currentStep >= 2) {
-            socket.emit('step:change', { step: session.currentStep })
-          }
-          if (session.resultsRevealed) {
-            socket.emit('results:revealed')
-          }
-          if (session.status === 'closed' || session.deleted) {
-            socket.emit('session:closed')
-          }
+          if (session.currentStep >= 2) socket.emit('step:change', { step: session.currentStep })
+          if (session.resultsRevealed)  socket.emit('results:revealed')
+          if (session.step3Revealed)    socket.emit('step3:revealed')
+          if (session.winnersRevealed)  socket.emit('winners:revealed')
+          if (session.status === 'closed' || session.deleted) socket.emit('session:closed')
         }
       } catch {
         socket.emit('error', { message: 'Error al unirse a la sesión' })
@@ -82,19 +80,15 @@ export function registerSocketHandlers(io) {
         socket.data.isTeamScreen = true
 
         const [session, results] = await Promise.all([
-          Session.findOne({ code }, 'status currentStep resultsRevealed deleted'),
+          Session.findOne({ code }, 'status currentStep resultsRevealed step3Revealed winnersRevealed deleted'),
           FootprintResult.find({ sessionCode: code }),
         ])
 
-        if (session?.currentStep >= 2) {
-          socket.emit('step:change', { step: session.currentStep })
-        }
-        if (session?.resultsRevealed) {
-          socket.emit('results:revealed')
-        }
-        if (session?.status === 'closed' || session?.deleted) {
-          socket.emit('session:closed')
-        }
+        if (session?.currentStep >= 2) socket.emit('step:change', { step: session.currentStep })
+        if (session?.resultsRevealed)  socket.emit('results:revealed')
+        if (session?.step3Revealed)    socket.emit('step3:revealed')
+        if (session?.winnersRevealed)  socket.emit('winners:revealed')
+        if (session?.status === 'closed' || session?.deleted) socket.emit('session:closed')
 
         if (results.length > 0) {
           const individual = results.map(r => ({
@@ -173,6 +167,66 @@ export function registerSocketHandlers(io) {
         io.to(sessionCode).emit('ranking:update', { individual })
       } catch {
         socket.emit('error', { message: 'Error al guardar huella' })
+      }
+    })
+
+    // ── Step 3 ─────────────────────────────────────────────────────────────────
+
+    socket.on('team:confirmActions', async ({ sessionCode, group, actions, pointsUsed }) => {
+      try {
+        await TeamActions.findOneAndUpdate(
+          { sessionCode, group },
+          { actions: actions || [], pointsUsed: pointsUsed || 0, confirmed: true },
+          { upsert: true, new: true }
+        )
+        const confirmedCount = await TeamActions.countDocuments({ sessionCode, confirmed: true })
+        io.to(sessionCode).emit('team:confirmed', { group, confirmedCount })
+      } catch {
+        socket.emit('error', { message: 'Error al confirmar acciones' })
+      }
+    })
+
+    socket.on('team:confirmFinal', async ({ sessionCode, group, actions, pointsUsed }) => {
+      try {
+        const reduction = (actions || []).reduce((sum, id) => {
+          const action = ACTIONS.find(a => a.id === id)
+          return sum + (action?.co2Reduction || 0)
+        }, 0)
+        await TeamActions.findOneAndUpdate(
+          { sessionCode, group },
+          { actions: actions || [], pointsUsed: pointsUsed || 0, confirmedFinal: true, totalReduction: reduction },
+          { upsert: true, new: true }
+        )
+        const confirmedFinalCount = await TeamActions.countDocuments({ sessionCode, confirmedFinal: true })
+        io.to(sessionCode).emit('team:confirmedFinal', { group, confirmedFinalCount })
+      } catch {
+        socket.emit('error', { message: 'Error al confirmar selección final' })
+      }
+    })
+
+    socket.on('step3:reveal', async ({ sessionCode }) => {
+      try {
+        const allTeamActions = await TeamActions.find({ sessionCode, confirmed: true })
+        for (const ta of allTeamActions) {
+          const reduction = ta.actions.reduce((sum, id) => {
+            const action = ACTIONS.find(a => a.id === id)
+            return sum + (action?.co2Reduction || 0)
+          }, 0)
+          await TeamActions.findByIdAndUpdate(ta._id, { totalReduction: reduction })
+        }
+        await Session.findOneAndUpdate({ code: sessionCode }, { step3Revealed: true })
+        io.to(sessionCode).emit('step3:revealed')
+      } catch {
+        socket.emit('error', { message: 'Error al revelar step 3' })
+      }
+    })
+
+    socket.on('winners:reveal', async ({ sessionCode }) => {
+      try {
+        await Session.findOneAndUpdate({ code: sessionCode }, { winnersRevealed: true })
+        io.to(sessionCode).emit('winners:revealed')
+      } catch {
+        socket.emit('error', { message: 'Error al revelar ganadores' })
       }
     })
 

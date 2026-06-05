@@ -2,6 +2,8 @@ import { Router } from 'express'
 import { authMiddleware } from '../middleware/authMiddleware.js'
 import Session from '../models/Session.js'
 import FootprintResult from '../models/FootprintResult.js'
+import TeamActions from '../models/TeamActions.js'
+import { ACTIONS } from '../utils/actions.js'
 import { generateCode } from '../utils/generateCode.js'
 
 const STEP_MAP = { waiting: 1, active: 2, closed: 3 }
@@ -23,6 +25,68 @@ export default function sessionsRouter(io) {
       })
     } catch {
       res.status(500).json({ error: 'Error al obtener sesión' })
+    }
+  })
+
+  // Public: step 3 data — all team actions + rankings
+  router.get('/:code/step3', async (req, res) => {
+    try {
+      const { code } = req.params
+      const [session, teamActions, results] = await Promise.all([
+        Session.findOne({ code }, 'groups step3Revealed winnersRevealed'),
+        TeamActions.find({ sessionCode: code }),
+        FootprintResult.find({ sessionCode: code }),
+      ])
+      if (!session) return res.status(404).json({ error: 'Sesión no encontrada' })
+
+      // Group average original carbon tons
+      const groupAvg = {}
+      const groupCount = {}
+      for (const r of results) {
+        groupAvg[r.group]   = (groupAvg[r.group]   || 0) + r.carbonTons
+        groupCount[r.group] = (groupCount[r.group] || 0) + 1
+      }
+      Object.keys(groupAvg).forEach(g => { groupAvg[g] = groupAvg[g] / groupCount[g] })
+
+      const groups = session.groups || []
+      const teams = groups.map(group => {
+        const ta  = teamActions.find(t => t.group === group)
+        const orig = groupAvg[group] ?? null
+        const red  = ta?.totalReduction || 0
+        return {
+          group,
+          confirmed:      ta?.confirmed      || false,
+          confirmedFinal: ta?.confirmedFinal || false,
+          actions:        ta?.actions        || [],
+          pointsUsed:     ta?.pointsUsed     || 0,
+          totalReduction: red,
+          originalTons:   orig ? Math.round(orig * 100) / 100 : null,
+          newTons:        orig ? Math.max(0, Math.round((orig - red / 1000) * 100) / 100) : null,
+        }
+      })
+
+      // Action stats (only when revealed)
+      const actionStats = session.step3Revealed
+        ? ACTIONS.map(a => {
+            const choosers = teamActions.filter(ta => ta.actions.includes(a.id))
+            return { ...a, count: choosers.length, teams: choosers.map(ta => ta.group) }
+          }).filter(a => a.count > 0).sort((a, b) => b.co2Reduction - a.co2Reduction)
+        : []
+
+      const allConfirmed      = groups.length > 0 && groups.every(g => teamActions.find(t => t.group === g)?.confirmed)
+      const allConfirmedFinal = groups.length > 0 && groups.every(g => teamActions.find(t => t.group === g)?.confirmedFinal)
+
+      res.json({
+        teams,
+        actionStats,
+        allConfirmed,
+        allConfirmedFinal,
+        step3Revealed:   session.step3Revealed,
+        winnersRevealed: session.winnersRevealed,
+        totalGroups:     groups.length,
+      })
+    } catch {
+      res.status(500).json({ error: 'Error al obtener datos step 3' })
     }
   })
 
