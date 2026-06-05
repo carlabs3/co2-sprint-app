@@ -32,7 +32,6 @@ export default function WaitingRoom() {
     function onStepChange({ step }) {
       console.log('[WaitingRoom] step:change received', step)
       if (step >= 2) navigate(`/session/${code}/calculator`, { replace: true })
-      if (step >= 3) navigate(`/session/${code}/calculator`, { replace: true })
     }
     function onResultsRevealed() {
       navigate(`/session/${code}/results`, { replace: true })
