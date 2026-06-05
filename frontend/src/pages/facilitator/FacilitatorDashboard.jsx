@@ -175,13 +175,14 @@ export default function FacilitatorDashboard() {
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       {session.groups.map(group => {
-                        const slug = group.toLowerCase().replace(/\s+/g, '-')
-                        const url  = `${window.location.origin}/team/${session.code}/${encodeURIComponent(slug)}`
+                        // Use encodeURIComponent with the ORIGINAL group name so the URL param
+                        // decodes back to the exact DB value — avoids slug vs. name mismatch
+                        const url = `${window.location.origin}/team/${session.code}/${encodeURIComponent(group)}`
                         return (
                           <div key={group} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#555', minWidth: 60, flexShrink: 0 }}>{group}</span>
                             <code style={{ flex: 1, fontSize: '0.62rem', color: '#aaa', background: '#f5f5f0', padding: '2px 6px', borderRadius: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
-                              /team/{session.code}/{slug}
+                              /team/{session.code}/{group}
                             </code>
                             <button
                               onClick={() => navigator.clipboard.writeText(url)}

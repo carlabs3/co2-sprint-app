@@ -88,6 +88,8 @@ export function registerSocketHandlers(io) {
           FootprintResult.find({ sessionCode: code }),
         ])
 
+        console.log(`[team:join] code=${code} urlGroup="${group}" | DB groups:`, results.map(r => r.group))
+
         if (session?.currentStep >= 2) socket.emit('step:change', { step: session.currentStep })
         if (session?.resultsRevealed)  socket.emit('results:revealed')
         if (session?.step3Revealed)    socket.emit('step3:revealed')

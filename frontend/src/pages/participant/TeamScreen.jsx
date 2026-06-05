@@ -5,6 +5,16 @@ import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
 import { ACTIONS, MAX_POINTS, AREA_EMOJI, AREA_COLOR, AREA_LABEL, TYPE_LABEL } from '../../utils/actions.js'
 
+// Normalize group name for comparison: "Equipo A" === "equipo-a"
+function normalizeGroup(g) {
+  return (g || '').toLowerCase().replace(/\s+/g, '-')
+}
+function groupMatches(recordGroup, urlGroup) {
+  if (!recordGroup || !urlGroup) return false
+  if (recordGroup === urlGroup) return true
+  return normalizeGroup(recordGroup) === normalizeGroup(urlGroup)
+}
+
 const AREA_META = [
   { key: 'transport',   label: 'Transporte',   color: '#4a90d9' },
   { key: 'energy',      label: 'Vivienda',     color: '#e8a020' },
@@ -823,7 +833,7 @@ function Step3WinnersPhase({ group, teamAvg, selectedActions, step3Data }) {
   let totalGroups = null
   if (step3Data?.teams?.length) {
     const sorted = [...step3Data.teams].sort((a, b) => b.totalReduction - a.totalReduction)
-    const idx = sorted.findIndex(t => t.group === group)
+    const idx = sorted.findIndex(t => groupMatches(t.group, group))
     rank = idx >= 0 ? idx + 1 : null
     totalGroups = step3Data.totalGroups || sorted.length
   }
@@ -887,7 +897,7 @@ function Step3WinnersPhase({ group, teamAvg, selectedActions, step3Data }) {
                 {[...step3Data.teams]
                   .sort((a, b) => b.totalReduction - a.totalReduction)
                   .map((team, idx) => {
-                    const isMe = team.group === group
+                    const isMe = groupMatches(team.group, group)
                     const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}.`
                     return (
                       <div
@@ -1005,15 +1015,16 @@ export default function TeamScreen() {
 
     function onRankingUpdate({ individual }) {
       if (individual) {
+        console.log('[TeamScreen] ranking:update groups:', [...new Set(individual.map(r => r.group))], '| url group:', group)
         setSessionResults(individual)
-        const myTeam = individual.filter(r => r.group === group)
+        const myTeam = individual.filter(r => groupMatches(r.group, group))
         setTeamResults(myTeam)
         setTeamJoined(prev => Math.max(prev, myTeam.length))
       }
     }
 
     function onParticipantJoined({ group: joinedGroup }) {
-      if (joinedGroup === group) setTeamJoined(prev => prev + 1)
+      if (groupMatches(joinedGroup, group)) setTeamJoined(prev => prev + 1)
     }
 
     function onResultsRevealed() { setPhase('results') }
