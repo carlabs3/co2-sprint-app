@@ -13,7 +13,7 @@ const AREA_META = [
   { key: 'waste',       label: 'Digital',      color: '#7a7aaa' },
 ]
 
-const SPAIN_AVG = 7.2
+const SPAIN_AVG = 8.1
 
 const CATEGORY_CONFIG = {
   bajo:       { label: 'Huella baja' },

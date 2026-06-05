@@ -8,7 +8,7 @@ import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
 import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
 
-const SPAIN_AVG = 7.2
+const SPAIN_AVG = 8.1
 const BAR_MAX_H = 120
 
 const CATEGORY_CONFIG = {
@@ -42,8 +42,8 @@ function getCategory(tons) {
 }
 
 const MOCK_RESULT = {
-  carbonTons: 7.2,
-  areas: { transport: 2.2, energy: 1.1, food: 1.9, consumption: 0.4, waste: 1.6 },
+  carbonTons: 8.1,
+  areas: { transport: 2.1, energy: 1.8, food: 1.6, consumption: 1.4, waste: 1.2 },
   answers: {},
 }
 

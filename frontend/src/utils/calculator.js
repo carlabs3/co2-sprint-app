@@ -27,8 +27,10 @@ const MAP = {
   homeHabits:  { closeWindows: -40, thermostat19: -80, ledBulbs: -60, ecoPrograms: -50 },
 
   // Alimentación
+  breakfast:    { '6a': 1081, '6b': 1633, '6c': 2595, '6d': 291, '6e': 1924 },
   milkType:     { 'a': 200, 'b': 30, 'c': 0 },
   hotDrinks:    { '7a': 180, '7b': 160, '7c': 20, '7d': 0 },
+  alcohol:      { soda_low: 9, soda_mid: 21, soda_high: 37, wine_low: 14, wine_mid: 32, wine_high: 56, beer_low: 44, beer_mid: 102, beer_high: 175, spirit_low: 4, spirit_mid: 10, spirit_high: 17, none: 0 },
   lunch:        { '9a': 300, '9b': 400, '9c': 500, '9d': 700, '9e': 900, '9f': 1300 },
   dinner:       { '10a': 300, '10b': 400, '10c': 500, '10d': 700, '10e': 900, '10f': 1300 },
   bottledWater: { '13a': 200, '13b': 80, '13c': 0 },
@@ -83,11 +85,14 @@ export function calculator(answers) {
     + (answers.hostelNights  || 0) * 1
     + (answers.campingNights || 0) * 1
     + (answers.airbnbNights  || 0) * 5
+    + (answers.secondHome    ? 250 : 0)
 
   // ── Alimentación ────────────────────────────────────────────────────────────
   const foodKg = Math.max(0,
+    get('breakfast', answers.breakfast) +
     get('milkType', answers.milkType) +
     get('hotDrinks', answers.hotDrinks) +
+    sum('alcohol', answers.alcohol) +
     get('lunch', answers.lunch) +
     get('dinner', answers.dinner) +
     get('bottledWater', answers.bottledWater) +

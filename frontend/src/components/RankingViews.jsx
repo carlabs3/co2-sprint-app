@@ -118,8 +118,8 @@ export const HISTOGRAM_TABS = [
 ]
 
 export const SPAIN_AVERAGES = {
-  total: 7.2, transport: 2.0, energy: 1.0,
-  food: 2.0, consumption: 0.7, waste: 1.5,
+  total: 8.1, transport: 2.1, energy: 1.8,
+  food: 1.6, consumption: 1.4, waste: 1.2,
 }
 
 export const AREA_COLORS = {
