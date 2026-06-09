@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { PieChart, Pie, Cell } from 'recharts'
 import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
-import { ACTIONS, MAX_POINTS, AREA_EMOJI, AREA_COLOR, AREA_LABEL, TYPE_LABEL } from '../../utils/actions.js'
+import { ACTIONS, AREA_EMOJI } from '../../utils/actions.js'
+import WaitingForFacilitator from '../../components/WaitingForFacilitator.jsx'
 
 // Normalize group name for comparison: "Equipo A" === "equipo-a"
 function normalizeGroup(g) {
@@ -345,644 +346,84 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
   )
 }
 
-// ── Step 3: Selecting ─────────────────────────────────────────────────────────
-function Step3SelectingPhase({ group, code, teamAvg, showCO2, onConfirm, initialSelected = [] }) {
-  const [selectedActions, setSelectedActions] = useState(initialSelected)
-  const [filterArea, setFilterArea]           = useState('all')
-  const [filterType, setFilterType]           = useState('all')
-
-  const pointsUsed     = selectedActions.reduce((s, id) => {
-    const a = ACTIONS.find(x => x.id === id)
-    return s + (a ? a.cost : 0)
-  }, 0)
-
-  const totalReduction = selectedActions.reduce((s, id) => {
-    const a = ACTIONS.find(x => x.id === id)
-    return s + (a ? a.co2Reduction : 0)
-  }, 0)
-
-  const filteredActions = ACTIONS.filter(a => {
-    if (filterArea !== 'all' && a.area !== filterArea) return false
-    if (filterType !== 'all' && a.type !== filterType) return false
-    return true
-  })
-
-  function toggleAction(id) {
-    const action = ACTIONS.find(a => a.id === id)
-    if (!action) return
-    if (selectedActions.includes(id)) {
-      setSelectedActions(prev => prev.filter(x => x !== id))
-    } else {
-      if (pointsUsed + action.cost > MAX_POINTS) return
-      setSelectedActions(prev => [...prev, id])
-    }
-  }
-
-  const areaFilters = [
-    { key: 'all', label: 'Todas' },
-    { key: 'transport',   label: `${AREA_EMOJI.transport} Transporte` },
-    { key: 'energy',      label: `${AREA_EMOJI.energy} Vivienda` },
-    { key: 'food',        label: `${AREA_EMOJI.food} Alimentación` },
-    { key: 'consumption', label: `${AREA_EMOJI.consumption} Consumo` },
-    { key: 'waste',       label: `${AREA_EMOJI.waste} Digital` },
-  ]
-
-  const typeFilters = [
-    { key: 'all',        label: 'Todos' },
-    { key: 'individual', label: 'Individual' },
-    { key: 'colectiva',  label: 'Colectiva' },
-  ]
+// ── Step 3: Display (receiver only) ──────────────────────────────────────────
+function Step3DisplayPhase({ group, teamAvg, confirmedData, showValues }) {
+  const { actions = [], newCarbonTons = 0, totalReduction = 0 } = confirmedData || {}
+  const reduction = totalReduction / 1000 // convert kg to tons
 
   return (
     <div style={{ minHeight: '100vh', background: '#f5f5f0', display: 'flex', flexDirection: 'column' }}>
-      <style>{`
-        @keyframes co2Appear { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-      `}</style>
       <Navbar group={group} />
 
-      {/* Header */}
-      <div style={{ background: '#2d5a27', color: '#fff', padding: '1.5rem 1.75rem 1.25rem' }}>
-        <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.55, margin: '0 0 0.4rem' }}>
-          {showCO2 ? 'Ajusta tu selección — impacto visible' : 'Elige tus acciones de reducción'}
-        </p>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <span style={{ fontWeight: 900, fontSize: 'clamp(1.4rem, 4vw, 2rem)', lineHeight: 1 }}>
-            {group}
-          </span>
-          {teamAvg > 0 && (
-            <span style={{ fontSize: '0.9rem', opacity: 0.7 }}>
-              Huella actual: {teamAvg.toFixed(1)} t CO₂/año
-            </span>
-          )}
-        </div>
-        {showCO2 && totalReduction > 0 && (
-          <div style={{ marginTop: '0.75rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-            <div style={{ fontSize: '0.8rem', opacity: 0.85 }}>
-              Reducción: <strong>−{totalReduction} kg CO₂/año</strong>
+      {/* Before/After hero */}
+      <div style={{ background: '#2d5a27', color: '#fff', padding: '2.5rem 2rem 3rem' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+          <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.5, margin: '0 0 1.5rem' }}>
+            Plan de reducción · {group}
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem 4rem', alignItems: 'center' }}>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 0.3rem' }}>Antes</p>
+              <p style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 7vw, 4rem)', lineHeight: 1, margin: 0 }}>
+                {teamAvg.toFixed(1)}
+              </p>
+              <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: '0.2rem 0 0', textTransform: 'uppercase' }}>t CO₂/año</p>
             </div>
-            <div style={{ fontSize: '0.8rem', opacity: 0.85 }}>
-              Nueva huella: <strong>{Math.max(0, teamAvg - totalReduction / 1000).toFixed(1)} t</strong>
+
+            <div style={{ fontSize: '2rem', opacity: 0.4 }}>→</div>
+
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 0.3rem' }}>Después</p>
+              <p style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 7vw, 4rem)', lineHeight: 1, color: '#a8d8a0', margin: 0 }}>
+                {newCarbonTons.toFixed(1)}
+              </p>
+              <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: '0.2rem 0 0', textTransform: 'uppercase' }}>t CO₂/año</p>
+            </div>
+
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 0.3rem' }}>Ahorro</p>
+              <p style={{ fontWeight: 900, fontSize: 'clamp(2rem, 5vw, 3rem)', lineHeight: 1, color: '#a8d8a0', margin: 0 }}>
+                −{reduction.toFixed(2)}
+              </p>
+              <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: '0.2rem 0 0', textTransform: 'uppercase' }}>t CO₂/año</p>
             </div>
           </div>
-        )}
-      </div>
-
-      {/* Budget bar */}
-      <div style={{ background: '#fff', padding: '1rem 1.75rem', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: 5 }}>
-          {Array.from({ length: MAX_POINTS }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: 22, height: 22, borderRadius: '50%',
-                background: i < pointsUsed ? '#2d5a27' : '#e8e8e8',
-                border: i < pointsUsed ? 'none' : '2px solid #ddd',
-                transition: 'background 0.2s ease',
-              }}
-            />
-          ))}
-        </div>
-        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: pointsUsed > MAX_POINTS ? '#e05555' : '#2d5a27' }}>
-          {pointsUsed} / {MAX_POINTS} pts
-        </span>
-      </div>
-
-      {/* Filter row */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '0.75rem 1.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto', paddingBottom: '0.1rem' }}>
-          {areaFilters.map(f => (
-            <button
-              key={f.key}
-              onClick={() => setFilterArea(f.key)}
-              style={{
-                flexShrink: 0,
-                padding: '0.35rem 0.85rem',
-                borderRadius: 999,
-                border: filterArea === f.key ? '2px solid #2d5a27' : '2px solid #e0e0e0',
-                background: filterArea === f.key ? '#f0f7ee' : '#fff',
-                color: filterArea === f.key ? '#2d5a27' : '#666',
-                fontSize: '0.78rem',
-                fontWeight: filterArea === f.key ? 700 : 500,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
-          {typeFilters.map(f => (
-            <button
-              key={f.key}
-              onClick={() => setFilterType(f.key)}
-              style={{
-                flexShrink: 0,
-                padding: '0.28rem 0.75rem',
-                borderRadius: 999,
-                border: filterType === f.key ? '2px solid #7a7aaa' : '2px solid #e0e0e0',
-                background: filterType === f.key ? '#f0f0f8' : '#fff',
-                color: filterType === f.key ? '#4a4a80' : '#666',
-                fontSize: '0.73rem',
-                fontWeight: filterType === f.key ? 700 : 500,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {f.label}
-            </button>
-          ))}
         </div>
       </div>
 
-      {/* Action list */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.25rem 6rem' }}>
-        <div style={{ maxWidth: 760, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-          {filteredActions.map(action => {
-            const isSelected = selectedActions.includes(action.id)
-            const isDisabled = !isSelected && pointsUsed + action.cost > MAX_POINTS
-            const areaColor  = AREA_COLOR[action.area]
-
+      {/* Actions list */}
+      <div style={{ maxWidth: 800, margin: '2rem auto', padding: '0 1.5rem', width: '100%' }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#aaa', marginBottom: '1rem' }}>
+          Acciones de vuestro equipo
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          {actions.map(actionId => {
+            const action = ACTIONS.find(a => a.id === actionId)
+            if (!action) return null
             return (
-              <div
-                key={action.id}
-                onClick={() => !isDisabled && toggleAction(action.id)}
-                style={{
-                  background: isSelected ? '#f0f7ee' : '#fff',
-                  border: isSelected ? '2px solid #2d5a27' : '2px solid #e8e8e8',
-                  borderRadius: 12,
-                  padding: '0.9rem 1.1rem',
-                  cursor: isDisabled ? 'not-allowed' : 'pointer',
-                  opacity: isDisabled ? 0.45 : 1,
-                  transition: 'all 0.15s ease',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '0.85rem',
-                }}
-              >
-                {/* Area color stripe */}
-                <div style={{ width: 4, alignSelf: 'stretch', borderRadius: 4, background: areaColor, flexShrink: 0 }} />
-
-                {/* Checkbox */}
-                <div style={{
-                  width: 22, height: 22, borderRadius: 6, flexShrink: 0, marginTop: 1,
-                  background: isSelected ? '#2d5a27' : '#f0f0f0',
-                  border: isSelected ? 'none' : '2px solid #ddd',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.15s ease',
-                }}>
-                  {isSelected && <span style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 900 }}>✓</span>}
+              <div key={actionId} style={{ background: '#fff', borderRadius: '10px', padding: '1rem 1.25rem', border: '1px solid #e0e0d8', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <span style={{ fontSize: '1.3rem' }}>{AREA_EMOJI[action.area]}</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1a1a1a', margin: 0 }}>{action.label}</p>
+                  <p style={{ fontSize: '0.75rem', color: '#888', margin: '0.15rem 0 0' }}>{action.description}</p>
                 </div>
-
-                {/* Content */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#1a1a1a', lineHeight: 1.35 }}>
-                      {action.label}
-                    </span>
-                    <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0, alignItems: 'center' }}>
-                      <span style={{
-                        fontSize: '0.68rem', fontWeight: 700, padding: '0.18rem 0.55rem', borderRadius: 999,
-                        background: areaColor + '22', color: areaColor,
-                      }}>
-                        {AREA_EMOJI[action.area]} {AREA_LABEL[action.area]}
-                      </span>
-                      <span style={{
-                        fontSize: '0.68rem', fontWeight: 700, padding: '0.18rem 0.55rem', borderRadius: 999,
-                        background: '#f0f0f0', color: '#666',
-                      }}>
-                        {TYPE_LABEL[action.type]}
-                      </span>
-                    </div>
+                {showValues && (
+                  <div style={{ textAlign: 'right', flexShrink: 0, animation: 'fadeInVal 0.6s ease' }}>
+                    <p style={{ fontWeight: 900, fontSize: '1rem', color: '#2d5a27', margin: 0 }}>−{action.co2Reduction}</p>
+                    <p style={{ fontSize: '0.65rem', color: '#aaa', margin: 0 }}>kg CO₂/año</p>
                   </div>
-                  <p style={{ fontSize: '0.75rem', color: '#888', margin: '0.3rem 0 0', lineHeight: 1.5 }}>
-                    {action.description}
-                  </p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#2d5a27' }}>
-                      {action.cost} {action.cost === 1 ? 'pt' : 'pts'}
-                    </span>
-                    {showCO2 && (
-                      <span style={{
-                        fontSize: '0.78rem', fontWeight: 700, color: '#e05555',
-                        animation: 'co2Appear 0.4s ease both',
-                      }}>
-                        −{action.co2Reduction} kg CO₂/año
-                      </span>
-                    )}
-                  </div>
-                </div>
+                )}
               </div>
             )
           })}
         </div>
-      </div>
+        <style>{`@keyframes fadeInVal { from { opacity:0; transform:translateX(8px); } to { opacity:1; transform:translateX(0); } }`}</style>
 
-      {/* Sticky footer */}
-      <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: '#fff', borderTop: '1px solid #e8e8e8',
-        padding: '0.9rem 1.75rem',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
-        boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
-      }}>
-        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: pointsUsed > MAX_POINTS ? '#e05555' : '#1a1a1a' }}>
-          {pointsUsed} / {MAX_POINTS} pts usados · {selectedActions.length} acciones
-        </span>
-        <button
-          disabled={pointsUsed === 0 || pointsUsed > MAX_POINTS}
-          onClick={() => onConfirm({ actions: selectedActions, pointsUsed })}
-          style={{
-            padding: '0.75rem 2rem',
-            borderRadius: 10,
-            border: 'none',
-            background: pointsUsed === 0 || pointsUsed > MAX_POINTS ? '#ccc' : '#2d5a27',
-            color: '#fff',
-            fontWeight: 900,
-            fontSize: '0.9rem',
-            letterSpacing: '0.06em',
-            cursor: pointsUsed === 0 || pointsUsed > MAX_POINTS ? 'not-allowed' : 'pointer',
-            transition: 'background 0.2s ease',
-          }}
-        >
-          CONFIRMAR
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// ── Step 3: Waiting (after first confirm) ─────────────────────────────────────
-function Step3WaitingPhase({ group, selectedActions, showCO2 }) {
-  const actionObjects = selectedActions.map(id => ACTIONS.find(a => a.id === id)).filter(Boolean)
-
-  return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f0', display: 'flex', flexDirection: 'column' }}>
-      <Navbar group={group} />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2.5rem 2rem', textAlign: 'center' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem', lineHeight: 1 }}>✅</div>
-        <h2 style={{ fontWeight: 900, fontSize: 'clamp(1.4rem, 4vw, 2rem)', color: '#1a1a1a', marginBottom: '0.5rem' }}>
-          Selección confirmada
-        </h2>
-        <p style={{ fontSize: '0.9rem', color: '#888', marginBottom: '2rem', maxWidth: 380 }}>
-          Espera a que el facilitador revele el impacto...
-        </p>
-
-        {/* Selected actions list */}
-        <div style={{ width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '2rem' }}>
-          {actionObjects.map(action => (
-            <div
-              key={action.id}
-              style={{
-                background: '#fff',
-                border: '1px solid #e0e8dc',
-                borderRadius: 10,
-                padding: '0.65rem 1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                textAlign: 'left',
-              }}
-            >
-              <span style={{ fontSize: '1rem' }}>{AREA_EMOJI[action.area]}</span>
-              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1a1a1a', flex: 1 }}>{action.label}</span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#2d5a27', flexShrink: 0 }}>
-                {action.cost} pts
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <DotsLoader />
-      </div>
-    </div>
-  )
-}
-
-// ── Step 3: Revealed ──────────────────────────────────────────────────────────
-function Step3RevealedPhase({ group, teamAvg, selectedActions, onAdjust }) {
-  const actionObjects  = selectedActions.map(id => ACTIONS.find(a => a.id === id)).filter(Boolean)
-  const totalReduction = actionObjects.reduce((s, a) => s + a.co2Reduction, 0)
-  const newTons        = Math.max(0, teamAvg - totalReduction / 1000)
-
-  return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f0', display: 'flex', flexDirection: 'column', animation: 'tmReveal 0.5s ease both' }}>
-      <style>{`
-        @keyframes tmReveal { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes co2Appear { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
-      `}</style>
-      <Navbar group={group} />
-
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 1.25rem 7rem' }}>
-        <div style={{ maxWidth: 600, margin: '0 auto' }}>
-
-          {/* Hero card */}
-          <div style={{
-            background: 'linear-gradient(135deg, #1e4020 0%, #2d5a27 100%)',
-            color: '#fff',
-            borderRadius: 18,
-            padding: '2rem 1.75rem',
-            marginBottom: '1.5rem',
-            textAlign: 'center',
-          }}>
-            <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.55, margin: '0 0 1.25rem' }}>
-              Impacto de tus acciones · {group}
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Antes</div>
-                <div style={{ fontWeight: 900, fontSize: 'clamp(2rem, 7vw, 3rem)', lineHeight: 1, opacity: 0.7 }}>
-                  {teamAvg.toFixed(1)} t
-                </div>
-              </div>
-              <div style={{ fontSize: '1.8rem', opacity: 0.5 }}>→</div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Después</div>
-                <div style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 8vw, 3.8rem)', lineHeight: 1, color: '#a8d8a0' }}>
-                  {newTons.toFixed(1)} t
-                </div>
-              </div>
-            </div>
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-              background: 'rgba(255,255,255,0.15)', padding: '0.5rem 1.25rem', borderRadius: 999,
-              fontSize: '0.88rem', fontWeight: 700,
-            }}>
-              <span>🌱</span>
-              <span>Ahorro: −{totalReduction} kg CO₂/año</span>
-            </div>
-          </div>
-
-          {/* Actions with co2 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
-            {actionObjects.map((action, idx) => (
-              <div
-                key={action.id}
-                style={{
-                  background: '#fff',
-                  border: '2px solid #c8e6c0',
-                  borderRadius: 12,
-                  padding: '0.9rem 1.1rem',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '0.75rem',
-                  animation: `co2Appear 0.4s ease ${idx * 0.08}s both`,
-                }}
-              >
-                <div style={{ width: 4, alignSelf: 'stretch', borderRadius: 4, background: AREA_COLOR[action.area], flexShrink: 0 }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.87rem', color: '#1a1a1a', marginBottom: '0.2rem' }}>
-                    {AREA_EMOJI[action.area]} {action.label}
-                  </div>
-                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#888' }}>{action.cost} pts</span>
-                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#e05555', animation: `co2Appear 0.5s ease ${idx * 0.08 + 0.15}s both` }}>
-                      −{action.co2Reduction} kg CO₂/año
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: '#fff', borderTop: '1px solid #e8e8e8',
-        padding: '0.9rem 1.75rem',
-        boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
-        display: 'flex', justifyContent: 'center',
-      }}>
-        <button
-          onClick={onAdjust}
-          style={{
-            padding: '0.8rem 2.5rem',
-            borderRadius: 10,
-            border: '2px solid #2d5a27',
-            background: '#fff',
-            color: '#2d5a27',
-            fontWeight: 900,
-            fontSize: '0.9rem',
-            letterSpacing: '0.06em',
-            cursor: 'pointer',
-          }}
-        >
-          AJUSTAR SELECCIÓN
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// ── Step 3: Confirmed (waiting for winners) ───────────────────────────────────
-function Step3ConfirmedPhase({ group, selectedActions }) {
-  const actionObjects = selectedActions.map(id => ACTIONS.find(a => a.id === id)).filter(Boolean)
-
-  return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f0', display: 'flex', flexDirection: 'column' }}>
-      <Navbar group={group} />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2.5rem 2rem', textAlign: 'center' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem', lineHeight: 1 }}>✅</div>
-        <h2 style={{ fontWeight: 900, fontSize: 'clamp(1.4rem, 4vw, 2rem)', color: '#1a1a1a', marginBottom: '0.5rem' }}>
-          Selección final confirmada
-        </h2>
-        <p style={{ fontSize: '0.9rem', color: '#888', marginBottom: '2rem', maxWidth: 380 }}>
-          Esperando resultados finales...
-        </p>
-
-        <div style={{ width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '2rem' }}>
-          {actionObjects.map(action => (
-            <div
-              key={action.id}
-              style={{
-                background: '#fff',
-                border: '1px solid #e0e8dc',
-                borderRadius: 10,
-                padding: '0.65rem 1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                textAlign: 'left',
-              }}
-            >
-              <span style={{ fontSize: '1rem' }}>{AREA_EMOJI[action.area]}</span>
-              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1a1a1a', flex: 1 }}>{action.label}</span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#e05555', flexShrink: 0 }}>
-                −{action.co2Reduction} kg
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <DotsLoader />
-      </div>
-    </div>
-  )
-}
-
-// ── Step 3: Winners ───────────────────────────────────────────────────────────
-function Step3WinnersPhase({ group, teamAvg, selectedActions, step3Data }) {
-  const actionObjects  = selectedActions.map(id => ACTIONS.find(a => a.id === id)).filter(Boolean)
-  const totalReduction = actionObjects.reduce((s, a) => s + a.co2Reduction, 0)
-  const newTons        = Math.max(0, teamAvg - totalReduction / 1000)
-
-  // Find this team's rank
-  let rank = null
-  let totalGroups = null
-  if (step3Data?.teams?.length) {
-    const sorted = [...step3Data.teams].sort((a, b) => b.totalReduction - a.totalReduction)
-    const idx = sorted.findIndex(t => groupMatches(t.group, group))
-    rank = idx >= 0 ? idx + 1 : null
-    totalGroups = step3Data.totalGroups || sorted.length
-  }
-
-  const rankLabel = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank ? `#${rank}` : null
-
-  const topActions = step3Data?.actionStats
-    ? [...step3Data.actionStats].sort((a, b) => b.co2Reduction * b.count - a.co2Reduction * a.count).slice(0, 5)
-    : null
-
-  return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f0', display: 'flex', flexDirection: 'column', animation: 'tmReveal 0.5s ease both' }}>
-      <style>{`
-        @keyframes tmReveal { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes co2Appear { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
-      `}</style>
-      <Navbar group={group} />
-
-      <div style={{ overflowY: 'auto', padding: '1.5rem 1.25rem 3rem' }}>
-        <div style={{ maxWidth: 640, margin: '0 auto' }}>
-
-          {/* Hero */}
-          <div style={{
-            background: 'linear-gradient(135deg, #1e4020 0%, #2d5a27 100%)',
-            color: '#fff',
-            borderRadius: 18,
-            padding: '2rem 1.75rem',
-            marginBottom: '1.5rem',
-            textAlign: 'center',
-          }}>
-            {rankLabel && (
-              <div style={{ fontSize: '3rem', marginBottom: '0.75rem', lineHeight: 1 }}>{rankLabel}</div>
-            )}
-            <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.55, margin: '0 0 0.75rem' }}>
-              Resultado final · {group}
-            </p>
-            <div style={{ fontWeight: 900, fontSize: 'clamp(2.8rem, 9vw, 4.5rem)', lineHeight: 1, color: '#a8d8a0', marginBottom: '0.5rem' }}>
-              {newTons.toFixed(1)} t
-            </div>
-            <div style={{ fontSize: '0.9rem', opacity: 0.75, marginBottom: '1rem' }}>
-              CO₂/año · antes {teamAvg.toFixed(1)} t
-            </div>
-            {rank && totalGroups && (
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                background: 'rgba(255,255,255,0.15)', padding: '0.4rem 1.1rem', borderRadius: 999,
-                fontSize: '0.82rem', fontWeight: 700,
-              }}>
-                Puesto {rank} de {totalGroups} equipos
-              </div>
-            )}
-          </div>
-
-          {/* Ranking table */}
-          {step3Data?.teams?.length > 0 && (
-            <div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', marginBottom: '1.25rem' }}>
-              <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#aaa', marginBottom: '1rem' }}>
-                Clasificación de equipos
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {[...step3Data.teams]
-                  .sort((a, b) => b.totalReduction - a.totalReduction)
-                  .map((team, idx) => {
-                    const isMe = groupMatches(team.group, group)
-                    const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}.`
-                    return (
-                      <div
-                        key={team.group}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: '0.75rem',
-                          padding: '0.65rem 0.85rem', borderRadius: 10,
-                          background: isMe ? '#f0f7ee' : '#f9f9f9',
-                          border: isMe ? '2px solid #2d5a27' : '2px solid transparent',
-                          animation: `co2Appear 0.35s ease ${idx * 0.06}s both`,
-                        }}
-                      >
-                        <span style={{ fontSize: '1rem', minWidth: 28, textAlign: 'center' }}>{medal}</span>
-                        <span style={{ flex: 1, fontWeight: isMe ? 700 : 500, fontSize: '0.85rem', color: '#1a1a1a' }}>
-                          {team.group}
-                        </span>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e05555' }}>
-                          −{team.totalReduction} kg
-                        </span>
-                        <span style={{ fontSize: '0.8rem', color: '#888', minWidth: 50, textAlign: 'right' }}>
-                          {(team.newTons ?? Math.max(0, (team.originalTons || 0) - team.totalReduction / 1000)).toFixed(1)} t
-                        </span>
-                      </div>
-                    )
-                  })}
-              </div>
-            </div>
-          )}
-
-          {/* My selected actions */}
-          <div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', marginBottom: '1.25rem' }}>
-            <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#aaa', marginBottom: '0.85rem' }}>
-              Mis acciones — {group}
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {actionObjects.map((action, idx) => (
-                <div
-                  key={action.id}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '0.65rem',
-                    padding: '0.6rem 0.85rem', borderRadius: 10,
-                    background: '#f9f9f9',
-                    animation: `co2Appear 0.35s ease ${idx * 0.06}s both`,
-                  }}
-                >
-                  <span style={{ fontSize: '1rem' }}>{AREA_EMOJI[action.area]}</span>
-                  <span style={{ flex: 1, fontSize: '0.82rem', fontWeight: 600, color: '#1a1a1a' }}>{action.label}</span>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#e05555', flexShrink: 0 }}>
-                    −{action.co2Reduction} kg
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Top actions across session */}
-          {topActions && topActions.length > 0 && (
-            <div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem' }}>
-              <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#aaa', marginBottom: '0.85rem' }}>
-                Acciones más elegidas en la sesión
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {topActions.map((stat, idx) => (
-                  <div
-                    key={stat.id}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '0.65rem',
-                      padding: '0.6rem 0.85rem', borderRadius: 10, background: '#f9f9f9',
-                      animation: `co2Appear 0.35s ease ${idx * 0.06}s both`,
-                    }}
-                  >
-                    <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#bbb', minWidth: 18 }}>{idx + 1}</span>
-                    <span style={{ flex: 1, fontSize: '0.82rem', fontWeight: 600, color: '#1a1a1a' }}>{stat.label}</span>
-                    <span style={{ fontSize: '0.72rem', color: '#888', flexShrink: 0 }}>
-                      {stat.count} {stat.count === 1 ? 'equipo' : 'equipos'}
-                    </span>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#e05555', flexShrink: 0 }}>
-                      −{stat.co2Reduction} kg
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        {!showValues && (
+          <p style={{ fontSize: '0.8rem', color: '#aaa', textAlign: 'center', marginTop: '1.5rem', fontStyle: 'italic' }}>
+            El facilitador revelará el impacto de cada acción en breve.
+          </p>
+        )}
       </div>
     </div>
   )
@@ -992,35 +433,13 @@ function Step3WinnersPhase({ group, teamAvg, selectedActions, step3Data }) {
 export default function TeamScreen() {
   const { code, group } = useParams()
   const navigate = useNavigate()
-  const STEP3_KEY = `co2sprint_step3_${code}_${group}`
 
-  const [phase,               setPhase]               = useState('waiting')
-  const [step3Phase,          setStep3Phase]          = useState('selecting')
-  const [teamResults,         setTeamResults]         = useState([])
-  const [sessionResults,      setSessionResults]      = useState([])
-  const [teamJoined,          setTeamJoined]          = useState(0)
-  const [step3Data,           setStep3Data]           = useState(null)
-  const [step3SelectedActions, setStep3SelectedActions] = useState([])
-
-  useEffect(() => {
-    const saved = localStorage.getItem(STEP3_KEY)
-    if (!saved) return
-    try {
-      const { selectedActions: sa, step3Phase: sp } = JSON.parse(saved)
-      if (sa?.length > 0) setStep3SelectedActions(sa)
-      if (sp === 'waiting')   setStep3Phase('waiting')
-      if (sp === 'confirmed') setStep3Phase('confirmed')
-    } catch {
-      localStorage.removeItem(STEP3_KEY)
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    localStorage.setItem(STEP3_KEY, JSON.stringify({
-      selectedActions: step3SelectedActions,
-      step3Phase,
-    }))
-  }, [step3SelectedActions, step3Phase]) // eslint-disable-line react-hooks/exhaustive-deps
+  const [phase,            setPhase]            = useState('waiting')
+  const [teamResults,      setTeamResults]      = useState([])
+  const [sessionResults,   setSessionResults]   = useState([])
+  const [teamJoined,       setTeamJoined]       = useState(0)
+  const [confirmedActions, setConfirmedActions] = useState(null)  // { actions, newCarbonTons, totalReduction }
+  const [step3ShowValues,  setStep3ShowValues]  = useState(false)
 
   useEffect(() => {
     socket.connect()
@@ -1049,28 +468,37 @@ export default function TeamScreen() {
     }
 
     function onResultsRevealed() { setPhase('results') }
-    function onSessionClosed()   { localStorage.removeItem(STEP3_KEY); navigate('/') }
+    function onSessionClosed()   { navigate('/') }
 
-    function onStep3Revealed() {
-      setStep3Phase(p =>
-        p === 'selecting' || p === 'waiting' || p === 'adjusting' ? 'revealed' : p
-      )
+    function onTeamActionsConfirmed({ group: g, actions, newCarbonTons, totalReduction, showValues }) {
+      if (!groupMatches(g, group)) return
+      setConfirmedActions({ actions, newCarbonTons, totalReduction })
+      if (showValues) setStep3ShowValues(true)
+      setPhase(p => p === 'step3' || p === 'results' ? 'step3' : p)
     }
 
-    function onWinnersRevealed() {
-      setStep3Phase('winners')
-      api.get(`/api/sessions/${code}/step3`)
-        .then(res => setStep3Data(res.data))
-        .catch(() => {})
+    function onStep3Revealed({ allActions } = {}) {
+      setStep3ShowValues(true)
+      if (allActions) {
+        const myTA = allActions.find(ta => groupMatches(ta.group, group))
+        if (myTA) {
+          setConfirmedActions({
+            actions: myTA.actions,
+            newCarbonTons: myTA.newCarbonTons,
+            totalReduction: myTA.totalReduction,
+          })
+        }
+      }
+      setPhase(p => p === 'step3' || p === 'results' ? 'step3' : p)
     }
 
-    socket.on('step:change',        onStepChange)
-    socket.on('ranking:update',     onRankingUpdate)
-    socket.on('participant:joined', onParticipantJoined)
-    socket.on('results:revealed',   onResultsRevealed)
-    socket.on('session:closed',     onSessionClosed)
-    socket.on('step3:revealed',     onStep3Revealed)
-    socket.on('winners:revealed',   onWinnersRevealed)
+    socket.on('step:change',           onStepChange)
+    socket.on('ranking:update',        onRankingUpdate)
+    socket.on('participant:joined',    onParticipantJoined)
+    socket.on('results:revealed',      onResultsRevealed)
+    socket.on('session:closed',        onSessionClosed)
+    socket.on('team:actionsConfirmed', onTeamActionsConfirmed)
+    socket.on('step3:revealed',        onStep3Revealed)
 
     api.get(`/api/sessions/${code}/info`)
       .then(res => {
@@ -1081,33 +509,15 @@ export default function TeamScreen() {
       .catch(() => {})
 
     return () => {
-      socket.off('step:change',        onStepChange)
-      socket.off('ranking:update',     onRankingUpdate)
-      socket.off('participant:joined', onParticipantJoined)
-      socket.off('results:revealed',   onResultsRevealed)
-      socket.off('session:closed',     onSessionClosed)
-      socket.off('step3:revealed',     onStep3Revealed)
-      socket.off('winners:revealed',   onWinnersRevealed)
+      socket.off('step:change',           onStepChange)
+      socket.off('ranking:update',        onRankingUpdate)
+      socket.off('participant:joined',    onParticipantJoined)
+      socket.off('results:revealed',      onResultsRevealed)
+      socket.off('session:closed',        onSessionClosed)
+      socket.off('team:actionsConfirmed', onTeamActionsConfirmed)
+      socket.off('step3:revealed',        onStep3Revealed)
     }
   }, [code, group, navigate])
-
-  const teamAvg = mean(teamResults.map(r => r.tons))
-
-  function handleStep3Confirm({ actions, pointsUsed }) {
-    setStep3SelectedActions(actions)
-    socket.emit('team:confirmActions', { sessionCode: code, group, actions, pointsUsed })
-    setStep3Phase('waiting')
-  }
-
-  function handleStep3ConfirmFinal({ actions, pointsUsed }) {
-    setStep3SelectedActions(actions)
-    socket.emit('team:confirmFinal', { sessionCode: code, group, actions, pointsUsed })
-    setStep3Phase('confirmed')
-  }
-
-  function handleAdjust() {
-    setStep3Phase('adjusting')
-  }
 
   if (phase === 'waiting')     return <WaitingPhase group={group} />
   if (phase === 'calculating') return <CalculatingPhase group={group} teamResults={teamResults} teamJoined={teamJoined} />
@@ -1115,71 +525,23 @@ export default function TeamScreen() {
 
   // Step 3
   if (phase === 'step3') {
-    switch (step3Phase) {
-      case 'selecting':
-        return (
-          <Step3SelectingPhase
-            group={group}
-            code={code}
-            teamAvg={teamAvg}
-            showCO2={false}
-            onConfirm={handleStep3Confirm}
-            initialSelected={[]}
-          />
-        )
-
-      case 'waiting':
-        return (
-          <Step3WaitingPhase
-            group={group}
-            selectedActions={step3SelectedActions}
-            showCO2={false}
-          />
-        )
-
-      case 'revealed':
-        return (
-          <Step3RevealedPhase
-            group={group}
-            teamAvg={teamAvg}
-            selectedActions={step3SelectedActions}
-            onAdjust={handleAdjust}
-          />
-        )
-
-      case 'adjusting':
-        return (
-          <Step3SelectingPhase
-            group={group}
-            code={code}
-            teamAvg={teamAvg}
-            showCO2={true}
-            onConfirm={handleStep3ConfirmFinal}
-            initialSelected={step3SelectedActions}
-          />
-        )
-
-      case 'confirmed':
-        return (
-          <Step3ConfirmedPhase
-            group={group}
-            selectedActions={step3SelectedActions}
-          />
-        )
-
-      case 'winners':
-        return (
-          <Step3WinnersPhase
-            group={group}
-            teamAvg={teamAvg}
-            selectedActions={step3SelectedActions}
-            step3Data={step3Data}
-          />
-        )
-
-      default:
-        return <WaitingPhase group={group} />
+    const tAvg = teamResults.length ? mean(teamResults.map(r => r.tons)) : 0
+    if (!confirmedActions) {
+      return (
+        <div style={{ minHeight: '100vh', background: '#fff', display: 'flex', flexDirection: 'column' }}>
+          <Navbar group={group} />
+          <WaitingForFacilitator message="El facilitador está eligiendo las acciones para vuestro equipo..." />
+        </div>
+      )
     }
+    return (
+      <Step3DisplayPhase
+        group={group}
+        teamAvg={tAvg}
+        confirmedData={confirmedActions}
+        showValues={step3ShowValues}
+      />
+    )
   }
 
   return <WaitingPhase group={group} />

@@ -212,6 +212,30 @@ export default function sessionsRouter(io) {
     }
   })
 
+  // Team actions — facilitator sets actions for each team
+  router.post('/:code/team-actions', async (req, res) => {
+    try {
+      const { group, actions, totalReduction, newCarbonTons } = req.body
+      const ta = await TeamActions.findOneAndUpdate(
+        { sessionCode: req.params.code, group },
+        { actions: actions || [], totalReduction: totalReduction || 0, newCarbonTons: newCarbonTons ?? 0, confirmed: true },
+        { upsert: true, new: true }
+      )
+      res.json(ta)
+    } catch {
+      res.status(500).json({ error: 'Error al guardar acciones del equipo' })
+    }
+  })
+
+  router.get('/:code/team-actions', async (req, res) => {
+    try {
+      const ta = await TeamActions.find({ sessionCode: req.params.code })
+      res.json(ta)
+    } catch {
+      res.status(500).json({ error: 'Error al obtener acciones' })
+    }
+  })
+
   // Activate a draft session so participants can join
   router.patch('/:code/activate', async (req, res) => {
     try {
