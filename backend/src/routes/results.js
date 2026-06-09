@@ -23,7 +23,7 @@ router.post('/send-email', async (req, res) => {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({
-      from: 'CO2 Sprint <onboarding@resend.dev>',
+      from: 'CO2 Sprint <noreply@threeoclock.co>',
       to: email,
       subject: `Tu huella de carbono — ${Number(carbonTons).toFixed(1)} t CO₂/año`,
       html: `
