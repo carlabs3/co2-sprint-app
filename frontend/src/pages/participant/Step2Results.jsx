@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useLocation, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import { PieChart, Pie, Cell } from 'recharts'
 import { useSession } from '../../context/SessionContext.jsx'
 import SessionClosedBanner from '../../components/SessionClosedBanner.jsx'
+import WaitingForFacilitator from '../../components/WaitingForFacilitator.jsx'
 import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
 import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
@@ -133,23 +134,38 @@ function DotGrid({ lowerCount, higherCount }) {
 export default function Step2Results() {
   const location = useLocation()
   const { code }  = useParams()
+  const navigate  = useNavigate()
   const { participantGroup } = useSession()
   const data = (location.state?.carbonTons != null) ? location.state : MOCK_RESULT
   const { carbonTons, areas, answers } = data
 
-  const [revealed,      setRevealed]      = useState(false)
+  const [revealed,       setRevealed]       = useState(false)
+  const [step3Started,   setStep3Started]   = useState(false)
   const [sessionResults, setSessionResults] = useState(null)
-  const [emailInput,  setEmailInput]  = useState('')
-  const [emailStatus, setEmailStatus] = useState('idle')
+  const [emailInput,     setEmailInput]     = useState('')
+  const [emailStatus,    setEmailStatus]    = useState('idle')
+
   useEffect(() => {
-    // Check if results were already revealed (page reload after reveal)
     api.get(`/api/sessions/${code}/info`)
-      .then(res => { if (res.data.resultsRevealed) setRevealed(true) })
+      .then(res => {
+        if (res.data.resultsRevealed) setRevealed(true)
+        if (res.data.currentStep >= 3) setStep3Started(true)
+      })
       .catch(() => {})
 
-    socket.on('results:revealed', () => setRevealed(true))
-    return () => socket.off('results:revealed')
-  }, [code])
+    function onResultsRevealed() { setRevealed(true) }
+    function onStepChange({ step }) { if (step >= 3) setStep3Started(true) }
+    function onSessionClosed() { navigate(`/session/${code}/end`, { replace: true }) }
+
+    socket.on('results:revealed', onResultsRevealed)
+    socket.on('step:change', onStepChange)
+    socket.on('session:closed', onSessionClosed)
+    return () => {
+      socket.off('results:revealed', onResultsRevealed)
+      socket.off('step:change', onStepChange)
+      socket.off('session:closed', onSessionClosed)
+    }
+  }, [code, navigate])
 
   useEffect(() => {
     if (!revealed) return
@@ -537,6 +553,17 @@ export default function Step2Results() {
             Tu huella forma parte del resultado colectivo del taller
           </p>
         </div>
+
+        {/* Next phase banner */}
+        {!step3Started ? (
+          <WaitingForFacilitator message="El facilitador está preparando la fase de acciones..." />
+        ) : (
+          <div style={{ background: '#f0f7ee', border: '1px solid #c8e6c0', borderRadius: 8, padding: '1rem 1.25rem', marginTop: '1rem', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.85rem', color: '#2d5a27', fontWeight: 600, margin: 0 }}>
+              🌱 La fase de acciones ha comenzado — ve a la pantalla de equipo.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

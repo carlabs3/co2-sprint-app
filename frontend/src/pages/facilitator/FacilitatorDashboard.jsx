@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import api from '../../utils/api.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 
@@ -12,10 +12,12 @@ const AREA_LABELS = {
   consumption: 'Consumo', waste: 'Residuos',
 }
 
-const STATUS_LABEL = { waiting: 'En espera', active: 'Activa', closed: 'Cerrada' }
+const STATUS_LABEL = { draft: 'Borrador', waiting: 'En espera', active: 'Activa', actions: 'Fase acciones', closed: 'Cerrada' }
 const STATUS_STYLE = {
+  draft:   { background: '#f0f0f0',  color: '#999' },
   waiting: { background: '#f5f5f0',  color: '#888' },
   active:  { background: '#eaf3de',  color: '#3b6d11' },
+  actions: { background: '#e8f2fd',  color: '#2a5fa0' },
   closed:  { background: '#f5f5f0',  color: '#bbb' },
 }
 
@@ -70,8 +72,10 @@ const s = {
 
 export default function FacilitatorDashboard() {
   const { user } = useAuth()
-  const [sessions, setSessions] = useState([])
-  const [loading, setLoading]   = useState(true)
+  const navigate = useNavigate()
+  const [sessions, setSessions]     = useState([])
+  const [loading, setLoading]       = useState(true)
+  const [activeBanner, setActiveBanner] = useState(null)
 
   useEffect(() => {
     api.get('/api/sessions')
@@ -80,6 +84,11 @@ export default function FacilitatorDashboard() {
       .finally(() => setLoading(false))
   }, [])
 
+  useEffect(() => {
+    const active = sessions.find(s => s.status === 'active' || s.status === 'waiting' || s.status === 'actions')
+    setActiveBanner(active || null)
+  }, [sessions])
+
   async function handleDelete(code) {
     if (!confirm('¿Eliminar esta sesión? Se borrarán todos los datos permanentemente. Esta acción no se puede deshacer.')) return
     try {
@@ -87,6 +96,15 @@ export default function FacilitatorDashboard() {
       setSessions(prev => prev.filter(s => s.code !== code))
     } catch {
       alert('Error al eliminar la sesión')
+    }
+  }
+
+  async function handleActivate(code) {
+    try {
+      await api.patch(`/api/sessions/${code}/activate`)
+      setSessions(prev => prev.map(s => s.code === code ? { ...s, status: 'active' } : s))
+    } catch {
+      alert('Error al activar la sesión')
     }
   }
 
@@ -102,6 +120,26 @@ export default function FacilitatorDashboard() {
             <button style={s.btnNew}>+ Nueva Sesión</button>
           </Link>
         </div>
+
+        {/* Active session banner */}
+        {activeBanner && (
+          <div style={{ background: '#f0f7ee', border: '1.5px solid #c8e6c0', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <div>
+              <p style={{ fontSize: '13px', fontWeight: 600, color: '#2d5a27', margin: 0 }}>
+                🟢 Sesión activa: {activeBanner.code}
+              </p>
+              <p style={{ fontSize: '11px', color: '#3b6d11', margin: '2px 0 0' }}>
+                {activeBanner.name || 'Sin nombre'} · Creada {formatDate(activeBanner.createdAt)}
+              </p>
+            </div>
+            <button
+              onClick={() => navigate(`/session/${activeBanner.code}/rankings`)}
+              style={{ background: '#2d5a27', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.06em' }}
+            >
+              RETOMAR SESIÓN →
+            </button>
+          </div>
+        )}
 
         {loading ? (
           <div style={{ color: '#aaa', textAlign: 'center', padding: '3rem' }}>Cargando...</div>
@@ -198,16 +236,25 @@ export default function FacilitatorDashboard() {
                 )}
 
                 <div style={s.cardActions}>
-                  <Link
-                    to={session.status === 'closed'
-                      ? `/session/${session.code}/stats`
-                      : `/session/${session.code}/rankings`}
-                    style={{ flex: 1 }}
-                  >
-                    <button style={{ ...s.btnOpen, width: '100%' }}>
-                      {session.status === 'closed' ? 'Ver resultados' : 'Abrir sesión'}
+                  {session.status === 'draft' ? (
+                    <button
+                      style={{ ...s.btnOpen, flex: 1 }}
+                      onClick={() => handleActivate(session.code)}
+                    >
+                      Activar sesión →
                     </button>
-                  </Link>
+                  ) : (
+                    <Link
+                      to={session.status === 'closed'
+                        ? `/session/${session.code}/stats`
+                        : `/session/${session.code}/rankings`}
+                      style={{ flex: 1 }}
+                    >
+                      <button style={{ ...s.btnOpen, width: '100%' }}>
+                        {session.status === 'closed' ? 'Ver resultados' : 'Abrir sesión'}
+                      </button>
+                    </Link>
+                  )}
                   <button style={s.btnDelete} onClick={() => handleDelete(session.code)}>
                     Eliminar
                   </button>

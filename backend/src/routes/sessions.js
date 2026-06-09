@@ -16,6 +16,7 @@ export default function sessionsRouter(io) {
   router.get('/:code/info', async (req, res) => {
     try {
       const session = await Session.findOne({ code: req.params.code }, 'code name groups status currentStep resultsRevealed step3Revealed winnersRevealed')
+      // Note: 'draft' and 'closed' statuses are intentionally included
       if (!session) return res.status(404).json({ error: 'Sesión no encontrada' })
       res.json({
         code:            session.code,
@@ -208,6 +209,38 @@ export default function sessionsRouter(io) {
       res.json({ ok: true })
     } catch {
       res.status(500).json({ error: 'Error al actualizar step' })
+    }
+  })
+
+  // Activate a draft session so participants can join
+  router.patch('/:code/activate', async (req, res) => {
+    try {
+      const session = await Session.findOneAndUpdate(
+        { code: req.params.code, facilitatorId: req.user.id },
+        { status: 'active' },
+        { new: true }
+      )
+      if (!session) return res.status(404).json({ error: 'Sesión no encontrada' })
+      res.json({ ok: true })
+    } catch {
+      res.status(500).json({ error: 'Error al activar sesión' })
+    }
+  })
+
+  // Close session (keep data, notify participants)
+  router.patch('/:code/close', async (req, res) => {
+    try {
+      const { code } = req.params
+      const session = await Session.findOneAndUpdate(
+        { code, facilitatorId: req.user.id },
+        { status: 'closed' },
+        { new: true }
+      )
+      if (!session) return res.status(404).json({ error: 'Sesión no encontrada' })
+      io.to(code).emit('session:closed')
+      res.json({ ok: true })
+    } catch {
+      res.status(500).json({ error: 'Error al cerrar sesión' })
     }
   })
 

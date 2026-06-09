@@ -5,7 +5,7 @@ const sessionSchema = new Schema({
   facilitatorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   name: { type: String, default: '' },
   groups: [String],
-  status: { type: String, enum: ['waiting', 'active', 'closed'], default: 'waiting' },
+  status: { type: String, enum: ['draft', 'waiting', 'active', 'actions', 'closed'], default: 'draft' },
   currentStep: { type: Number, default: 2 },
   resultsRevealed: { type: Boolean, default: false },
   step3Revealed:   { type: Boolean, default: false },

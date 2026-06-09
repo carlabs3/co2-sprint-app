@@ -11,6 +11,7 @@ import JoinSession from './pages/participant/JoinSession.jsx'
 import WaitingRoom from './pages/participant/WaitingRoom.jsx'
 import Step2Calculator from './pages/participant/Step2Calculator.jsx'
 import Step2Results from './pages/participant/Step2Results.jsx'
+import SessionEnd from './pages/participant/SessionEnd.jsx'
 import TeamScreen from './pages/participant/TeamScreen.jsx'
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/session/:code/waiting" element={<WaitingRoom />} />
         <Route path="/session/:code/calculator" element={<Step2Calculator />} />
         <Route path="/session/:code/results" element={<Step2Results />} />
+        <Route path="/session/:code/end" element={<SessionEnd />} />
         <Route path="/team/:code/:group" element={<TeamScreen />} />
 
         <Route element={<PrivateRoute />}>

@@ -125,6 +125,7 @@ export default function Step2Rankings() {
   }
 
   async function handleReveal() {
+    if (!confirm('¿Revelar resultados? Los participantes verán su huella en ese momento.')) return
     setRevealed(true)
     setShowRanking(true)
     socket.emit('results:reveal', { sessionCode: code })
@@ -132,8 +133,11 @@ export default function Step2Rankings() {
   }
 
   async function handleClose() {
-    if (!confirm('¿Cerrar esta sesión? Los participantes no podrán seguir enviando resultados.')) return
-    try { await api.delete(`/api/sessions/${code}`) } catch {}
+    const choice = window.confirm(
+      '¿Qué quieres hacer con esta sesión?\n\nPulsa ACEPTAR para CERRAR la sesión (los participantes verán la pantalla de fin).\n\nPulsa CANCELAR para dejarla activa y retomarla más tarde.'
+    )
+    if (!choice) return
+    try { await api.patch(`/api/sessions/${code}/close`) } catch {}
     navigate('/dashboard')
   }
 
@@ -430,6 +434,15 @@ export default function Step2Rankings() {
           >
             {revealed ? '✓ Resultados revelados' : `Revelar resultados (${completed})`}
           </button>
+
+          {revealed && !step3Started && (
+            <button
+              onClick={() => { setActiveStep(3); handleStartStep3() }}
+              style={{ width: '100%', background: '#1a3f1a', color: '#fff', border: 'none', padding: '0.85rem', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: 'pointer' }}
+            >
+              Iniciar fase de acciones →
+            </button>
+          )}
         </>
       )}
 

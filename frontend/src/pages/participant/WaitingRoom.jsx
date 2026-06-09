@@ -37,7 +37,7 @@ export default function WaitingRoom() {
       navigate(`/session/${code}/results`, { replace: true })
     }
     function onSessionClosed() {
-      navigate('/', { replace: true })
+      navigate(`/session/${code}/end`, { replace: true })
     }
 
     socket.on('step:change', onStepChange)

@@ -992,6 +992,7 @@ function Step3WinnersPhase({ group, teamAvg, selectedActions, step3Data }) {
 export default function TeamScreen() {
   const { code, group } = useParams()
   const navigate = useNavigate()
+  const STEP3_KEY = `co2sprint_step3_${code}_${group}`
 
   const [phase,               setPhase]               = useState('waiting')
   const [step3Phase,          setStep3Phase]          = useState('selecting')
@@ -1000,6 +1001,26 @@ export default function TeamScreen() {
   const [teamJoined,          setTeamJoined]          = useState(0)
   const [step3Data,           setStep3Data]           = useState(null)
   const [step3SelectedActions, setStep3SelectedActions] = useState([])
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STEP3_KEY)
+    if (!saved) return
+    try {
+      const { selectedActions: sa, step3Phase: sp } = JSON.parse(saved)
+      if (sa?.length > 0) setStep3SelectedActions(sa)
+      if (sp === 'waiting')   setStep3Phase('waiting')
+      if (sp === 'confirmed') setStep3Phase('confirmed')
+    } catch {
+      localStorage.removeItem(STEP3_KEY)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    localStorage.setItem(STEP3_KEY, JSON.stringify({
+      selectedActions: step3SelectedActions,
+      step3Phase,
+    }))
+  }, [step3SelectedActions, step3Phase]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     socket.connect()
@@ -1028,7 +1049,7 @@ export default function TeamScreen() {
     }
 
     function onResultsRevealed() { setPhase('results') }
-    function onSessionClosed()   { navigate('/') }
+    function onSessionClosed()   { localStorage.removeItem(STEP3_KEY); navigate('/') }
 
     function onStep3Revealed() {
       setStep3Phase(p =>

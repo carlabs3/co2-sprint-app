@@ -143,9 +143,21 @@ export default function JoinSession() {
 
   useEffect(() => {
     const clean = code.replace('-', '')
-    if (clean.length < 7) { setGroups([]); return }
+    if (clean.length < 7) { setGroups([]); setCodeError(''); return }
     api.get(`/api/sessions/${code}/info`)
-      .then(res => { setGroups(res.data.groups || []); setCodeError('') })
+      .then(res => {
+        const { status, groups: g } = res.data
+        if (status === 'draft') {
+          setGroups([])
+          setCodeError('El taller aún no ha comenzado. Espera al facilitador.')
+        } else if (status === 'closed') {
+          setGroups([])
+          setCodeError('Este taller ha finalizado.')
+        } else {
+          setGroups(g || [])
+          setCodeError('')
+        }
+      })
       .catch(() => { setGroups([]); setCodeError('Sesión no encontrada') })
   }, [code])
 
