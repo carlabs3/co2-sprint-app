@@ -183,7 +183,7 @@ export default function JoinSession() {
       joinedAt: new Date().toISOString(),
     }))
     joinSession(code, resolvedName, group, age, gender)
-    navigate(`/session/${code}/waiting`)
+    navigate(`/session/${code}/calculator`)
   }
 
   return (
@@ -193,6 +193,9 @@ export default function JoinSession() {
           CO2 Sprint <span style={s.asterisk}>*</span>
         </div>
         <p style={s.tagline}>Calculadora de huella de carbono</p>
+        <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px', lineHeight: 1.5 }}>
+          Esta calculadora mide tu huella de carbono individual — no la de tu familia ni tu hogar compartido.
+        </p>
 
         <form onSubmit={handleSubmit}>
 

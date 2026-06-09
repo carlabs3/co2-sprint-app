@@ -6,7 +6,7 @@ const sessionSchema = new Schema({
   name: { type: String, default: '' },
   groups: [String],
   status: { type: String, enum: ['waiting', 'active', 'closed'], default: 'waiting' },
-  currentStep: { type: Number, default: 1 },
+  currentStep: { type: Number, default: 2 },
   resultsRevealed: { type: Boolean, default: false },
   step3Revealed:   { type: Boolean, default: false },
   winnersRevealed: { type: Boolean, default: false },

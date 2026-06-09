@@ -56,7 +56,7 @@ export const AREA_QUESTIONS = [
       },
       {
         id: 'moto',
-        text: '¿Utilizas moto o ciclomotor habitualmente?',
+        text: '¿Tienes moto o scooter de gasolina?',
         type: 'single',
         options: [
           { value: '4a', label: 'Ocasionalmente' },
@@ -224,13 +224,16 @@ export const AREA_QUESTIONS = [
       },
       {
         id: 'hotDrinks',
-        text: '¿Qué bebidas calientes consumes habitualmente?',
-        type: 'single',
+        text: '¿Qué bebidas calientes tomas habitualmente?',
+        info: 'Selecciona todas las que tomes regularmente.',
+        type: 'multi',
+        noneValue: '7a',
         options: [
-          { value: '7a', label: 'Café con leche de vaca' },
-          { value: '7b', label: 'Café solo o con leche vegetal' },
-          { value: '7c', label: 'Té o infusiones' },
-          { value: '7d', label: 'No tomo bebidas calientes' },
+          { value: '7a', label: 'No tomo bebidas calientes' },
+          { value: '7b', label: 'Leche con cacao / batido de leche' },
+          { value: '7c', label: 'Té' },
+          { value: '7d', label: 'Café con leche' },
+          { value: '7e', label: 'Café solo (3 o más al día)' },
         ],
       },
       {
@@ -257,7 +260,7 @@ export const AREA_QUESTIONS = [
       },
       {
         id: 'lunch',
-        text: '¿Cómo describirías tu almuerzo habitual?',
+        text: '¿Qué sueles comer?',
         type: 'single',
         options: [
           { value: '9a', label: 'Vegano (sin productos animales)' },
@@ -451,6 +454,18 @@ export const AREA_QUESTIONS = [
           { value: 'less1h', label: 'Menos de 1 hora' },
           { value: '1to2h',  label: '1 a 2 horas' },
           { value: 'more2h', label: 'Más de 2 horas' },
+        ],
+      },
+      {
+        id: 'aiUsage',
+        text: '¿Cuánto usas herramientas de IA al día? (ChatGPT, Claude, Copilot...)',
+        info: 'Una consulta a un modelo de IA grande consume ~10× más energía que una búsqueda en Google.',
+        type: 'single',
+        options: [
+          { value: 'none',   label: 'No uso IA' },
+          { value: 'low',    label: 'Poco (menos de 30 min/día)' },
+          { value: 'medium', label: 'Bastante (30 min – 2h/día)' },
+          { value: 'high',   label: 'Mucho (más de 2h/día)' },
         ],
       },
     ],

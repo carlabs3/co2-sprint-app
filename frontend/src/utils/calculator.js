@@ -29,7 +29,7 @@ const MAP = {
   // Alimentación
   breakfast:    { '6a': 1081, '6b': 1633, '6c': 2595, '6d': 291, '6e': 1924 },
   milkType:     { 'a': 200, 'b': 30, 'c': 0 },
-  hotDrinks:    { '7a': 180, '7b': 160, '7c': 20, '7d': 0 },
+  hotDrinks:    { '7a': 0, '7b': 594, '7c': 18, '7d': 395, '7e': 124 },
   alcohol:      { soda_low: 9, soda_mid: 21, soda_high: 37, wine_low: 14, wine_mid: 32, wine_high: 56, beer_low: 44, beer_mid: 102, beer_high: 175, spirit_low: 4, spirit_mid: 10, spirit_high: 17, none: 0 },
   lunch:        { '9a': 300, '9b': 400, '9c': 500, '9d': 700, '9e': 900, '9f': 1300 },
   dinner:       { '10a': 300, '10b': 400, '10c': 500, '10d': 700, '10e': 900, '10f': 1300 },
@@ -54,6 +54,7 @@ const MAP = {
   videoCalls:  { none: 0, less1h: 8, '1to2h': 20, more2h: 50 },
   streaming:   { none: 0, less1h: 12, '1to4h': 35, more4h: 80 },
   socialMedia: { less1h: 7, '1to2h': 18, more2h: 40 },
+  aiUsage:     { none: 0, low: 25, medium: 100, high: 250 },
 }
 
 function get(key, val) {
@@ -91,7 +92,7 @@ export function calculator(answers) {
   const foodKg = Math.max(0,
     get('breakfast', answers.breakfast) +
     get('milkType', answers.milkType) +
-    get('hotDrinks', answers.hotDrinks) +
+    sum('hotDrinks', answers.hotDrinks) +
     sum('alcohol', answers.alcohol) +
     get('lunch', answers.lunch) +
     get('dinner', answers.dinner) +
@@ -113,6 +114,7 @@ export function calculator(answers) {
     get('videoCalls', answers.videoCalls) +
     get('streaming', answers.streaming) +
     get('socialMedia', answers.socialMedia) +
+    get('aiUsage', answers.aiUsage) +
     PUBLIC_SERVICES_KG
 
   // ── Totales ─────────────────────────────────────────────────────────────────

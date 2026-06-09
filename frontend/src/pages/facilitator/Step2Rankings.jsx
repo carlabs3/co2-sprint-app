@@ -16,7 +16,7 @@ export default function Step2Rankings() {
   const [ranking, setRanking]                       = useState([])
   const [groups, setGroups]                         = useState([])
   const [totalJoined, setTotalJoined]               = useState(0)
-  const [calculatorStarted, setCalculatorStarted]   = useState(false)
+  const [calculatorStarted, setCalculatorStarted]   = useState(true)
   const [showRanking, setShowRanking]               = useState(false)
   const [revealed, setRevealed]                     = useState(false)
 

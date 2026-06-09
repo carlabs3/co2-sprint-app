@@ -26,10 +26,10 @@ const AREA_META = [
 const SPAIN_AVG = 8.1
 
 const CATEGORY_CONFIG = {
-  bajo:       { label: 'Huella baja' },
-  medio:      { label: 'Huella media' },
-  alto:       { label: 'Huella alta' },
-  'muy alto': { label: 'Huella muy alta' },
+  bajo:       { label: 'Huella reducida 🌿' },
+  medio:      { label: 'Huella moderada 🌱' },
+  alto:       { label: 'Huella elevada 🌍' },
+  'muy alto': { label: 'Huella muy elevada 🔥' },
 }
 
 function mean(arr) {
