@@ -78,10 +78,12 @@ export default function FacilitatorDashboard() {
   const [activeBanner, setActiveBanner] = useState(null)
 
   useEffect(() => {
-    api.get('/api/sessions')
-      .then(({ data }) => setSessions(data))
-      .catch(() => setSessions([]))
-      .finally(() => setLoading(false))
+    const fetchSessions = () =>
+      api.get('/api/sessions').then(({ data }) => setSessions(data)).catch(() => {})
+
+    fetchSessions().finally(() => setLoading(false))
+    const poll = setInterval(fetchSessions, 30000)
+    return () => clearInterval(poll)
   }, [])
 
   useEffect(() => {

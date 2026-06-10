@@ -252,6 +252,10 @@ export default function Step2Calculator() {
 
   function handleSelect(questionId, value) {
     setAnswers(prev => ({ ...prev, [questionId]: value }))
+    // Auto-advance for single questions after a brief visual confirmation delay
+    if (question.type === 'single' && !isLast) {
+      setTimeout(() => handleNext(true), 300)
+    }
   }
 
   function handleToggle(questionId, value) {
@@ -272,9 +276,10 @@ export default function Step2Calculator() {
     })
   }
 
-  function handleNext() {
-    if (!canNext) return
+  function handleNext(force = false) {
+    if (!force && !canNext) return
     if (isLast) {
+      if (force) return // never auto-submit on last question
       const calcResult = calculator(answers)
       const state = { ...calcResult, answers }
       submittedResultRef.current = state

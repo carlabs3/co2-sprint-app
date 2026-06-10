@@ -69,7 +69,11 @@ export function SessionProvider({ children }) {
   function clearSession() {
     // Clear participant and progress keys from localStorage
     Object.keys(localStorage)
-      .filter(k => k.startsWith('co2sprint_participant_') || k.startsWith('co2sprint_progress_'))
+      .filter(k =>
+        k.startsWith('co2sprint_participant_') ||
+        k.startsWith('co2sprint_progress_') ||
+        k.startsWith('co2sprint_results_')
+      )
       .forEach(k => localStorage.removeItem(k))
     setSessionCode(null)
     setParticipantName('')

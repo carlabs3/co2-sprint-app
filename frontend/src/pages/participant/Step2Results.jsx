@@ -136,10 +136,30 @@ export default function Step2Results() {
   const { code }  = useParams()
   const navigate  = useNavigate()
   const { participantGroup } = useSession()
-  const data = (location.state?.carbonTons != null) ? location.state : MOCK_RESULT
+
+  // Restore from localStorage if available (survives page reload)
+  const RESULTS_KEY = `co2sprint_results_${code}`
+  const savedRaw = localStorage.getItem(RESULTS_KEY)
+  const saved = savedRaw ? (() => { try { return JSON.parse(savedRaw) } catch { return null } })() : null
+
+  const data = location.state?.carbonTons != null
+    ? location.state
+    : saved?.carbonTons != null
+      ? saved
+      : MOCK_RESULT
   const { carbonTons, areas, answers } = data
 
-  const [revealed,       setRevealed]       = useState(false)
+  // Save real results to localStorage on mount
+  if (location.state?.carbonTons != null && !savedRaw) {
+    localStorage.setItem(RESULTS_KEY, JSON.stringify({
+      carbonTons: location.state.carbonTons,
+      areas: location.state.areas || {},
+      answers: location.state.answers || {},
+      revealed: false,
+    }))
+  }
+
+  const [revealed,       setRevealed]       = useState(saved?.revealed || false)
   const [step3Started,   setStep3Started]   = useState(false)
   const [sessionResults, setSessionResults] = useState(null)
   const [emailInput,     setEmailInput]     = useState('')
@@ -153,7 +173,11 @@ export default function Step2Results() {
       })
       .catch(() => {})
 
-    function onResultsRevealed() { setRevealed(true) }
+    function onResultsRevealed() {
+      setRevealed(true)
+      const existing = savedRaw ? JSON.parse(savedRaw) : { carbonTons, areas, answers: answers || {} }
+      localStorage.setItem(RESULTS_KEY, JSON.stringify({ ...existing, revealed: true }))
+    }
     function onStepChange({ step }) { if (step >= 3) setStep3Started(true) }
     function onSessionClosed() { navigate(`/session/${code}/end`, { replace: true }) }
 

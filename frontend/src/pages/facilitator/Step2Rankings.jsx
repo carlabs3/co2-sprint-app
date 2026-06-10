@@ -99,6 +99,13 @@ export default function Step2Rankings() {
       setTeamConfirmations(prev => ({ ...prev, [group]: { ...prev[group], confirmed: true } }))
     })
 
+    socket.on('team:actionsConfirmed', ({ group, newCarbonTons, totalReduction }) => {
+      setTeamConfirmations(prev => ({
+        ...prev,
+        [group]: { ...prev[group], confirmed: true, newCarbonTons, totalReduction },
+      }))
+    })
+
     socket.on('team:confirmedFinal', ({ group }) => {
       setTeamConfirmations(prev => ({ ...prev, [group]: { ...prev[group], confirmedFinal: true } }))
     })
@@ -106,6 +113,7 @@ export default function Step2Rankings() {
     socket.on('step3:revealed', () => {
       setStep3Revealed(true)
       fetchStep3Data()
+      setStep3Started(true)
     })
 
     socket.on('winners:revealed', () => {
@@ -118,6 +126,7 @@ export default function Step2Rankings() {
       socket.off('results:revealed')
       socket.off('team:confirmed')
       socket.off('team:confirmedFinal')
+      socket.off('team:actionsConfirmed')
       socket.off('step3:revealed')
       socket.off('winners:revealed')
     }

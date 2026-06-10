@@ -397,9 +397,13 @@ function Step3DisplayPhase({ group, teamAvg, confirmedData, showValues }) {
           Acciones de vuestro equipo
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-          {actions.map(actionId => {
-            const action = ACTIONS.find(a => a.id === actionId)
+          {[...actions]
+            .map(id => ACTIONS.find(a => a.id === id))
+            .filter(Boolean)
+            .sort((a, b) => b.co2Reduction - a.co2Reduction)
+            .map(action => {
             if (!action) return null
+            const actionId = action.id
             return (
               <div key={actionId} style={{ background: '#fff', borderRadius: '10px', padding: '1rem 1.25rem', border: '1px solid #e0e0d8', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <span style={{ fontSize: '1.3rem' }}>{AREA_EMOJI[action.area]}</span>
@@ -502,9 +506,23 @@ export default function TeamScreen() {
 
     api.get(`/api/sessions/${code}/info`)
       .then(res => {
-        if (res.data.winnersRevealed) setPhase('step3')
+        if (res.data.step3Revealed || res.data.currentStep >= 3) setPhase('step3')
         else if (res.data.resultsRevealed) setPhase('results')
         else if (res.data.status === 'active') setPhase('calculating')
+      })
+      .catch(() => {})
+
+    // Fetch confirmed team actions for late joiners (fallback if socket missed)
+    api.get(`/api/sessions/${code}/team-actions`)
+      .then(res => {
+        const myTeam = res.data.find(ta => groupMatches(ta.group, group))
+        if (myTeam?.confirmed) {
+          setConfirmedActions({
+            actions: myTeam.actions,
+            newCarbonTons: myTeam.newCarbonTons,
+            totalReduction: myTeam.totalReduction,
+          })
+        }
       })
       .catch(() => {})
 
@@ -530,6 +548,16 @@ export default function TeamScreen() {
       return (
         <div style={{ minHeight: '100vh', background: '#fff', display: 'flex', flexDirection: 'column' }}>
           <Navbar group={group} />
+          {tAvg > 0 && (
+            <div style={{ background: '#f5f5f0', padding: '2rem', textAlign: 'center', borderBottom: '1px solid #e0e0d8' }}>
+              <p style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.14em', color: '#aaa', margin: '0 0 0.4rem' }}>
+                Huella media actual del equipo
+              </p>
+              <p style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 8vw, 4rem)', lineHeight: 1, color: '#1a1a1a', margin: 0 }}>
+                {tAvg.toFixed(1)} <span style={{ fontSize: '1rem', color: '#888', fontWeight: 500 }}>t CO₂/año</span>
+              </p>
+            </div>
+          )}
           <WaitingForFacilitator message="El facilitador está eligiendo las acciones para vuestro equipo..." />
         </div>
       )
