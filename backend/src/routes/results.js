@@ -5,10 +5,99 @@ import FootprintResult from '../models/FootprintResult.js'
 
 const router = Router()
 
+// ── Calculator MAP (mirror of frontend/src/utils/calculator.js) ──────────────
 
-// Enviar resultados por email — público
+const MAP = {
+  car:           { '1a': 184, '1b': 797, '1c': 1839, '1d': 3677, '1e': 0 },
+  electricCar:   { 'a': 146, 'b': 775, 'c': 1550, 'd': 3600, 'e': 0 },
+  train:         { '3a': 21, '3b': 126, '3c': 630, '3d': 0 },
+  moto:          { '4a': 11, '4b': 57, '4c': 228, '4d': 0 },
+  urbanMobility: { '5a': 0, '5b': 2, '5c': 4, '5d': 5, '5e': 44 },
+  heatingSmall:  { '26a': 0, '26b': 625, '26c': 975,  '26d': 1429, '26e': 230, '26f': 375, '26g': 668 },
+  heatingMedium: { '26a': 0, '26b': 750, '26c': 1170, '26d': 1715, '26e': 276, '26f': 450, '26g': 802 },
+  heatingLarge:  { '26a': 0, '26b': 781, '26c': 1219, '26d': 1787, '26e': 288, '26f': 469, '26g': 835 },
+  renewable:     { 'a': -720, 'b': -200, 'c': 0 },
+  householdSize: { '1': 1, '2': 2, '3': 3, '4': 4, '4+': 4 },
+  homeHabits:    { closeWindows: -47, thermostat19: -47, ledBulbs: -4, ecoPrograms: -36, none: 0 },
+  breakfast:     { '6a': 1081, '6b': 1633, '6c': 2595, '6d': 291, '6e': 1924 },
+  milkType:      { 'a': 232, 'b': 82, 'c': 89, 'd': 64, 'e': 0 },
+  hotDrinks:     { '7a': 0, '7b': 594, '7c': 18, '7d': 395, '7e': 124 },
+  lunch:         { '9a': 110, '9b': 186, '9c': 317, '9d': 293, '9e': 1087, '9f': 2296, '9g': 745 },
+  dinner:        { '10a': 110, '10b': 186, '10c': 317, '10d': 293, '10e': 1087, '10f': 2296, '10g': 745 },
+  bottledWater:  { '13a': 97, '13b': 49, '13c': 0 },
+  foodHabits:    { localFood: -75, composting: -146, noFoodWaste: -80, none: 0 },
+  clothes:       { '15a': 75, '15b': 99, '15c': 187, '15d': 396, '15e': 594, '15f': 891, '15g': 15 },
+  electronics:   { '16a': 86, '16b': 63, '16c': 194, '16d': 302, '16e': 375, '16f': 73, '16g': 24, '16h': 10, '16i': 0 },
+  appliances:    { '19a': 340, '19b': 302, '19c': 270, '19d': 257, '19e': 217, '19f': 415, '19g': 98, '19h': 375, '19i': 0 },
+  pets:          { bigDog: 1100, medDog: 770, smallDog: 400, cat: 310, none: 0 },
+  hygiene:       { '22a': 13, '22b': 18, '22c': 39 },
+  smoking:       { '23a': 0, '23b': 20, '23c': 11, '23d': 46, '23e': 102 },
+  videoCalls:    { none: 0, less1h: 8, '1to2h': 18, more2h: 38 },
+  streaming:     { none: 0, '1to2h': 16, '2to4h': 34, more4h: 69 },
+  socialMedia:   { none: 0, less1h: 16, '1to2h': 39, more2h: 82 },
+  aiUsage:       { none: 0, low: 25, medium: 100, high: 250 },
+}
+
+const ALCOHOL_FACTORS = {
+  soda:    0.472 * 0.25 * 52,
+  wine:    1.19  * 0.15 * 52,
+  beer:    1.12  * 0.33 * 52,
+  spirits: 1.12  * 0.05 * 52,
+}
+
+function calcAlcohol(alcohol = {}) {
+  if (!alcohol || typeof alcohol !== 'object' || Array.isArray(alcohol)) return 0
+  return Math.round(
+    (alcohol.soda    || 0) * ALCOHOL_FACTORS.soda    +
+    (alcohol.wine    || 0) * ALCOHOL_FACTORS.wine    +
+    (alcohol.beer    || 0) * ALCOHOL_FACTORS.beer    +
+    (alcohol.spirits || 0) * ALCOHOL_FACTORS.spirits
+  )
+}
+
+// ── Subcategory definitions ──────────────────────────────────────────────────
+
+const SUBCATS = {
+  transport: [
+    { label: 'Vehículo privado',            calc: (a) => (MAP.car[a.car] || 0) + (MAP.electricCar[a.electricCar] || 0) },
+    { label: 'Vuelos',                       calc: (a) => (a.flights?.includes('flightShort') ? 824 : 0) + (a.flights?.includes('flightMedium') ? 1879 : 0) + (a.flights?.includes('flightLong') ? 2627 : 0) },
+    { label: 'Transporte público y activo',  calc: (a) => (MAP.train[a.train] || 0) + (MAP.moto[a.moto] || 0) + (MAP.urbanMobility[a.urbanMobility] || 0) },
+  ],
+  energy: [
+    { label: 'Calefacción y agua caliente',  calc: (a) => { const div = MAP.householdSize[a.householdSize] ?? 2; let h = 0; if (a.homeType === '25a') h = MAP.heatingSmall[a.heating] ?? 0; else if (a.homeType === '25b') h = MAP.heatingMedium[a.heating] ?? 0; else if (a.homeType === '25c') h = MAP.heatingLarge[a.heating] ?? 0; return h / div } },
+    { label: 'Refrigeración',                calc: (a) => a.hasAC === 'yes' ? (a.homeType === '25a' ? 350 : a.homeType === '25b' ? 420 : 438) : 0 },
+    { label: 'Extras (piscina y vacaciones)', calc: (a) => (a.pool?.includes('privatePool') ? 50 : 0) + (a.pool?.includes('communityPool') ? 17 : 0) + (a.hotelNights || 0) * 8 + (a.hostelNights || 0) + (a.campingNights || 0) + (a.airbnbNights || 0) * 5 + (a.secondHome ? 250 : 0) },
+    { label: 'Energía renovable',            calc: (a) => MAP.renewable[a.renewable] ?? 0, negative: true },
+    { label: 'Hábitos de eficiencia',        calc: (a) => ['closeWindows', 'thermostat19', 'ledBulbs', 'ecoPrograms'].filter(h => a.homeHabits?.includes(h)).reduce((s, h) => s + (MAP.homeHabits[h] || 0), 0), negative: true },
+  ],
+  food: [
+    { label: 'Dieta diaria',                 calc: (a) => (MAP.breakfast[a.breakfast] || 0) + (MAP.lunch[a.lunch] || 0) + (MAP.dinner[a.dinner] || 0) },
+    { label: 'Bebidas',                      calc: (a) => (MAP.milkType[a.milkType] || 0) + (Array.isArray(a.hotDrinks) ? a.hotDrinks : [a.hotDrinks]).reduce((s, v) => s + (MAP.hotDrinks[v] || 0), 0) + (MAP.bottledWater[a.bottledWater] || 0) + calcAlcohol(a.alcohol) },
+    { label: 'Hábitos sostenibles',          calc: (a) => ['localFood', 'composting', 'noFoodWaste'].filter(h => a.foodHabits?.includes(h)).reduce((s, h) => s + (MAP.foodHabits[h] || 0), 0), negative: true },
+  ],
+  consumption: [
+    { label: 'Moda',                         calc: (a) => MAP.clothes[a.clothes] || 0 },
+    { label: 'Tecnología',                   calc: (a) => (Array.isArray(a.electronics) ? a.electronics : []).reduce((s, v) => s + (MAP.electronics[v] || 0), 0) + (Array.isArray(a.appliances) ? a.appliances : []).reduce((s, v) => s + (MAP.appliances[v] || 0), 0) },
+    { label: 'Estilo de vida',               calc: (a) => ['bigDog', 'medDog', 'smallDog', 'cat'].filter(p => a.pets?.includes(p)).reduce((s, p) => s + (MAP.pets[p] || 0), 0) + (MAP.hygiene[a.hygiene] || 0) + (MAP.smoking[a.smoking] || 0) },
+  ],
+  waste: [
+    { label: 'Uso de pantallas',             calc: (a) => (MAP.videoCalls[a.videoCalls] || 0) + (MAP.streaming[a.streaming] || 0) + (MAP.socialMedia[a.socialMedia] || 0) },
+    { label: 'Inteligencia artificial',      calc: (a) => MAP.aiUsage[a.aiUsage] || 0 },
+  ],
+}
+
+const AREA_META = [
+  { id: 'transport',   label: 'Transporte',        emoji: '🚗', color: '#4a90d9' },
+  { id: 'energy',      label: 'Vivienda y energía', emoji: '🏡', color: '#e8a020' },
+  { id: 'food',        label: 'Alimentación',       emoji: '🥗', color: '#5aab5a' },
+  { id: 'consumption', label: 'Consumo',             emoji: '🛍️', color: '#b07a30' },
+  { id: 'waste',       label: 'Huella digital',      emoji: '📱', color: '#7a7aaa' },
+]
+
+// ── Email route ───────────────────────────────────────────────────────────────
+
 router.post('/send-email', async (req, res) => {
-  const { email, carbonTons, category, areas } = req.body
+  const { email, carbonTons, category, areas, answers } = req.body
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ error: 'Email no válido' })
@@ -19,6 +108,42 @@ router.post('/send-email', async (req, res) => {
   if (!process.env.RESEND_API_KEY) {
     return res.status(503).json({ error: 'Servicio de email no configurado' })
   }
+
+  // Build subcategory HTML
+  const ans = answers || {}
+  const subcatHtml = AREA_META.map(area => {
+    const subcats = SUBCATS[area.id] || []
+    const areaKg  = (areas?.[area.id] || 0) * 1000
+
+    const rows = subcats.map(sub => {
+      const kg       = sub.calc(ans)
+      const tons     = (kg / 1000).toFixed(2)
+      const pct      = areaKg > 0 ? Math.round((Math.abs(kg) / areaKg) * 100) : 0
+      const isNeg    = sub.negative && kg < 0
+      const color    = isNeg ? '#3b6d11' : area.color
+      const barWidth = Math.min(pct, 100)
+      return `
+        <tr>
+          <td style="padding: 6px 0; font-size: 13px; color: #555; border-bottom: 1px solid #f5f5f5;">${sub.label}</td>
+          <td style="padding: 6px 0; border-bottom: 1px solid #f5f5f5; width: 120px;">
+            <div style="background: #f0f0f0; border-radius: 3px; height: 5px; overflow: hidden;">
+              <div style="background: ${color}; height: 100%; width: ${barWidth}%; border-radius: 3px;"></div>
+            </div>
+          </td>
+          <td style="padding: 6px 0; text-align: right; font-size: 13px; font-weight: 600; color: ${color}; border-bottom: 1px solid #f5f5f5; white-space: nowrap;">${tons}t &nbsp; ${pct}%</td>
+        </tr>`
+    }).join('')
+
+    return `
+      <div style="margin-bottom: 20px;">
+        <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 16px;">${area.emoji}</span>
+          <span style="font-size: 14px; font-weight: 700; color: ${area.color};">${area.label}</span>
+          <span style="font-size: 13px; font-weight: 700; color: ${area.color}; margin-left: 8px;">${Number(areas?.[area.id] || 0).toFixed(1)}t</span>
+        </div>
+        <table style="width: 100%; border-collapse: collapse;">${rows}</table>
+      </div>`
+  }).join('')
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY)
@@ -44,7 +169,7 @@ router.post('/send-email', async (req, res) => {
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.transport || 0).toFixed(1)} t</td>
             </tr>
             <tr style="border-bottom: 1px solid #f0f0f0;">
-              <td style="padding: 10px 0; color: #555;">⚡ Energía</td>
+              <td style="padding: 10px 0; color: #555;">🏡 Vivienda y energía</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.energy || 0).toFixed(1)} t</td>
             </tr>
             <tr style="border-bottom: 1px solid #f0f0f0;">
@@ -56,10 +181,23 @@ router.post('/send-email', async (req, res) => {
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.consumption || 0).toFixed(1)} t</td>
             </tr>
             <tr>
-              <td style="padding: 10px 0; color: #555;">♻️ Residuos</td>
+              <td style="padding: 10px 0; color: #555;">📱 Huella digital</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.waste || 0).toFixed(1)} t</td>
             </tr>
           </table>
+
+          <h3 style="color: #1a1a1a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; margin: 32px 0 16px;">Detalle por categoría</h3>
+          ${subcatHtml}
+
+          <div style="background: #f5f5f0; border-radius: 8px; padding: 12px 16px; margin-top: 8px; margin-bottom: 32px;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="font-size: 13px; font-weight: 700; color: #555;">🏛️ Servicios públicos</td>
+                <td style="font-size: 11px; color: #aaa;">Fijo para todos en España — infraestructuras, sanidad, educación...</td>
+                <td style="font-size: 14px; font-weight: 700; color: #888; text-align: right; white-space: nowrap;">1.5 t</td>
+              </tr>
+            </table>
+          </div>
 
           <p style="color: #aaa; font-size: 11px; margin-top: 32px; text-align: center;">
             CO2 Sprint · Taller de huella de carbono

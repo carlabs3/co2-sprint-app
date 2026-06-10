@@ -415,7 +415,7 @@ export default function Step2Results() {
     setEmailStatus('sending')
     try {
       await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/results/send-email`, {
-        email: emailInput, carbonTons, category, areas, sessionCode: code,
+        email: emailInput, carbonTons, category, areas, answers, sessionCode: code,
       })
       setEmailStatus('success')
     } catch {
