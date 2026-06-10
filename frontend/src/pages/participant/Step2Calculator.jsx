@@ -238,10 +238,10 @@ export default function Step2Calculator() {
   const question = area.questions[questionIndex]
   const isFirst  = areaIndex === 0 && questionIndex === 0
   const isLast   = areaIndex === AREAS.length - 1 && questionIndex === area.questions.length - 1
-  const canNext  = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || answers[question.id] !== undefined
+  const canNext  = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.isSensibilization || answers[question.id] !== undefined
 
   function isAreaDone(ai) {
-    return AREAS[ai].questions.every(q => isSkipped(q) || q.type === 'multi' || q.type === 'nights' || answers[q.id] !== undefined)
+    return AREAS[ai].questions.every(q => isSkipped(q) || q.type === 'multi' || q.type === 'nights' || q.isSensibilization || answers[q.id] !== undefined)
   }
 
   function getAreaStatus(ai) {
@@ -251,10 +251,12 @@ export default function Step2Calculator() {
   }
 
   function handleSelect(questionId, value) {
-    setAnswers(prev => ({ ...prev, [questionId]: value }))
-    // Auto-advance for single questions after a brief visual confirmation delay
-    if (question.type === 'single' && !isLast) {
-      setTimeout(() => handleNext(true), 300)
+    const newAnswers = { ...answers, [questionId]: value }
+    setAnswers(newAnswers)
+    // Auto-advance for all single questions (including last → auto-submits)
+    // Pass newAnswers directly so the timeout doesn't use stale state
+    if (question.type === 'single') {
+      setTimeout(() => handleNext(newAnswers), 300)
     }
   }
 
@@ -276,12 +278,15 @@ export default function Step2Calculator() {
     })
   }
 
-  function handleNext(force = false) {
-    if (!force && !canNext) return
+  // overrideAnswers: passed from handleSelect to avoid stale closure on the answers state
+  function handleNext(overrideAnswers = null) {
+    const currentAnswers = overrideAnswers ?? answers
+    // Recompute canNext with the actual answers (avoids stale state in timeouts)
+    const currentCanNext = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.isSensibilization || currentAnswers[question.id] !== undefined
+    if (!currentCanNext) return
     if (isLast) {
-      if (force) return // never auto-submit on last question
-      const calcResult = calculator(answers)
-      const state = { ...calcResult, answers }
+      const calcResult = calculator(currentAnswers)
+      const state = { ...calcResult, answers: currentAnswers }
       submittedResultRef.current = state
       localStorage.removeItem(STORAGE_KEY)
       socket.emit('footprint:submit', {
@@ -290,7 +295,7 @@ export default function Step2Calculator() {
         name: participantName,
         carbonTons: calcResult.carbonTons,
         areas: calcResult.areas,
-        answers,
+        answers: currentAnswers,
         category: calcResult.category,
       })
       setSubmitted(true)
@@ -338,7 +343,7 @@ export default function Step2Calculator() {
       <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
         {a.questions.map((q, qi) => {
           if (isSkipped(q)) return null
-          const done   = q.type === 'multi' || q.type === 'nights' || answers[q.id] !== undefined
+          const done   = q.type === 'multi' || q.type === 'nights' || q.isSensibilization || answers[q.id] !== undefined
           const active = aIdx === areaIndex && qi === activeQIdx
           return (
             <div key={qi} style={{
