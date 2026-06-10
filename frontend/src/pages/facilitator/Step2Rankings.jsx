@@ -32,7 +32,7 @@ export default function Step2Rankings() {
   const [activeTeamTab,  setActiveTeamTab]          = useState(null)
   const [teamSelections, setTeamSelections]         = useState({})
   const [filter3Area,    setFilter3Area]            = useState('all')
-  const [filter3Type,    setFilter3Type]            = useState('all')
+  const [sessionStatus,  setSessionStatus]           = useState(null)
 
   const joinUrl = `${window.location.origin}/?code=${code}`
 
@@ -61,9 +61,10 @@ export default function Step2Rankings() {
       })
       .catch(() => {})
 
-    // Fetch session groups
+    // Fetch session info (groups + status)
     api.get(`/api/sessions/${code}/info`).then(res => {
       if (res.data.groups) setSessionGroups(res.data.groups)
+      if (res.data.status) setSessionStatus(res.data.status)
     }).catch(() => {})
 
     // Check if step3 already started/revealed
@@ -159,6 +160,13 @@ export default function Step2Rankings() {
     navigate('/dashboard')
   }
 
+  async function handleActivate() {
+    try {
+      await api.patch(`/api/sessions/${code}/activate`)
+      setSessionStatus('active')
+    } catch {}
+  }
+
   async function handleStartStep3() {
     setStep3Started(true)
     setActiveStep(3)
@@ -190,6 +198,22 @@ export default function Step2Rankings() {
     if (members.length > 0) acc[g] = members.reduce((s, r) => s + r.tons, 0) / members.length
     return acc
   }, {})
+
+  // ── Draft: session not yet active ────────────────────────────────────────────
+  if (sessionStatus === 'draft') return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 52px)', background: '#fff', gap: '1.5rem', padding: '2.5rem 2rem', textAlign: 'center' }}>
+      <div style={{ padding: '16px', background: '#fff', border: '1px solid #e0e0d8', borderRadius: '12px' }}>
+        <QRCodeSVG value={joinUrl} size={180} fgColor="#2d5a27" bgColor="#ffffff" level="M" />
+      </div>
+      <div style={{ fontWeight: 900, fontSize: 'clamp(2rem, 6vw, 3.5rem)', letterSpacing: '0.1em', color: '#2d5a27', lineHeight: 1 }}>{code}</div>
+      <p style={{ fontSize: '0.9rem', color: '#888', maxWidth: 360, lineHeight: 1.65 }}>
+        La sesión está en borrador. Actívala para que los participantes puedan entrar.
+      </p>
+      <button onClick={handleActivate} style={{ background: '#2d5a27', color: '#fff', border: 'none', padding: '1rem 2.5rem', fontSize: '0.88rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: '4px', cursor: 'pointer' }}>
+        ACTIVAR SESIÓN →
+      </button>
+    </div>
+  )
 
   // ── Phase 0: before calculator started — fullscreen QR ───────────────────────
   if (!calculatorStarted) return (
@@ -310,15 +334,13 @@ export default function Step2Rankings() {
             }, 0)
             const newTons = originalAvg != null ? Math.max(0, originalAvg - totalRed / 1000) : null
 
-            const filtered = ACTIONS.filter(a => {
-              if (filter3Area !== 'all' && a.area !== filter3Area) return false
-              if (filter3Type !== 'all' && a.type !== filter3Type) return false
-              return true
-            })
+            const filtered = ACTIONS.filter(a =>
+              filter3Area === 'all' || a.area === filter3Area
+            )
 
             return (
               <div>
-                {/* Team header */}
+                {/* Team header — solo huella actual, sin comparativa hasta revelar */}
                 <div style={{ background: '#f5f5f0', borderRadius: '8px', padding: '1rem 1.25rem', marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
                     <div>
@@ -328,21 +350,9 @@ export default function Step2Rankings() {
                       </div>
                     </div>
                     {selected.length > 0 && (
-                      <>
-                        <div style={{ fontSize: '1.2rem', color: '#ccc' }}>→</div>
-                        <div>
-                          <span style={{ fontSize: '0.68rem', color: '#2d5a27', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Nueva huella</span>
-                          <div style={{ fontWeight: 900, fontSize: '1.5rem', color: '#2d5a27' }}>
-                            {newTons != null ? `${newTons.toFixed(1)} t` : '–'}
-                          </div>
-                        </div>
-                        <div>
-                          <span style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Reducción</span>
-                          <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#2d5a27' }}>
-                            −{(totalRed / 1000).toFixed(2)} t
-                          </div>
-                        </div>
-                      </>
+                      <div style={{ fontSize: '0.72rem', color: '#888' }}>
+                        {selected.length} acción{selected.length !== 1 ? 'es' : ''} seleccionada{selected.length !== 1 ? 's' : ''}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -372,17 +382,11 @@ export default function Step2Rankings() {
                   </div>
                 )}
 
-                {/* Filters */}
+                {/* Filters — solo por área */}
                 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
                   {['all', 'transport', 'energy', 'food', 'consumption', 'waste'].map(area => (
                     <button key={area} onClick={() => setFilter3Area(area)} style={{ padding: '0.3rem 0.7rem', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', background: filter3Area === area ? '#2d5a27' : '#f5f5f0', color: filter3Area === area ? '#fff' : '#888', border: 'none' }}>
                       {area === 'all' ? 'Todas' : `${AREA_EMOJI[area]} ${AREA_LABEL[area]}`}
-                    </button>
-                  ))}
-                  <div style={{ width: '1px', background: '#e0e0d8', margin: '0 0.25rem' }} />
-                  {['all', 'individual', 'colectiva'].map(type => (
-                    <button key={type} onClick={() => setFilter3Type(type)} style={{ padding: '0.3rem 0.7rem', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', background: filter3Type === type ? '#555' : '#f5f5f0', color: filter3Type === type ? '#fff' : '#888', border: 'none' }}>
-                      {type === 'all' ? 'Todos' : type.charAt(0).toUpperCase() + type.slice(1)}
                     </button>
                   ))}
                 </div>
@@ -408,9 +412,6 @@ export default function Step2Rankings() {
                         </div>
                         <span style={{ fontSize: '0.72rem' }}>{AREA_EMOJI[a.area]}</span>
                         <span style={{ flex: 1, fontSize: '0.82rem', fontWeight: isSel ? 600 : 400, color: isSel ? '#1a1a1a' : '#555' }}>{a.label}</span>
-                        <span style={{ fontSize: '0.68rem', color: '#aaa', background: '#f5f5f0', padding: '0.15rem 0.5rem', borderRadius: '3px', flexShrink: 0 }}>
-                          {a.type}
-                        </span>
                       </button>
                     )
                   })}
@@ -442,7 +443,7 @@ export default function Step2Rankings() {
                 onClick={handleRevealStep3}
                 style={{ width: '100%', padding: '1rem', background: '#1a3f1a', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer' }}
               >
-                Revelar acciones a todos los equipos →
+                Revelar huella a todos los equipos →
               </button>
             </div>
           )}
@@ -474,16 +475,21 @@ export default function Step2Rankings() {
                 </div>
               ))}
             </div>
-            {/* Top actions */}
+            {/* Top actions — sorted by frequency then co2Reduction */}
             <div>
               <div style={{ fontWeight: 700, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', marginBottom: '1rem' }}>Acciones más elegidas</div>
-              {(step3Data.actionStats || []).slice(0, 8).map(a => (
-                <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.65rem 0.9rem', marginBottom: '0.4rem', background: '#fff', borderRadius: '6px', border: '1px solid #e0e0d8' }}>
-                  <span>{AREA_EMOJI[a.area]}</span>
-                  <span style={{ flex: 1, fontSize: '0.8rem', fontWeight: 600 }}>{a.label}</span>
-                  <span style={{ fontSize: '0.72rem', background: '#f5f5f0', padding: '0.15rem 0.5rem', borderRadius: '3px', color: '#888' }}>{a.count} equipo{a.count !== 1 ? 's' : ''}</span>
-                </div>
-              ))}
+              {[...(step3Data.actionStats || [])]
+                .sort((a, b) => (b.count - a.count) || (b.co2Reduction - a.co2Reduction))
+                .slice(0, 8)
+                .map((a, i) => (
+                  <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.65rem 0.9rem', marginBottom: '0.4rem', background: '#fff', borderRadius: '6px', border: '1px solid #e0e0d8' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#ccc', minWidth: 16 }}>{i + 1}</span>
+                    <span>{AREA_EMOJI[a.area]}</span>
+                    <span style={{ flex: 1, fontSize: '0.8rem', fontWeight: 600 }}>{a.label}</span>
+                    <span style={{ fontSize: '0.72rem', color: '#2d5a27', fontWeight: 600 }}>−{(a.co2Reduction / 1000).toFixed(2)} t</span>
+                    <span style={{ fontSize: '0.72rem', background: '#f5f5f0', padding: '0.15rem 0.5rem', borderRadius: '3px', color: '#888' }}>{a.count}/{sessionGroups.length}</span>
+                  </div>
+                ))}
             </div>
           </div>
         </>

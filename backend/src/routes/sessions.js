@@ -236,6 +236,23 @@ export default function sessionsRouter(io) {
     }
   })
 
+  // Reveal actions to all team screens (alias for step3 reveal)
+  router.patch('/:code/reveal-actions', async (req, res) => {
+    try {
+      const { code } = req.params
+      await Session.findOneAndUpdate(
+        { code, facilitatorId: req.user.id },
+        { step3Revealed: true }
+      )
+      const allTA = await TeamActions.find({ sessionCode: code })
+      io.to(code).emit('step3:revealed', { allActions: allTA.map(ta => ta.toObject()) })
+      io.to(code).emit('actions:revealed')
+      res.json({ ok: true })
+    } catch {
+      res.status(500).json({ error: 'Error al revelar acciones' })
+    }
+  })
+
   // Activate a draft session so participants can join
   router.patch('/:code/activate', async (req, res) => {
     try {
