@@ -120,7 +120,6 @@ export default function JoinSession() {
   const codeFromUrl = searchParams.get('code')
 
   const [code,        setCode]        = useState('')
-  const [name,        setName]        = useState('')
   const [age,         setAge]         = useState('')
   const [gender,      setGender]      = useState('')
   const [group,       setGroup]       = useState('')
@@ -189,12 +188,11 @@ export default function JoinSession() {
     }
     if (!valid) return
 
-    const resolvedName = name.trim() || 'Anónimo'
     localStorage.setItem(`co2sprint_participant_${code}`, JSON.stringify({
-      code, name: resolvedName, group, age, gender,
+      code, name: 'Anónimo', group, age, gender,
       joinedAt: new Date().toISOString(),
     }))
-    joinSession(code, resolvedName, group, age, gender)
+    joinSession(code, 'Anónimo', group, age, gender)
     navigate(`/session/${code}/calculator`)
   }
 
@@ -224,24 +222,6 @@ export default function JoinSession() {
               maxLength={8}
             />
             {codeError && <div style={s.error}>{codeError}</div>}
-          </div>
-
-          {/* Nombre (opcional) */}
-          <div style={s.field}>
-            <label style={s.label} htmlFor="name">
-              Tu nombre o alias{' '}
-              <span style={{ color: '#bbb', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(opcional)</span>
-            </label>
-            <input
-              id="name"
-              style={s.input}
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="ej. María, M.García, Participante 7..."
-              maxLength={40}
-            />
-            <div style={s.hint}>Solo visible en el ranking en vivo. No se guarda en ninguna base de datos.</div>
           </div>
 
           {/* Grupo */}

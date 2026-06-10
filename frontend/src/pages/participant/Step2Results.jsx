@@ -159,48 +159,32 @@ export default function Step2Results() {
     }))
   }
 
-  // If navigated directly with results (late participant after reveal), show immediately
-  const [revealed,       setRevealed]       = useState(
-    saved?.revealed || location.state?.carbonTons != null || false
-  )
   const [step3Started,   setStep3Started]   = useState(false)
   const [sessionResults, setSessionResults] = useState(null)
   const [emailInput,     setEmailInput]     = useState('')
   const [emailStatus,    setEmailStatus]    = useState('idle')
 
   useEffect(() => {
-    api.get(`/api/sessions/${code}/info`)
-      .then(res => {
-        if (res.data.resultsRevealed) setRevealed(true)
-        if (res.data.currentStep >= 3) setStep3Started(true)
-      })
-      .catch(() => {})
-
-    function onResultsRevealed() {
-      setRevealed(true)
-      const existing = savedRaw ? JSON.parse(savedRaw) : { carbonTons, areas, answers: answers || {} }
-      localStorage.setItem(RESULTS_KEY, JSON.stringify({ ...existing, revealed: true }))
-    }
-    function onStepChange({ step }) { if (step >= 3) setStep3Started(true) }
-    function onSessionClosed() { navigate(`/session/${code}/end`, { replace: true }) }
-
-    socket.on('results:revealed', onResultsRevealed)
-    socket.on('step:change', onStepChange)
-    socket.on('session:closed', onSessionClosed)
-    return () => {
-      socket.off('results:revealed', onResultsRevealed)
-      socket.off('step:change', onStepChange)
-      socket.off('session:closed', onSessionClosed)
-    }
-  }, [code, navigate])
-
-  useEffect(() => {
-    if (!revealed) return
+    // Load session ranking immediately
     axios
       .get(`${import.meta.env.VITE_BACKEND_URL}/api/results/${code}/ranking`)
       .then(res => setSessionResults(res.data))
       .catch(() => setSessionResults([]))
-  }, [code, revealed])
+
+    api.get(`/api/sessions/${code}/info`)
+      .then(res => { if (res.data.currentStep >= 3) setStep3Started(true) })
+      .catch(() => {})
+
+    function onStepChange({ step }) { if (step >= 3) setStep3Started(true) }
+    function onSessionClosed() { navigate(`/session/${code}/end`, { replace: true }) }
+
+    socket.on('step:change', onStepChange)
+    socket.on('session:closed', onSessionClosed)
+    return () => {
+      socket.off('step:change', onStepChange)
+      socket.off('session:closed', onSessionClosed)
+    }
+  }, [code, navigate])
 
   // ── derived ───────────────────────────────────────────────────
   const category = getCategory(carbonTons)
@@ -247,37 +231,6 @@ export default function Step2Results() {
   }
 
   // ── render ────────────────────────────────────────────────────
-  if (!revealed) return (
-    <div style={{
-      minHeight: 'calc(100vh - 52px)', background: '#f5f5f0',
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      padding: '2rem', textAlign: 'center',
-    }}>
-      <div style={{ fontSize: '3rem', marginBottom: '1.25rem', lineHeight: 1 }}>⏳</div>
-      <h1 style={{ fontWeight: 900, fontSize: '1.35rem', textTransform: 'uppercase', marginBottom: '0.75rem', color: '#1a1a1a' }}>
-        Espera al facilitador
-      </h1>
-      <p style={{ fontSize: '0.85rem', color: '#888', maxWidth: 300, lineHeight: 1.65, margin: '0 0 2rem' }}>
-        El facilitador revelará los resultados de todos al mismo tiempo...
-      </p>
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-        {[0, 1, 2].map(i => (
-          <div key={i} style={{
-            width: 8, height: 8, borderRadius: '50%', background: '#c8e6c0',
-            animation: `resdot 1.2s ease-in-out ${i * 0.2}s infinite`,
-          }} />
-        ))}
-        <style>{`
-          @keyframes resdot {
-            0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-            40%            { opacity: 1;   transform: scale(1); }
-          }
-        `}</style>
-      </div>
-    </div>
-  )
-
   return (
     <div style={{ background: '#f5f5f0', minHeight: 'calc(100vh - 52px)', animation: 'resReveal 0.4s ease both' }}>
       <style>{`

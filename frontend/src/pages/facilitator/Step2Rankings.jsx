@@ -86,15 +86,16 @@ export default function Step2Rankings() {
           .sort((a, b) => a.tons - b.tons)
         setRanking(sorted)
         setGroups(computeGroups(sorted))
+        setShowRanking(true) // auto-show results as they arrive
       }
     })
 
     socket.on('participant:joined', data => setTotalJoined(data.total ?? data.count ?? 0))
 
     socket.on('results:revealed', () => {
-      setRevealed(true)
       setShowRanking(true)
     })
+
 
     socket.on('team:confirmed', ({ group }) => {
       setTeamConfirmations(prev => ({ ...prev, [group]: { ...prev[group], confirmed: true } }))
@@ -612,18 +613,17 @@ export default function Step2Rankings() {
 
       <div style={{ width: '100%', borderTop: '1px solid #e0e0d8' }} />
 
-      <div style={{ background: '#f5f5f0', padding: '0.85rem 1.25rem', textAlign: 'center', width: '100%', borderRadius: '8px' }}>
-        <div style={{ fontWeight: 900, fontSize: '2.2rem', lineHeight: 1, color: '#1a1a1a' }}>{total === 0 ? '0/0' : `${completed}/${total}`}</div>
-        <div style={{ fontSize: '0.68rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '0.3rem' }}>Completados</div>
-      </div>
-      <div style={{ width: '100%', height: 5, background: '#e0e0d8', borderRadius: 3, overflow: 'hidden' }}>
-        <div style={{ height: '100%', width: `${progressPct}%`, background: completed > 0 && completed >= total ? '#2d5a27' : '#7db87a', borderRadius: 3, transition: 'width 0.5s ease' }} />
+      <div style={{ textAlign: 'center', padding: '0.25rem 0' }}>
+        <div style={{ fontSize: 32, fontWeight: 900, color: '#2d5a27', lineHeight: 1 }}>{completed}</div>
+        <div style={{ fontSize: 10, color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>
+          huellas recibidas
+        </div>
       </div>
 
       <div style={{ width: '100%', borderTop: '1px solid #e0e0d8' }} />
 
-      {/* Step toggle — shown once results are revealed */}
-      {revealed && (
+      {/* Step toggle — always visible */}
+      {(
         <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
           <button
             onClick={() => setActiveStep(2)}
@@ -653,22 +653,13 @@ export default function Step2Rankings() {
       {/* Step 2 sidebar controls */}
       {activeStep === 2 && (
         <>
-          <button
-            disabled
+          <button disabled
             style={{ width: '100%', background: '#eaf3de', color: '#2d5a27', border: '1px solid #c8e6c0', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: 'default' }}
           >
             ✓ Calculadora activa
           </button>
 
-          <button
-            onClick={revealed ? undefined : handleReveal}
-            disabled={revealed}
-            style={{ width: '100%', background: revealed ? '#eaf3de' : '#2d5a27', color: revealed ? '#2d5a27' : '#fff', border: revealed ? '1px solid #c8e6c0' : 'none', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: revealed ? 'default' : 'pointer' }}
-          >
-            {revealed ? '✓ Resultados revelados' : `Revelar resultados (${completed})`}
-          </button>
-
-          {revealed && !step3Started && (
+          {completed > 0 && !step3Started && (
             <button
               onClick={() => { setActiveStep(3); handleStartStep3() }}
               style={{ width: '100%', background: '#1a3f1a', color: '#fff', border: 'none', padding: '0.85rem', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '4px', cursor: 'pointer' }}
