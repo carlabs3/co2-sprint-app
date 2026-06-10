@@ -4,8 +4,8 @@ import { useSession } from '../context/SessionContext.jsx'
 
 function formatCode(val) {
   const clean = val.toUpperCase().replace(/[^A-Z0-9]/g, '')
-  if (clean.length <= 3) return clean
-  return clean.slice(0, 3) + '-' + clean.slice(3, 7)
+  if (clean.length <= 4) return clean
+  return clean.slice(0, 4) + '-' + clean.slice(4, 8)
 }
 
 export default function Home() {
@@ -36,8 +36,8 @@ export default function Home() {
       setError('Introduce el código de sesión')
       return
     }
-    if (formatted.length < 7) {
-      setError('El código debe tener el formato ECO-0000')
+    if (formatted.length < 9) {
+      setError('El código debe tener el formato DROP-0000')
       return
     }
     navigate(`/join?code=${formatted}`)
@@ -119,10 +119,10 @@ export default function Home() {
                   <input
                     className="join-input"
                     type="text"
-                    placeholder="ECO-0000"
+                    placeholder="DROP-0000"
                     value={code}
                     onChange={handleCodeChange}
-                    maxLength={8}
+                    maxLength={9}
                     autoCapitalize="characters"
                     autoCorrect="off"
                     spellCheck={false}

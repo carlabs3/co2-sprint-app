@@ -142,7 +142,7 @@ export default function JoinSession() {
 
   useEffect(() => {
     const clean = code.replace('-', '')
-    if (clean.length < 7) { setGroups([]); setCodeError(''); return }
+    if (clean.length < 8) { setGroups([]); setCodeError(''); return }
     api.get(`/api/sessions/${code}/info`)
       .then(res => {
         const { status, groups: g } = res.data
@@ -162,16 +162,16 @@ export default function JoinSession() {
 
   function formatCode(val) {
     const clean = val.toUpperCase().replace(/[^A-Z0-9]/g, '')
-    if (clean.length <= 3) return clean
-    return clean.slice(0, 3) + '-' + clean.slice(3, 7)
+    if (clean.length <= 4) return clean
+    return clean.slice(0, 4) + '-' + clean.slice(4, 8)
   }
 
   function handleSubmit(e) {
     e.preventDefault()
     let valid = true
 
-    if (!code || code.length < 7) {
-      setCodeError('Ingresa un código válido (ej: ECO-4872)')
+    if (!code || code.length < 9) {
+      setCodeError('Ingresa un código válido (ej: DROP-4872)')
       valid = false
     }
     if (!age) {
@@ -218,8 +218,8 @@ export default function JoinSession() {
               type="text"
               value={code}
               onChange={e => { setCode(formatCode(e.target.value)); setCodeError('') }}
-              placeholder="ECO-4872"
-              maxLength={8}
+              placeholder="DROP-4872"
+              maxLength={9}
             />
             {codeError && <div style={s.error}>{codeError}</div>}
           </div>
