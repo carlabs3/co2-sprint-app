@@ -155,21 +155,23 @@ export function registerSocketHandlers(io) {
         if (participant?._id) {
           const existing = await FootprintResult.findOne({ sessionCode, participantId: participant._id })
           if (existing) {
-            await FootprintResult.findByIdAndUpdate(existing._id, {
-              carbonTons, areas: mappedAreas, answers: answers || {}, category,
-            })
-          } else {
-            await FootprintResult.create({
-              sessionCode, participantId: participant._id, group,
-              carbonTons, areas: mappedAreas, category, answers: answers || {},
-            })
+            // Already saved — confirm to client without updating (prevents duplicates)
+            socket.emit('footprint:saved')
+            return
           }
+          await FootprintResult.create({
+            sessionCode, participantId: participant._id, group,
+            carbonTons, areas: mappedAreas, category, answers: answers || {},
+          })
         } else {
           await FootprintResult.create({
             sessionCode, participantId: null, group,
             carbonTons, areas: mappedAreas, category, answers: answers || {},
           })
         }
+
+        // Confirm to the participant that their result was saved
+        socket.emit('footprint:saved')
 
         const results = await FootprintResult.find({ sessionCode }).sort({ carbonTons: 1 })
 

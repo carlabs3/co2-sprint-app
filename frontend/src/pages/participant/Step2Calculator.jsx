@@ -219,6 +219,7 @@ export default function Step2Calculator() {
   const [isMobile, setIsMobile]           = useState(() => window.innerWidth <= 768)
   const submittedResultRef                = useRef(null)
   const STORAGE_KEY                       = `co2sprint_progress_${code}`
+  const PARTICIPANT_KEY                   = `co2sprint_participant_${code}`
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth <= 768)
@@ -226,12 +227,16 @@ export default function Step2Calculator() {
     return () => window.removeEventListener('resize', handler)
   }, [])
 
-  // Restore progress on mount
+  // Restore progress on mount — if submitted flag found, show waiting screen directly
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (!saved) return
     try {
-      const { answers: a, areaIndex: ai, questionIndex: qi } = JSON.parse(saved)
+      const { answers: a, areaIndex: ai, questionIndex: qi, submitted: sub } = JSON.parse(saved)
+      if (sub) {
+        setSubmitted(true) // already submitted — skip back to waiting screen
+        return
+      }
       setAnswers(a || {})
       setAreaIndex(ai || 0)
       setQuestionIndex(qi || 0)
@@ -240,18 +245,28 @@ export default function Step2Calculator() {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Save progress on every change
+  // Save progress on every change (never remove here — server confirms via footprint:saved)
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers, areaIndex, questionIndex }))
   }, [answers, areaIndex, questionIndex]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    socket.on('results:revealed', () => {
+    function onResultsRevealed() {
       const result = submittedResultRef.current
       if (result) navigate(`/session/${code}/results`, { state: result })
-    })
-    return () => socket.off('results:revealed')
-  }, [code, navigate])
+    }
+    // Clear localStorage only when server confirms the result was saved
+    function onFootprintSaved() {
+      localStorage.removeItem(STORAGE_KEY)
+      localStorage.removeItem(PARTICIPANT_KEY)
+    }
+    socket.on('results:revealed', onResultsRevealed)
+    socket.on('footprint:saved', onFootprintSaved)
+    return () => {
+      socket.off('results:revealed', onResultsRevealed)
+      socket.off('footprint:saved', onFootprintSaved)
+    }
+  }, [code, navigate]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function isSkipped(q) {
     return q.id === 'electricCar' && answers.car === '1e'
@@ -311,7 +326,9 @@ export default function Step2Calculator() {
       const calcResult = calculator(currentAnswers)
       const state = { ...calcResult, answers: currentAnswers }
       submittedResultRef.current = state
-      localStorage.removeItem(STORAGE_KEY)
+      // Mark as submitted in localStorage so a refresh shows the waiting screen
+      // (localStorage is cleared only when server emits footprint:saved)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers: currentAnswers, areaIndex, questionIndex, submitted: true }))
       socket.emit('footprint:submit', {
         sessionCode: code,
         group: participantGroup,
