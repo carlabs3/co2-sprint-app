@@ -89,94 +89,112 @@ function NightsInput({ question, answers, onChange }) {
   )
 }
 
-function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
-  const useGrid = compact && question.options.length >= 4
+// Shared card style for mobile (compact) option buttons
+function cardStyle(isSel, area, extra = {}) {
+  return {
+    border: `1.5px solid ${isSel ? area.color : '#e0e0d8'}`,
+    borderRadius: 12,
+    background: isSel ? area.bg : '#fafafa',
+    padding: '10px 8px',
+    fontSize: 12,
+    fontWeight: isSel ? 600 : 400,
+    color: isSel ? area.color : '#333',
+    lineHeight: 1.3,
+    textAlign: 'center',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...extra,
+  }
+}
 
+function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
   if (question.type === 'multi') {
     const selected = Array.isArray(answers[question.id]) ? answers[question.id] : []
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <div style={{ display: useGrid ? 'grid' : 'flex', gridTemplateColumns: useGrid ? '1fr 1fr' : undefined, flexDirection: useGrid ? undefined : 'column', gap: compact ? 5 : 9 }}>
-          {question.options.map(opt => {
-            const isSel = selected.includes(opt.value)
-            return (
-              <button
-                key={opt.value}
-                onClick={() => onToggle(question.id, opt.value)}
-                style={{
-                  position: 'relative',
-                  display: 'flex', alignItems: useGrid ? 'flex-start' : 'center', gap: useGrid ? 0 : 12,
-                  padding: useGrid ? '12px 10px 12px 10px' : compact ? '8px 12px' : '12px 16px',
-                  minHeight: useGrid ? 56 : undefined,
-                  borderRadius: useGrid ? 12 : 10, width: '100%', textAlign: 'left',
-                  border: `1.5px solid ${isSel ? area.color : '#e0e0e0'}`,
-                  background: isSel ? area.bg : '#fafafa', cursor: 'pointer',
-                  transition: 'border-color 0.15s, background 0.15s',
-                }}
-              >
-                {!useGrid && (
-                  <div style={{
-                    width: compact ? 16 : 18, height: compact ? 16 : 18, borderRadius: 4, flexShrink: 0,
-                    border: `2px solid ${isSel ? area.color : '#ccc'}`,
-                    background: isSel ? area.color : 'transparent',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {isSel && <span style={{ color: '#fff', fontSize: 11, fontWeight: 900, lineHeight: 1 }}>✓</span>}
-                  </div>
-                )}
-                {useGrid && isSel && (
-                  <div style={{ position: 'absolute', top: 6, right: 6, width: 14, height: 14, borderRadius: 3, background: area.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ color: '#fff', fontSize: 9, fontWeight: 900, lineHeight: 1 }}>✓</span>
-                  </div>
-                )}
-                <span style={{ fontSize: compact ? 12 : 13, fontWeight: isSel ? 600 : 400, color: isSel ? '#1a1a1a' : '#555', lineHeight: 1.3 }}>
+
+    if (compact) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {question.options.map(opt => {
+              const isSel = selected.includes(opt.value)
+              const isNone = opt.value === question.noneValue
+              return (
+                <button key={opt.value} onClick={() => onToggle(question.id, opt.value)}
+                  style={cardStyle(isSel, area, { gridColumn: isNone ? 'span 2' : 'span 1' })}
+                >
                   {opt.label}
-                </span>
-              </button>
-            )
-          })}
+                </button>
+              )
+            })}
+          </div>
+          <p style={{ fontSize: 11, color: '#bbb', margin: '2px 0 0', fontStyle: 'italic', fontWeight: 400 }}>
+            {selected.length === 0 ? 'Si no aplica ninguna, continúa sin marcar.' : `${selected.length} seleccionado${selected.length !== 1 ? 's' : ''}`}
+          </p>
         </div>
-        <p style={{ fontSize: 11, color: '#bbb', margin: '2px 0 0', fontStyle: 'italic' }}>
+      )
+    }
+
+    // Desktop multi — list with checkboxes
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+        {question.options.map(opt => {
+          const isSel = selected.includes(opt.value)
+          return (
+            <button key={opt.value} onClick={() => onToggle(question.id, opt.value)}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 10, width: '100%', textAlign: 'left', border: `1.5px solid ${isSel ? area.color : '#e0e0e0'}`, background: isSel ? area.bg : '#fafafa', cursor: 'pointer', transition: 'border-color 0.15s, background 0.15s' }}
+            >
+              <div style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, border: `2px solid ${isSel ? area.color : '#ccc'}`, background: isSel ? area.color : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {isSel && <span style={{ color: '#fff', fontSize: 11, fontWeight: 900, lineHeight: 1 }}>✓</span>}
+              </div>
+              <span style={{ fontSize: 13, fontWeight: isSel ? 600 : 400, color: isSel ? '#1a1a1a' : '#555', lineHeight: 1.4 }}>{opt.label}</span>
+            </button>
+          )
+        })}
+        <p style={{ fontSize: 11, color: '#bbb', margin: '2px 0 0', fontStyle: 'italic', fontWeight: 400 }}>
           {selected.length === 0 ? 'Si no aplica ninguna, continúa sin marcar.' : `${selected.length} seleccionado${selected.length !== 1 ? 's' : ''}`}
         </p>
       </div>
     )
   }
 
+  // Single
   const currentAnswer = answers[question.id]
-  // Desktop: 2 cols for 4+ options; mobile: 2 cols (grid) for 4+ options without radio indicator
-  const cols = useGrid ? 2 : (!compact && question.options.length >= 4 ? 2 : 1)
+
+  if (compact) {
+    // Mobile: always 2-column grid, no radio indicator
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        {question.options.map(opt => {
+          const isSel = currentAnswer === opt.value
+          const isNone = opt.value === question.noneValue
+          return (
+            <button key={opt.value} onClick={() => onSelect(question.id, opt.value)}
+              style={cardStyle(isSel, area, { gridColumn: isNone ? 'span 2' : 'span 1' })}
+            >
+              {opt.label}
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // Desktop single — list with radio
+  const cols = question.options.length >= 4 ? 2 : 1
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: compact ? 5 : 9 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 9 }}>
       {question.options.map(opt => {
         const isSel = currentAnswer === opt.value
         return (
-          <button
-            key={opt.value}
-            onClick={() => onSelect(question.id, opt.value)}
-            style={{
-              display: 'flex', alignItems: useGrid ? 'center' : 'center', justifyContent: useGrid ? 'center' : undefined, gap: useGrid ? 0 : 12,
-              padding: useGrid ? '14px 10px' : compact ? '8px 12px' : '12px 16px',
-              minHeight: useGrid ? 56 : undefined,
-              borderRadius: useGrid ? 12 : 10, width: '100%', textAlign: useGrid ? 'center' : 'left',
-              border: `1.5px solid ${isSel ? area.color : '#e0e0e0'}`,
-              background: isSel ? area.bg : '#fafafa', cursor: 'pointer',
-              transition: 'border-color 0.15s, background 0.15s',
-            }}
+          <button key={opt.value} onClick={() => onSelect(question.id, opt.value)}
+            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 10, width: '100%', textAlign: 'left', border: `1.5px solid ${isSel ? area.color : '#e0e0e0'}`, background: isSel ? area.bg : '#fafafa', cursor: 'pointer', transition: 'border-color 0.15s, background 0.15s' }}
           >
-            {!useGrid && (
-              <div style={{
-                width: compact ? 16 : 18, height: compact ? 16 : 18, borderRadius: '50%', flexShrink: 0,
-                border: `2px solid ${isSel ? area.color : '#ccc'}`,
-                background: isSel ? area.color : 'transparent',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {isSel && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />}
-              </div>
-            )}
-            <span style={{ fontSize: compact ? 12 : 13, fontWeight: isSel ? 700 : 400, color: isSel ? area.color : '#555', lineHeight: 1.3 }}>
-              {opt.label}
-            </span>
+            <div style={{ width: 18, height: 18, borderRadius: '50%', flexShrink: 0, border: `2px solid ${isSel ? area.color : '#ccc'}`, background: isSel ? area.color : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {isSel && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />}
+            </div>
+            <span style={{ fontSize: 13, fontWeight: isSel ? 600 : 400, color: isSel ? '#1a1a1a' : '#555', lineHeight: 1.4 }}>{opt.label}</span>
           </button>
         )
       })}
@@ -356,7 +374,7 @@ export default function Step2Calculator() {
     )
   }
 
-  const nextLabel = isLast ? 'Ver resultados →' : 'Siguiente →'
+  const nextIcon = isLast ? '✓' : '→'
 
   // ── submitted waiting screen ─────────────────────────────────────────────────
   if (submitted) return (
@@ -432,33 +450,31 @@ export default function Step2Calculator() {
         </div>
 
         {/* Main */}
-        <div style={{ background: '#f8f8f6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          {/* Header card */}
-          <div style={{ margin: '24px 24px 0', borderRadius: 16, padding: '20px 24px', background: area.bg, flexShrink: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ width: 48, height: 48, borderRadius: 14, background: area.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
-                {area.emoji}
-              </div>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: area.color }}>{area.label}</div>
-                <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>Pregunta {questionIndex + 1} de {area.questions.filter(q => !isSkipped(q)).length}</div>
-              </div>
+        <div style={{ background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {/* Progress */}
+          <div style={{ padding: '20px 28px 0', flexShrink: 0 }}>
+            <p style={{ fontSize: 11, color: '#aaa', marginBottom: 6, fontWeight: 400 }}>
+              Pregunta {questionIndex + 1} de {area.questions.filter(q => !isSkipped(q)).length}
+            </p>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {area.questions.filter(q => !isSkipped(q)).map((q, qi) => (
+                <div key={qi} style={{ flex: 1, height: 3, borderRadius: 2, background: qi <= questionIndex ? area.color : '#e0e0d8' }} />
+              ))}
             </div>
-            {renderProgressDots(areaIndex, questionIndex)}
           </div>
 
           {/* Question */}
-          <div style={{ padding: '24px 28px 12px', flexShrink: 0 }}>
-            <p style={{ fontSize: 17, fontWeight: 500, maxWidth: 560, lineHeight: 1.55, color: '#1a1a1a', margin: 0 }}>
+          <div style={{ padding: '20px 28px 12px', flexShrink: 0 }}>
+            <p style={{ fontSize: 20, fontWeight: 700, maxWidth: 560, lineHeight: 1.3, color: '#1a1a1a', margin: 0 }}>
               {question.text}
             </p>
-            {question.id === 'heating' && (
-              <p style={{ fontSize: 13, color: area.color, margin: '4px 0 0', fontWeight: 500 }}>
-                {`Para tu ${homeTypeLabels[answers.homeType] || 'vivienda'}, ¿qué sistema de calefacción tienes?`}
+            {question.id === 'heating' && answers.homeType && (
+              <p style={{ fontSize: 13, color: area.color, margin: '4px 0 0', fontWeight: 400 }}>
+                Para tu {homeTypeLabels[answers.homeType]}
               </p>
             )}
             {question.info && (
-              <p style={{ fontSize: 12, color: '#aaa', margin: '6px 0 0', fontStyle: 'italic' }}>{question.info}</p>
+              <p style={{ fontSize: 12, color: '#aaa', margin: '6px 0 0', fontStyle: 'italic', fontWeight: 400 }}>{question.info}</p>
             )}
           </div>
 
@@ -477,34 +493,14 @@ export default function Step2Calculator() {
           </div>
 
           {/* Footer */}
-          <div style={{ padding: '16px 28px', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, borderTop: '1px solid #eee', background: '#f8f8f6' }}>
-            <button
-              onClick={handlePrev}
-              disabled={isFirst}
-              style={{
-                padding: '10px 20px', borderRadius: 10, fontSize: 13, fontWeight: 600,
-                letterSpacing: '0.05em', background: 'transparent',
-                border: `1.5px solid ${isFirst ? '#eee' : '#ddd'}`,
-                color: isFirst ? '#ccc' : '#555',
-              }}
-            >
-              ← Anterior
-            </button>
-            <span style={{ flex: 1, textAlign: 'center', fontSize: 12, color: '#999', fontWeight: 500 }}>
-              Pregunta {questionIndex + 1} de {area.questions.filter(q => !isSkipped(q)).length}
-            </span>
-            <button
-              onClick={handleNext}
-              disabled={!canNext}
-              style={{
-                padding: '10px 20px', borderRadius: 10, fontSize: 13, fontWeight: 600,
-                letterSpacing: '0.05em', border: 'none',
-                background: canNext ? area.color : '#eee',
-                color: canNext ? '#fff' : '#bbb',
-              }}
-            >
-              {nextLabel}
-            </button>
+          <div style={{ padding: '16px 28px', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, borderTop: '1px solid #f0f0f0', background: '#fff' }}>
+            <button onClick={handlePrev} disabled={isFirst}
+              style={{ width: 48, height: 48, borderRadius: 12, fontSize: 18, background: 'transparent', border: `1.5px solid ${isFirst ? '#eee' : '#ddd'}`, color: isFirst ? '#ccc' : '#555', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isFirst ? 'default' : 'pointer' }}
+            >←</button>
+            <div style={{ flex: 1 }} />
+            <button onClick={handleNext} disabled={!canNext}
+              style={{ width: 48, height: 48, borderRadius: 12, border: 'none', fontSize: 18, background: canNext ? area.color : '#eee', color: canNext ? '#fff' : '#bbb', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: canNext ? 'pointer' : 'default' }}
+            >{nextIcon}</button>
           </div>
         </div>
       </div>
@@ -515,60 +511,55 @@ export default function Step2Calculator() {
   return (
     <div>
       <SessionClosedBanner onViewPartial={handleViewPartial} />
-      <div style={{ height: 'calc(100dvh - 52px)', background: '#ffffff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ height: 'calc(100dvh - 52px)', background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-        {/* Gradient header — altura fija */}
-        <div style={{ background: `linear-gradient(180deg, ${area.bg} 0%, #ffffff 100%)`, paddingTop: 12, flexShrink: 0 }}>
+        {/* Area tabs — emoji only, border-bottom indicator */}
+        <div style={{ display: 'flex', padding: '8px 16px 0', borderBottom: '1px solid #f0f0f0', flexShrink: 0 }}>
+          {AREAS.map((a, ai) => {
+            const status = getAreaStatus(ai)
+            return (
+              <div key={a.id} onClick={() => handleAreaClick(ai)}
+                style={{
+                  flex: 1, display: 'flex', justifyContent: 'center',
+                  paddingBottom: 8,
+                  borderBottom: `3px solid ${status === 'active' ? a.color : status === 'done' ? '#2d5a27' : 'transparent'}`,
+                  opacity: status === 'inactive' ? 0.25 : 1,
+                  cursor: status !== 'inactive' ? 'pointer' : 'default',
+                  fontSize: 22,
+                }}
+              >
+                {a.emoji}
+              </div>
+            )
+          })}
+        </div>
 
-          {/* Pills */}
-          <div style={{ display: 'flex', gap: 6, padding: '0 16px 10px', overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none', flexShrink: 0 }}>
-            {AREAS.map((a, ai) => {
-              const status = getAreaStatus(ai)
-              return (
-                <button
-                  key={a.id}
-                  onClick={() => handleAreaClick(ai)}
-                  style={{
-                    flexShrink: 0, padding: '4px 10px', borderRadius: 20,
-                    fontSize: 11, fontWeight: 600, border: 'none',
-                    outline: status === 'done' ? '1px solid #c8e6c0' : 'none',
-                    background: status === 'active' ? a.color : status === 'done' ? '#f0f7ee' : '#f0f0f0',
-                    color: status === 'active' ? '#fff' : status === 'done' ? '#2d5a27' : '#bbb',
-                    whiteSpace: 'nowrap',
-                    cursor: status !== 'inactive' ? 'pointer' : 'default',
-                  }}
-                >
-                  {status === 'done' ? `✓ ${a.emoji} ${a.label}` : `${a.emoji} ${a.label}`}
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Area row */}
-          <div style={{ padding: '2px 16px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 38, height: 38, borderRadius: 12, background: area.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
-              {area.emoji}
-            </div>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: area.color }}>{area.label}</div>
-              <div style={{ fontSize: 11, color: '#888', marginTop: 1 }}>Pregunta {questionIndex + 1} de {area.questions.filter(q => !isSkipped(q)).length}</div>
-              {renderProgressDots(areaIndex, questionIndex)}
-            </div>
+        {/* Progress — "Pregunta X de Y" + colored bar */}
+        <div style={{ padding: '10px 16px 0', flexShrink: 0 }}>
+          <p style={{ fontSize: 11, color: '#aaa', marginBottom: 5, fontWeight: 400 }}>
+            Pregunta {questionIndex + 1} de {area.questions.filter(q => !isSkipped(q)).length}
+          </p>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {area.questions.filter(q => !isSkipped(q)).map((q, qi) => (
+              <div key={qi} style={{ flex: 1, height: 3, borderRadius: 2, background: qi <= questionIndex ? area.color : '#e0e0d8' }} />
+            ))}
           </div>
         </div>
 
-        {/* Question — altura fija */}
-        <div style={{ padding: '10px 16px 6px', flexShrink: 0 }}>
-          <p style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.45, color: '#1a1a1a', margin: 0 }}>
+        {/* Question */}
+        <div style={{ padding: '14px 16px 10px', flexShrink: 0 }}>
+          <p style={{ fontSize: 17, fontWeight: 700, color: '#1a1a1a', lineHeight: 1.3, margin: 0 }}>
             {question.text}
           </p>
-          {question.id === 'heating' && (
-            <p style={{ fontSize: 11, color: area.color, margin: '3px 0 0', fontWeight: 500 }}>
-              {`Para tu ${homeTypeLabels[answers.homeType] || 'vivienda'}, ¿qué sistema de calefacción tienes?`}
+          {question.info && (
+            <p style={{ fontSize: 11, color: '#aaa', margin: '5px 0 0', fontStyle: 'italic', fontWeight: 400 }}>
+              {question.info}
             </p>
           )}
-          {question.info && (
-            <p style={{ fontSize: 10, color: '#aaa', margin: '4px 0 0', fontStyle: 'italic' }}>{question.info}</p>
+          {question.id === 'heating' && answers.homeType && (
+            <p style={{ fontSize: 12, color: area.color, margin: '4px 0 0', fontWeight: 400 }}>
+              Para tu {homeTypeLabels[answers.homeType]}
+            </p>
           )}
         </div>
 
@@ -581,7 +572,7 @@ export default function Step2Calculator() {
           </div>
         )}
 
-        {/* Options — ocupa el espacio restante con scroll interno */}
+        {/* Options — flex 1 con scroll interno si necesario */}
         <div style={{ padding: '0 16px 8px', flex: 1, overflowY: 'auto' }}>
           {question.type === 'nights' ? (
             <div style={{ '--area-color': area.color, '--area-bg': area.bg }}>
@@ -595,32 +586,14 @@ export default function Step2Calculator() {
           )}
         </div>
 
-        {/* Footer — siempre visible */}
-        <div style={{ padding: '10px 16px 12px', display: 'flex', gap: 10, flexShrink: 0, borderTop: '1px solid #f0f0f0', background: '#fff' }}>
-          <button
-            onClick={handlePrev}
-            disabled={isFirst}
-            style={{
-              width: 44, height: 44, borderRadius: 12, flexShrink: 0, fontSize: 16,
-              fontWeight: 600, background: 'transparent',
-              border: `1.5px solid ${isFirst ? '#eee' : '#ddd'}`,
-              color: isFirst ? '#ccc' : '#555',
-            }}
-          >
-            ←
-          </button>
-          <button
-            onClick={handleNext}
-            disabled={!canNext}
-            style={{
-              flex: 1, height: 44, borderRadius: 12, fontSize: 13, fontWeight: 600,
-              letterSpacing: '0.05em', border: 'none',
-              background: canNext ? area.color : '#eee',
-              color: canNext ? '#fff' : '#bbb',
-            }}
-          >
-            {nextLabel}
-          </button>
+        {/* Footer — flechas simples */}
+        <div style={{ padding: '10px 16px 14px', display: 'flex', gap: 8, flexShrink: 0, borderTop: '1px solid #f0f0f0', background: '#fff' }}>
+          <button onClick={handlePrev} disabled={isFirst}
+            style={{ width: 48, height: 48, borderRadius: 12, border: `1.5px solid ${isFirst ? '#eee' : '#ddd'}`, background: 'transparent', color: isFirst ? '#ddd' : '#555', fontSize: 18, cursor: isFirst ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >←</button>
+          <button onClick={handleNext} disabled={!canNext}
+            style={{ flex: 1, height: 48, borderRadius: 12, border: 'none', background: canNext ? area.color : '#eee', color: canNext ? '#fff' : '#bbb', fontSize: 18, cursor: canNext ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >{nextIcon}</button>
         </div>
       </div>
     </div>
