@@ -1,6 +1,6 @@
 export const PUBLIC_SERVICES_KG = 1500
 
-const MAP = {
+export const MAP = {
   // ── TRANSPORTE ──
   car:           { '1a': 184, '1b': 797, '1c': 1839, '1d': 3677, '1e': 0 },
   electricCar:   { 'a': 146, 'b': 775, 'c': 1550, 'd': 3600, 'e': 0 },

@@ -8,6 +8,7 @@ import WaitingForFacilitator from '../../components/WaitingForFacilitator.jsx'
 import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
 import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
+import { MAP, calcAlcohol } from '../../utils/calculator.js'
 
 const SPAIN_AVG = 8.1
 const BAR_MAX_H = 120
@@ -40,6 +41,182 @@ function getCategory(tons) {
   if (tons < 7)  return 'medio'
   if (tons < 10) return 'alto'
   return 'muy alto'
+}
+
+// Areas ordered for the detail section
+const AREAS = [
+  { id: 'transport',   label: 'Transporte',   emoji: '🚗', color: '#4a90d9' },
+  { id: 'energy',      label: 'Hogar',        emoji: '🏠', color: '#e8a020' },
+  { id: 'food',        label: 'Alimentación', emoji: '🥗', color: '#5aab5a' },
+  { id: 'consumption', label: 'Consumo',      emoji: '🛍️', color: '#b07a30' },
+  { id: 'waste',       label: 'Digital',      emoji: '📱', color: '#7a7aaa' },
+]
+
+const SUBCATEGORIES = {
+  transport: [
+    {
+      label: 'Vehículo privado',
+      calc: (answers) => ((MAP.car[answers.car] || 0) + (MAP.electricCar[answers.electricCar] || 0)) / 1000,
+    },
+    {
+      label: 'Vuelos',
+      calc: (answers) => (
+        (answers.flights?.includes('flightShort')  ? 824  : 0) +
+        (answers.flights?.includes('flightMedium') ? 1879 : 0) +
+        (answers.flights?.includes('flightLong')   ? 2627 : 0)
+      ) / 1000,
+    },
+    {
+      label: 'Transporte público y activo',
+      calc: (answers) => (
+        (MAP.train[answers.train]                   || 0) +
+        (MAP.moto[answers.moto]                     || 0) +
+        (MAP.urbanMobility[answers.urbanMobility]   || 0)
+      ) / 1000,
+    },
+  ],
+  energy: [
+    {
+      label: 'Calefacción y agua caliente',
+      calc: (answers) => {
+        const div = MAP.householdSize[answers.householdSize] ?? 2
+        let kg = 0
+        if (answers.homeType === '25a')      kg = MAP.heatingSmall[answers.heating]  ?? 0
+        else if (answers.homeType === '25b') kg = MAP.heatingMedium[answers.heating] ?? 0
+        else if (answers.homeType === '25c') kg = MAP.heatingLarge[answers.heating]  ?? 0
+        return (kg / div) / 1000
+      },
+    },
+    {
+      label: 'Refrigeración',
+      calc: (answers) => {
+        if (answers.hasAC !== 'yes') return 0
+        return (answers.homeType === '25a' ? 350 : answers.homeType === '25b' ? 420 : 438) / 1000
+      },
+    },
+    {
+      label: 'Extras (piscina y vacaciones)',
+      calc: (answers) => {
+        const poolKg = (answers.pool?.includes('privatePool') ? 50 : 0) + (answers.pool?.includes('communityPool') ? 17 : 0)
+        const vacKg  = (answers.hotelNights   || 0) * 8 + (answers.hostelNights  || 0) + (answers.campingNights || 0) + (answers.airbnbNights || 0) * 5 + (answers.secondHome ? 250 : 0)
+        return (poolKg + vacKg) / 1000
+      },
+    },
+    {
+      label: 'Energía renovable',
+      calc: (answers) => (MAP.renewable[answers.renewable] ?? 0) / 1000,
+      negative: true,
+    },
+    {
+      label: 'Hábitos de eficiencia',
+      calc: (answers) => {
+        const habits = ['closeWindows', 'thermostat19', 'ledBulbs', 'ecoPrograms']
+        return habits.filter(h => answers.homeHabits?.includes(h)).reduce((s, h) => s + (MAP.homeHabits[h] || 0), 0) / 1000
+      },
+      negative: true,
+    },
+  ],
+  food: [
+    {
+      label: 'Dieta diaria',
+      calc: (answers) => ((MAP.breakfast[answers.breakfast] || 0) + (MAP.lunch[answers.lunch] || 0) + (MAP.dinner[answers.dinner] || 0)) / 1000,
+    },
+    {
+      label: 'Bebidas',
+      calc: (answers) => {
+        const milkKg  = MAP.milkType[answers.milkType] || 0
+        const hotKg   = (Array.isArray(answers.hotDrinks) ? answers.hotDrinks : [answers.hotDrinks]).reduce((s, v) => s + (MAP.hotDrinks[v] || 0), 0)
+        const waterKg = MAP.bottledWater[answers.bottledWater] || 0
+        return (milkKg + hotKg + waterKg + calcAlcohol(answers.alcohol)) / 1000
+      },
+    },
+    {
+      label: 'Hábitos sostenibles',
+      calc: (answers) => ['localFood', 'composting', 'noFoodWaste'].filter(h => answers.foodHabits?.includes(h)).reduce((s, h) => s + (MAP.foodHabits[h] || 0), 0) / 1000,
+      negative: true,
+    },
+  ],
+  consumption: [
+    {
+      label: 'Moda',
+      calc: (answers) => (MAP.clothes[answers.clothes] || 0) / 1000,
+    },
+    {
+      label: 'Tecnología',
+      calc: (answers) => {
+        const elecKg = (Array.isArray(answers.electronics) ? answers.electronics : []).reduce((s, v) => s + (MAP.electronics[v] || 0), 0)
+        const appKg  = (Array.isArray(answers.appliances)  ? answers.appliances  : []).reduce((s, v) => s + (MAP.appliances[v]  || 0), 0)
+        return (elecKg + appKg) / 1000
+      },
+    },
+    {
+      label: 'Estilo de vida',
+      calc: (answers) => {
+        const petsKg    = ['bigDog','medDog','smallDog','cat'].filter(p => answers.pets?.includes(p)).reduce((s, p) => s + (MAP.pets[p] || 0), 0)
+        return (petsKg + (MAP.hygiene[answers.hygiene] || 0) + (MAP.smoking[answers.smoking] || 0)) / 1000
+      },
+    },
+  ],
+  waste: [
+    {
+      label: 'Uso de pantallas',
+      calc: (answers) => ((MAP.videoCalls[answers.videoCalls] || 0) + (MAP.streaming[answers.streaming] || 0) + (MAP.socialMedia[answers.socialMedia] || 0)) / 1000,
+    },
+    {
+      label: 'Inteligencia artificial',
+      calc: (answers) => (MAP.aiUsage[answers.aiUsage] || 0) / 1000,
+    },
+  ],
+}
+
+function AreaDetailCard({ areaId, areaLabel, areaEmoji, areaColor, areaTons, subcategories, answers, totalTons, maxAreaTons }) {
+  const [expanded, setExpanded] = useState(false)
+
+  const subcatValues = subcategories.map(sub => ({
+    label:    sub.label,
+    tons:     Math.round(sub.calc(answers) * 100) / 100,
+    negative: sub.negative || false,
+  }))
+
+  const maxVal = Math.max(...subcatValues.filter(s => !s.negative).map(s => Math.abs(s.tons)), 0.01)
+
+  return (
+    <div style={{ background: '#fff', border: '1px solid #E8E4DF', borderRadius: 12, overflow: 'hidden', marginBottom: 8 }}>
+      <div onClick={() => setExpanded(e => !e)}
+        style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', gap: 10, cursor: 'pointer' }}>
+        <span style={{ fontSize: 18, width: 22, textAlign: 'center' }}>{areaEmoji}</span>
+        <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{areaLabel}</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: areaColor }}>{areaTons.toFixed(1)}t</span>
+        <span style={{ fontSize: 10, color: '#aaa', marginLeft: 4 }}>
+          {totalTons > 0 ? Math.round((areaTons / totalTons) * 100) : 0}%
+        </span>
+        <span style={{ fontSize: 9, color: '#bbb', marginLeft: 4 }}>{expanded ? '▲' : '▼'}</span>
+      </div>
+      <div style={{ height: 3, margin: '0 12px', background: '#E8E4DF', borderRadius: 2, overflow: 'hidden', marginBottom: expanded ? 0 : 10 }}>
+        <div style={{ height: '100%', width: `${maxAreaTons > 0 ? Math.min((areaTons / maxAreaTons) * 100, 100) : 0}%`, background: areaColor, borderRadius: 2 }} />
+      </div>
+      {expanded && (
+        <div style={{ padding: '4px 12px 10px' }}>
+          {subcatValues.map((sub, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderTop: '0.5px solid #F0EDE8' }}>
+              <span style={{ flex: 1, fontSize: 11, color: '#555' }}>{sub.label}</span>
+              <div style={{ width: 70, height: 4, background: '#F0EDE8', borderRadius: 2, overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%',
+                  width: `${Math.min((Math.abs(sub.tons) / maxVal) * 100, 100)}%`,
+                  background: sub.negative ? '#3b6d11' : areaColor,
+                  borderRadius: 2,
+                }} />
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 600, width: 36, textAlign: 'right', color: sub.negative ? '#3b6d11' : areaColor }}>
+                {sub.tons.toFixed(2)}t
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 const MOCK_RESULT = {
@@ -400,6 +577,39 @@ export default function Step2Results() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* ── detalle por subcategoría ── */}
+        {(() => {
+          const maxAreaTons = Math.max(...AREAS.map(a => areas[a.id] || 0), 0.01)
+          return (
+            <div style={{ marginBottom: '1rem' }}>
+              <p style={{ fontSize: '0.68rem', fontWeight: 600, color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+                Detalle por categoría
+              </p>
+              {AREAS.map(area => (
+                <AreaDetailCard
+                  key={area.id}
+                  areaId={area.id}
+                  areaLabel={area.label}
+                  areaEmoji={area.emoji}
+                  areaColor={area.color}
+                  areaTons={areas[area.id] || 0}
+                  subcategories={SUBCATEGORIES[area.id] || []}
+                  answers={answers}
+                  totalTons={carbonTons}
+                  maxAreaTons={maxAreaTons}
+                />
+              ))}
+              <div style={{ background: '#F0EDE8', borderRadius: 10, padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#555' }}>🏛️ Servicios públicos</div>
+                  <div style={{ fontSize: '0.65rem', color: '#aaa', marginTop: 2 }}>Fijo para todos en España — infraestructuras, sanidad, educación...</div>
+                </div>
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#888' }}>1.5t</span>
               </div>
             </div>
           )
