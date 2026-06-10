@@ -4,6 +4,7 @@ import {
   ReferenceLine, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
 import { AREA_QUESTIONS } from '../utils/answerLabels.js'
+import { MAP, calcAlcohol } from '../utils/calculator.js'
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -135,6 +136,93 @@ export const AREA_LABELS = {
 export const CATEGORY_COLORS = { bajo: '#3b6d11', medio: '#2d5a27', alto: '#b07a30', 'muy alto': '#cc4444' }
 export const CATEGORY_BG     = { bajo: '#eaf3de', medio: '#eaf3de', alto: '#fff0e0', 'muy alto': '#fce8e8' }
 export const CATEGORY_LABELS = { bajo: 'BAJO', medio: 'MEDIO', alto: 'ALTO', 'muy alto': 'MUY ALTO' }
+
+// ── Subcategory definitions ───────────────────────────────────────────────────
+
+const AREA_SUBCATEGORIES = {
+  transport: [
+    { label: 'Vehículo privado',           keys: ['car', 'electricCar'] },
+    { label: 'Vuelos',                      keys: ['flights'] },
+    { label: 'Transporte público y activo', keys: ['train', 'moto', 'urbanMobility'] },
+  ],
+  energy: [
+    { label: 'Calefacción y agua caliente', keys: ['heating'] },
+    { label: 'Refrigeración',               keys: ['hasAC'] },
+    { label: 'Extras (piscina y vacaciones)', keys: ['pool', 'hotelNights', 'hostelNights', 'campingNights', 'airbnbNights', 'secondHome'] },
+    { label: 'Energía renovable',           keys: ['renewable'],   negative: true },
+    { label: 'Hábitos de eficiencia',       keys: ['homeHabits'],  negative: true },
+  ],
+  food: [
+    { label: 'Dieta diaria',                keys: ['breakfast', 'lunch', 'dinner'] },
+    { label: 'Bebidas',                     keys: ['milkType', 'hotDrinks', 'alcohol', 'bottledWater'] },
+    { label: 'Hábitos sostenibles',         keys: ['foodHabits'],  negative: true },
+  ],
+  consumption: [
+    { label: 'Moda',                        keys: ['clothes'] },
+    { label: 'Tecnología',                  keys: ['electronics', 'appliances'] },
+    { label: 'Estilo de vida',              keys: ['pets', 'hygiene', 'smoking'] },
+  ],
+  waste: [
+    { label: 'Uso de pantallas',            keys: ['videoCalls', 'streaming', 'socialMedia'] },
+    { label: 'Inteligencia artificial',     keys: ['aiUsage'] },
+  ],
+}
+
+// Contribution of a single question key in kgCO2
+function getContribution(answers, key) {
+  if (!answers) return 0
+  switch (key) {
+    case 'car':          return MAP.car[answers.car] || 0
+    case 'electricCar':  return MAP.electricCar[answers.electricCar] || 0
+    case 'flights':      return ((answers.flights?.includes('flightShort') ? 824 : 0) + (answers.flights?.includes('flightMedium') ? 1879 : 0) + (answers.flights?.includes('flightLong') ? 2627 : 0))
+    case 'train':        return MAP.train[answers.train] || 0
+    case 'moto':         return MAP.moto[answers.moto] || 0
+    case 'urbanMobility':return MAP.urbanMobility[answers.urbanMobility] || 0
+    case 'heating': {
+      const div = MAP.householdSize[answers.householdSize] ?? 2
+      let kg = 0
+      if (answers.homeType === '25a')      kg = MAP.heatingSmall[answers.heating]  ?? 0
+      else if (answers.homeType === '25b') kg = MAP.heatingMedium[answers.heating] ?? 0
+      else if (answers.homeType === '25c') kg = MAP.heatingLarge[answers.heating]  ?? 0
+      return kg / div
+    }
+    case 'hasAC':        return answers.hasAC === 'yes' ? (answers.homeType === '25a' ? 350 : answers.homeType === '25b' ? 420 : 438) : 0
+    case 'pool':         return (answers.pool?.includes('privatePool') ? 50 : 0) + (answers.pool?.includes('communityPool') ? 17 : 0)
+    case 'hotelNights':  return (answers.hotelNights   || 0) * 8
+    case 'hostelNights': return (answers.hostelNights  || 0) * 1
+    case 'campingNights':return (answers.campingNights || 0) * 1
+    case 'airbnbNights': return (answers.airbnbNights  || 0) * 5
+    case 'secondHome':   return answers.secondHome ? 250 : 0
+    case 'renewable':    return MAP.renewable[answers.renewable] ?? 0
+    case 'homeHabits':   return ['closeWindows', 'thermostat19', 'ledBulbs', 'ecoPrograms'].filter(h => answers.homeHabits?.includes(h)).reduce((s, h) => s + (MAP.homeHabits[h] || 0), 0)
+    case 'breakfast':    return MAP.breakfast[answers.breakfast] || 0
+    case 'lunch':        return MAP.lunch[answers.lunch] || 0
+    case 'dinner':       return MAP.dinner[answers.dinner] || 0
+    case 'milkType':     return MAP.milkType[answers.milkType] || 0
+    case 'hotDrinks':    return (Array.isArray(answers.hotDrinks) ? answers.hotDrinks : [answers.hotDrinks]).reduce((s, v) => s + (MAP.hotDrinks[v] || 0), 0)
+    case 'alcohol':      return calcAlcohol(answers.alcohol)
+    case 'bottledWater': return MAP.bottledWater[answers.bottledWater] || 0
+    case 'foodHabits':   return ['localFood', 'composting', 'noFoodWaste'].filter(h => answers.foodHabits?.includes(h)).reduce((s, h) => s + (MAP.foodHabits[h] || 0), 0)
+    case 'clothes':      return MAP.clothes[answers.clothes] || 0
+    case 'electronics':  return (Array.isArray(answers.electronics) ? answers.electronics : []).reduce((s, v) => s + (MAP.electronics[v] || 0), 0)
+    case 'appliances':   return (Array.isArray(answers.appliances)  ? answers.appliances  : []).reduce((s, v) => s + (MAP.appliances[v]  || 0), 0)
+    case 'pets':         return ['bigDog','medDog','smallDog','cat'].filter(p => answers.pets?.includes(p)).reduce((s, p) => s + (MAP.pets[p] || 0), 0)
+    case 'hygiene':      return MAP.hygiene[answers.hygiene] || 0
+    case 'smoking':      return MAP.smoking[answers.smoking] || 0
+    case 'videoCalls':   return MAP.videoCalls[answers.videoCalls] || 0
+    case 'streaming':    return MAP.streaming[answers.streaming] || 0
+    case 'socialMedia':  return MAP.socialMedia[answers.socialMedia] || 0
+    case 'aiUsage':      return MAP.aiUsage[answers.aiUsage] || 0
+    default:             return 0
+  }
+}
+
+function getSubcatAvg(ranking, keys) {
+  const vals = ranking
+    .filter(r => r.answers && Object.keys(r.answers).length > 0)
+    .map(r => keys.reduce((sum, key) => sum + getContribution(r.answers, key), 0))
+  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0
+}
 
 // ── DistributionView ──────────────────────────────────────────────────────────
 
@@ -273,30 +361,59 @@ export function DistributionView({ ranking }) {
         ))}
       </div>
 
-      {/* Area breakdown */}
+      {/* Area breakdown — Total tab: legend with percentages; Area tabs: subcategory distribution */}
       {areaTotal > 0 && (
         <div style={{ background: '#fff', border: '1px solid #f0f0ee', borderRadius: 12, padding: '1.5rem', marginBottom: '1.25rem' }}>
-          <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '1rem' }}>
-            Media del grupo por áreas
-          </div>
-          <div style={{ display: 'flex', height: 28, borderRadius: 6, overflow: 'hidden', marginBottom: '0.75rem' }}>
-            {Object.entries(AREA_COLORS).map(([key, color]) => {
-              const w = areaAvg[key] / areaTotal * 100
-              return w > 0 ? (
-                <div key={key} title={`${AREA_LABELS[key]}: ${areaAvg[key].toFixed(2)} t`}
-                  style={{ width: `${w}%`, background: color, transition: 'width 0.5s ease' }} />
-              ) : null
-            })}
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem 1.25rem' }}>
-            {Object.entries(AREA_COLORS).map(([key, color]) => (
-              <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem' }}>
-                <div style={{ width: 10, height: 10, borderRadius: 2, background: color, flexShrink: 0 }} />
-                <span style={{ color: '#555' }}>{AREA_LABELS[key]}</span>
-                <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{areaAvg[key].toFixed(2)} t</span>
+          {activeTab === 'total' ? (
+            <>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '1rem' }}>
+                Media del grupo por áreas
               </div>
-            ))}
-          </div>
+              <div style={{ display: 'flex', height: 28, borderRadius: 6, overflow: 'hidden', marginBottom: '0.75rem' }}>
+                {Object.entries(AREA_COLORS).map(([key, color]) => {
+                  const w = areaAvg[key] / areaTotal * 100
+                  return w > 0 ? (
+                    <div key={key} title={`${AREA_LABELS[key]}: ${areaAvg[key].toFixed(2)} t`}
+                      style={{ width: `${w}%`, background: color, transition: 'width 0.5s ease' }} />
+                  ) : null
+                })}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                {Object.entries(AREA_COLORS).map(([key, color]) => (
+                  <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.72rem' }}>
+                    <div style={{ width: 10, height: 10, borderRadius: 2, background: color, flexShrink: 0 }} />
+                    <span style={{ flex: 1, color: '#555' }}>{AREA_LABELS[key]}</span>
+                    <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{areaAvg[key].toFixed(2)} t</span>
+                    <span style={{ color: '#aaa', minWidth: 36, textAlign: 'right' }}>
+                      {areaTotal > 0 ? Math.round((areaAvg[key] / areaTotal) * 100) : 0}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '0.85rem' }}>
+                Distribución de subcategorías
+              </div>
+              {(AREA_SUBCATEGORIES[activeTab] || []).map((sub, i) => {
+                const avgKg     = getSubcatAvg(ranking, sub.keys)
+                const areaTotalKg = areaAvg[activeTab] * 1000
+                const pct       = areaTotalKg > 0 ? Math.round((Math.abs(avgKg) / areaTotalKg) * 100) : 0
+                return (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '0.5px solid #f0f0f0' }}>
+                    <span style={{ flex: 1, fontSize: '0.75rem', color: sub.negative ? '#3b6d11' : '#1a1a1a' }}>{sub.label}</span>
+                    <div style={{ width: 80, height: 5, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: sub.negative ? '#3b6d11' : AREA_COLORS[activeTab], borderRadius: 3 }} />
+                    </div>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 600, width: 36, textAlign: 'right', color: sub.negative ? '#3b6d11' : AREA_COLORS[activeTab] }}>
+                      {pct}%
+                    </span>
+                  </div>
+                )
+              })}
+            </>
+          )}
         </div>
       )}
 

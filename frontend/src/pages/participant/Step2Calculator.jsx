@@ -283,6 +283,7 @@ export default function Step2Calculator() {
   const [submitted, setSubmitted]         = useState(false)
   const [isMobile, setIsMobile]           = useState(() => window.innerWidth <= 768)
   const submittedResultRef                = useRef(null)
+  const autoAdvanceRef                    = useRef(null) // pending auto-advance timeout
   const STORAGE_KEY                       = `co2sprint_progress_${code}`
   const PARTICIPANT_KEY                   = `co2sprint_participant_${code}`
 
@@ -357,9 +358,13 @@ export default function Step2Calculator() {
     const newAnswers = { ...answers, [questionId]: value }
     setAnswers(newAnswers)
     // Auto-advance for all single questions (including last → auto-submits)
-    // Pass newAnswers directly so the timeout doesn't use stale state
+    // Cancel any previous pending advance before scheduling a new one
     if (question.type === 'single') {
-      setTimeout(() => handleNext(newAnswers), 500)
+      if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current)
+      autoAdvanceRef.current = setTimeout(() => {
+        autoAdvanceRef.current = null
+        handleNext(newAnswers)
+      }, 500)
     }
   }
 
@@ -427,6 +432,8 @@ export default function Step2Calculator() {
   }
 
   function handlePrev() {
+    // Cancel any pending auto-advance before navigating back
+    if (autoAdvanceRef.current) { clearTimeout(autoAdvanceRef.current); autoAdvanceRef.current = null }
     if (isFirst) return
     let prevQ = questionIndex - 1
     let prevA = areaIndex
@@ -440,6 +447,7 @@ export default function Step2Calculator() {
   }
 
   function handleAreaClick(ai) {
+    if (autoAdvanceRef.current) { clearTimeout(autoAdvanceRef.current); autoAdvanceRef.current = null }
     if (getAreaStatus(ai) !== 'inactive') {
       setAreaIndex(ai)
       setQuestionIndex(0)
