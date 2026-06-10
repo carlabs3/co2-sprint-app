@@ -215,6 +215,7 @@ export default function Step2Calculator() {
   const [areaIndex, setAreaIndex]         = useState(0)
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answers, setAnswers]             = useState({})
+  const [submitted, setSubmitted]         = useState(false)
   const [isMobile, setIsMobile]           = useState(() => window.innerWidth <= 768)
   const submittedResultRef                = useRef(null)
   const STORAGE_KEY                       = `co2sprint_progress_${code}`
@@ -244,6 +245,13 @@ export default function Step2Calculator() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers, areaIndex, questionIndex }))
   }, [answers, areaIndex, questionIndex]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    socket.on('results:revealed', () => {
+      const result = submittedResultRef.current
+      if (result) navigate(`/session/${code}/results`, { state: result })
+    })
+    return () => socket.off('results:revealed')
+  }, [code, navigate])
 
   function isSkipped(q) {
     return q.id === 'electricCar' && answers.car === '1e'
@@ -271,7 +279,7 @@ export default function Step2Calculator() {
     // Auto-advance for all single questions (including last → auto-submits)
     // Pass newAnswers directly so the timeout doesn't use stale state
     if (question.type === 'single') {
-      setTimeout(() => handleNext(newAnswers), 800)
+      setTimeout(() => handleNext(newAnswers), 500)
     }
   }
 
@@ -313,8 +321,16 @@ export default function Step2Calculator() {
         answers: currentAnswers,
         category: calcResult.category,
       })
-      // Navigate directly to results — no waiting screen
-      navigate(`/session/${code}/results`, { state })
+      // If results already revealed, navigate directly without waiting
+      api.get(`/api/sessions/${code}/info`)
+        .then(res => {
+          if (res.data.resultsRevealed) {
+            navigate(`/session/${code}/results`, { state })
+          } else {
+            setSubmitted(true)
+          }
+        })
+        .catch(() => setSubmitted(true))
       return
     }
     let nextQ = questionIndex + 1
@@ -373,6 +389,31 @@ export default function Step2Calculator() {
   }
 
   const nextIcon = isLast ? '✓' : '→'
+
+  // ── submitted waiting screen ─────────────────────────────────────────────────
+  if (submitted) return (
+    <div>
+      <SessionClosedBanner onViewPartial={handleViewPartial} />
+      <div style={{
+        minHeight: 'calc(100vh - 52px)', background: '#ffffff',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        padding: '2rem', textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '3.5rem', marginBottom: '1.25rem', lineHeight: 1 }}>✅</div>
+        <h1 style={{ fontWeight: 900, fontSize: '1.6rem', textTransform: 'uppercase', marginBottom: '0.6rem', color: '#1a1a1a' }}>
+          ¡Listo!
+        </h1>
+        <p style={{ fontSize: '1rem', fontWeight: 600, color: '#2d5a27', marginBottom: '0.6rem' }}>
+          Tu huella ha sido calculada
+        </p>
+        <p style={{ fontSize: '0.85rem', color: '#888', maxWidth: 300, lineHeight: 1.65, margin: '0 0 2rem' }}>
+          Espera a que el facilitador revele los resultados del grupo...
+        </p>
+        <DotsLoader />
+      </div>
+    </div>
+  )
 
   // ── desktop ─────────────────────────────────────────────────────────────────
   if (!isMobile) return (
