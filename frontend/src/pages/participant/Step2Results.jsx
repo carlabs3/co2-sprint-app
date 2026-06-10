@@ -149,17 +149,20 @@ export default function Step2Results() {
       : MOCK_RESULT
   const { carbonTons, areas, answers } = data
 
-  // Save real results to localStorage on mount
+  // Save real results to localStorage on mount (revealed:true for late participants)
   if (location.state?.carbonTons != null && !savedRaw) {
     localStorage.setItem(RESULTS_KEY, JSON.stringify({
       carbonTons: location.state.carbonTons,
       areas: location.state.areas || {},
       answers: location.state.answers || {},
-      revealed: false,
+      revealed: true,
     }))
   }
 
-  const [revealed,       setRevealed]       = useState(saved?.revealed || false)
+  // If navigated directly with results (late participant after reveal), show immediately
+  const [revealed,       setRevealed]       = useState(
+    saved?.revealed || location.state?.carbonTons != null || false
+  )
   const [step3Started,   setStep3Started]   = useState(false)
   const [sessionResults, setSessionResults] = useState(null)
   const [emailInput,     setEmailInput]     = useState('')

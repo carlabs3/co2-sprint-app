@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { socket } from '../../utils/socket.js'
+import api from '../../utils/api.js'
 import { useSession } from '../../context/SessionContext.jsx'
 import SessionClosedBanner from '../../components/SessionClosedBanner.jsx'
 import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
@@ -320,7 +321,16 @@ export default function Step2Calculator() {
         answers: currentAnswers,
         category: calcResult.category,
       })
-      setSubmitted(true)
+      // If results already revealed, navigate directly without waiting
+      api.get(`/api/sessions/${code}/info`)
+        .then(res => {
+          if (res.data.resultsRevealed) {
+            navigate(`/session/${code}/results`, { state })
+          } else {
+            setSubmitted(true)
+          }
+        })
+        .catch(() => setSubmitted(true))
       return
     }
     let nextQ = questionIndex + 1
