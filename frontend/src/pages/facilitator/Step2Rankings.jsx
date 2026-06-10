@@ -448,56 +448,158 @@ export default function Step2Rankings() {
             </div>
           )}
         </>
-      ) : step3Data ? (
-        /* Post-reveal: rankings */
-        <>
-          <h1 style={{ fontWeight: 900, fontSize: '1.6rem', textTransform: 'uppercase', marginBottom: '2rem' }}>
-            Resultados — Acciones
-          </h1>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-            {/* Ranking by reduction */}
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', marginBottom: '1rem' }}>Mayor reducción</div>
-              {[...(step3Data.teams || [])].sort((a, b) => (b.totalReduction || 0) - (a.totalReduction || 0)).map((team, i) => (
-                <div key={team.group} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.85rem 1rem', marginBottom: '0.5rem', background: '#f5f5f0', borderRadius: '6px', border: '1px solid #e0e0d8' }}>
-                  <span style={{ fontWeight: 900, fontSize: '1.1rem', color: '#bbb', minWidth: 24 }}>{i + 1}</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{team.group}</div>
-                    <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '0.1rem' }}>
-                      {team.originalTons != null ? `${Number(team.originalTons).toFixed(1)} t` : '–'} → {team.newTons != null ? `${Number(team.newTons).toFixed(1)} t` : '–'}
-                    </div>
-                  </div>
-                  {team.totalReduction != null && (
-                    <span style={{ background: '#eaf3de', color: '#2d5a27', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>
-                      −{Math.round(team.totalReduction)} kg
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-            {/* Top actions — sorted by frequency then co2Reduction */}
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', marginBottom: '1rem' }}>Acciones más elegidas</div>
-              {[...(step3Data.actionStats || [])]
-                .sort((a, b) => (b.count - a.count) || (b.co2Reduction - a.co2Reduction))
-                .slice(0, 8)
-                .map((a, i) => (
-                  <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.65rem 0.9rem', marginBottom: '0.4rem', background: '#fff', borderRadius: '6px', border: '1px solid #e0e0d8' }}>
-                    <span style={{ fontSize: '0.72rem', color: '#ccc', minWidth: 16 }}>{i + 1}</span>
-                    <span>{AREA_EMOJI[a.area]}</span>
-                    <span style={{ flex: 1, fontSize: '0.8rem', fontWeight: 600 }}>{a.label}</span>
-                    <span style={{ fontSize: '0.72rem', color: '#2d5a27', fontWeight: 600 }}>−{(a.co2Reduction / 1000).toFixed(2)} t</span>
-                    <span style={{ fontSize: '0.72rem', background: '#f5f5f0', padding: '0.15rem 0.5rem', borderRadius: '3px', color: '#888' }}>{a.count}/{sessionGroups.length}</span>
-                  </div>
-                ))}
-            </div>
-          </div>
-        </>
-      ) : (
-        <div style={{ color: '#aaa', fontSize: '0.85rem' }}>Cargando datos...</div>
-      )}
+      ) : step3Data ? <Step3Results step3Data={step3Data} ranking={ranking} sessionGroups={sessionGroups} /> : null}
     </div>
   )
+
+  // ── Step3Results helper ───────────────────────────────────────────────────────
+  function Step3Results({ step3Data, ranking, sessionGroups }) {
+        /* Post-reveal: 3-column results */
+        const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste']
+        const A_COLORS = { transport: '#4a90d9', energy: '#e8a020', food: '#5aab5a', consumption: '#b07a30', waste: '#7a7aaa' }
+
+        const sortedTeams = [...(step3Data.teams || [])].sort((a, b) => (b.totalReduction || 0) - (a.totalReduction || 0))
+        const maxOriginal = Math.max(...sortedTeams.map(t => t.originalTons || 0), 0.1)
+
+        // Per-team area averages from ranking data
+        const getGroupAreaAvg = (group) => {
+          const members = ranking.filter(r => r.group === group)
+          if (!members.length) return {}
+          const avg = {}
+          AREA_ORDER.forEach(area => { avg[area] = members.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / members.length })
+          return avg
+        }
+
+        // Per-team area after from confirmed actions
+        const getGroupAreaAfter = (group, areaAvg) => {
+          const teamData = step3Data.teams?.find(t => t.group === group)
+          const red = { transport: 0, energy: 0, food: 0, consumption: 0, waste: 0 }
+          if (teamData?.actions) {
+            teamData.actions.forEach(id => {
+              const a = ACTIONS.find(x => x.id === id)
+              if (a) red[a.area] = (red[a.area] || 0) + a.co2Reduction / 1000
+            })
+          }
+          const after = {}
+          AREA_ORDER.forEach(area => { after[area] = Math.max(0, (areaAvg[area] || 0) - (red[area] || 0)) })
+          return after
+        }
+
+        const StackedBar = ({ areaAvg, total, maxVal, label, muted = false }) => (
+          <div style={{ marginBottom: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+              <span style={{ fontSize: '0.65rem', color: '#aaa' }}>{label}</span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>{total.toFixed(1)} t</span>
+            </div>
+            <div style={{ height: 12, background: '#f0f0f0', borderRadius: 2, overflow: 'hidden', display: 'flex' }}>
+              {AREA_ORDER.map(area => {
+                const pct = maxVal > 0 ? (areaAvg[area] / maxVal) * 100 : 0
+                if (pct < 0.1) return null
+                return <div key={area} style={{ width: `${pct}%`, background: A_COLORS[area], opacity: muted ? 0.7 : 1 }} />
+              })}
+            </div>
+          </div>
+        )
+
+        // Global distribution
+        const globalBefore = step3Data.teams?.length
+          ? step3Data.teams.reduce((s, t) => s + (t.originalTons || 0), 0) / step3Data.teams.length
+          : 0
+        const globalAfter = step3Data.teams?.length
+          ? step3Data.teams.reduce((s, t) => s + (t.newTons || 0), 0) / step3Data.teams.length
+          : 0
+        const globalAreaAvg = AREA_ORDER.reduce((acc, area) => {
+          const members = ranking
+          acc[area] = members.length ? members.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / members.length : 0
+          return acc
+        }, {})
+
+        // All actions sorted by frequency then co2Reduction
+        const allActionsSorted = [...(step3Data.actionStats || [])]
+          .sort((a, b) => (b.count - a.count) || (b.co2Reduction - a.co2Reduction))
+
+        return (
+          <>
+            <div style={{ fontWeight: 700, fontSize: '1rem', textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '0.04em' }}>
+              Resultados — Acciones
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
+
+              {/* Column 1: Ranking by reduction with stacked bars */}
+              <div>
+                <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', marginBottom: '0.85rem' }}>Ranking reducción</div>
+                {sortedTeams.map((team, i) => {
+                  const areaAvg = getGroupAreaAvg(team.group)
+                  const areaAfter = getGroupAreaAfter(team.group, areaAvg)
+                  return (
+                    <div key={team.group} style={{ marginBottom: '1rem', padding: '0.75rem 0.9rem', background: '#f9f9f7', borderRadius: '6px', border: '1px solid #e0e0d8' }}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                        <span style={{ fontWeight: 900, fontSize: '0.85rem', color: '#bbb' }}>{i + 1}</span>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', flex: 1 }}>{team.group}</span>
+                        {team.totalReduction != null && (
+                          <span style={{ fontWeight: 900, fontSize: '0.95rem', color: '#2d5a27' }}>
+                            −{(team.totalReduction / 1000).toFixed(1)} t
+                          </span>
+                        )}
+                      </div>
+                      <StackedBar areaAvg={areaAvg}   total={team.originalTons || 0} maxVal={maxOriginal} label="Antes" />
+                      <StackedBar areaAvg={areaAfter} total={team.newTons || 0}      maxVal={maxOriginal} label="Después" muted />
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Column 2: Global distribution */}
+              <div>
+                <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', marginBottom: '0.85rem' }}>Distribución global</div>
+                <div style={{ padding: '0.85rem 0.9rem', background: '#f9f9f7', borderRadius: '6px', border: '1px solid #e0e0d8', marginBottom: '0.75rem' }}>
+                  <StackedBar areaAvg={globalAreaAvg} total={globalBefore} maxVal={globalBefore} label="Media antes" />
+                  <StackedBar areaAvg={globalAreaAvg} total={globalAfter}  maxVal={globalBefore} label="Media después" muted />
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', padding: '0.5rem', background: '#eaf3de', borderRadius: '4px' }}>
+                    <span style={{ fontWeight: 700, fontSize: '1rem', color: '#2d5a27' }}>−{(globalBefore - globalAfter).toFixed(1)} t</span>
+                    <span style={{ fontSize: '0.65rem', color: '#4a8a44', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ahorro medio</span>
+                  </div>
+                </div>
+                {/* Area color legend */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                  {AREA_ORDER.map(area => (
+                    <div key={area} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{ width: 10, height: 10, background: A_COLORS[area], borderRadius: 2, flexShrink: 0 }} />
+                      <span style={{ fontSize: '0.7rem', color: '#666' }}>{AREA_LABEL[area]}</span>
+                      <span style={{ fontSize: '0.7rem', color: '#aaa', marginLeft: 'auto' }}>
+                        {globalAreaAvg[area]?.toFixed(2)} t
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Column 3: All actions with scroll */}
+              <div>
+                <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', marginBottom: '0.85rem' }}>
+                  Acciones elegidas ({allActionsSorted.length})
+                </div>
+                <div style={{ maxHeight: '55vh', overflowY: 'auto' }}>
+                  {allActionsSorted.map((a, i) => (
+                    <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '7px 0', borderBottom: '0.5px solid #f0f0f0' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 900, color: '#ccc', width: 18, flexShrink: 0 }}>{i + 1}</span>
+                      <span style={{ fontSize: '0.95rem' }}>{AREA_EMOJI[a.area]}</span>
+                      <span style={{ flex: 1, fontSize: '0.78rem', fontWeight: 500, lineHeight: 1.3 }}>{a.label}</span>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#2d5a27', flexShrink: 0 }}>
+                        −{(a.co2Reduction / 1000).toFixed(1)}t
+                      </span>
+                      <span style={{ fontSize: '0.65rem', background: '#f0f7ee', color: '#2d5a27', padding: '1px 6px', borderRadius: 20, fontWeight: 600, flexShrink: 0 }}>
+                        {a.count}/{sessionGroups.length}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </>
+        )
+  }
 
   // ── Sidebar (phases 1 & 2) ────────────────────────────────────────────────────
   const sidebar = (
