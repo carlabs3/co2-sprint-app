@@ -1,60 +1,62 @@
-export const PUBLIC_SERVICES_KG = 1500 // kgCO2e/año, fijo para España
+export const PUBLIC_SERVICES_KG = 1500
 
-// Valores de referencia por respuesta (kgCO2e/año)
 const MAP = {
-  // Transporte — coche (km base antes de factor combustible)
-  car:           { '1a': 500, '1b': 1200, '1c': 2500, '1d': 4000, '1e': 0 },
-  // Factor por tipo de combustible (multiplica km coche)
-  electricCar:   { 'a': 0.15, 'b': 0.5, 'c': 0.75, 'd': 0.9, 'e': 1.0 },
-  // Tren larga distancia
-  train:         { '3a': 80, '3b': 40, '3c': 15, '3d': 0 },
-  // Moto
-  moto:          { '4a': 50, '4b': 250, '4c': 650, '4d': 0 },
-  // Movilidad urbana
-  urbanMobility: { '5a': 0, '5b': 100, '5c': 300, '5d': 500, '5e': 750 },
+  // ── TRANSPORTE ──
+  car:           { '1a': 184, '1b': 797, '1c': 1839, '1d': 3677, '1e': 0 },
+  electricCar:   { 'a': 146, 'b': 775, 'c': 1550, 'd': 3600, 'e': 0 },
+  train:         { '3a': 21, '3b': 126, '3c': 630, '3d': 0 },
+  moto:          { '4a': 11, '4b': 57, '4c': 228, '4d': 0 },
+  urbanMobility: { '5a': 0, '5b': 2, '5c': 4, '5d': 5, '5e': 44 },
 
-  // Hogar — tamaño y tipo
-  homeType:    { '25a': 400, '25b': 750, '25c': 1200 },
-  // Calefacción (por hogar, antes de dividir por personas)
-  heating:     { '26a': 50, '26b': 1000, '26c': 700, '26d': 2200, '26e': 200, '26f': 250 },
-  // Factor renovables (reduce el total hogar)
-  renewable:   { 'a': 0.40, 'b': 0.70, 'c': 1.0 },
-  // Aire acondicionado
-  hasAC:       { 'no': 0, 'yes': 460 },
-  // Divisor por personas en el hogar
-  householdSize: { '1': 1, '2': 2, '3': 3, '4+': 4 },
-  // Hábitos hogar (reducciones, multi)
-  homeHabits:  { closeWindows: -40, thermostat19: -80, ledBulbs: -60, ecoPrograms: -50 },
+  // ── VIVIENDA ── (3 tablas de calefacción por tipo de vivienda)
+  heatingSmall:  { '26a': 0, '26b': 625, '26c': 975,  '26d': 1429, '26e': 230, '26f': 375, '26g': 668 },
+  heatingMedium: { '26a': 0, '26b': 750, '26c': 1170, '26d': 1715, '26e': 276, '26f': 450, '26g': 802 },
+  heatingLarge:  { '26a': 0, '26b': 781, '26c': 1219, '26d': 1787, '26e': 288, '26f': 469, '26g': 835 },
+  renewable:     { 'a': -720, 'b': -200, 'c': 0 },
+  householdSize: { '1': 1, '2': 2, '3': 3, '4': 4, '4+': 4 },
+  pool:          { privatePool: 50, communityPool: 17, noPool: 0 },
+  homeHabits:    { closeWindows: -47, thermostat19: -47, ledBulbs: -4, ecoPrograms: -36, none: 0 },
 
-  // Alimentación
+  // ── ALIMENTACIÓN ──
   breakfast:    { '6a': 1081, '6b': 1633, '6c': 2595, '6d': 291, '6e': 1924 },
-  milkType:     { 'a': 200, 'b': 30, 'c': 0 },
+  milkType:     { 'a': 232, 'b': 82, 'c': 89, 'd': 64, 'e': 0 },
   hotDrinks:    { '7a': 0, '7b': 594, '7c': 18, '7d': 395, '7e': 124 },
-  alcohol:      { soda_low: 9, soda_mid: 21, soda_high: 37, wine_low: 14, wine_mid: 32, wine_high: 56, beer_low: 44, beer_mid: 102, beer_high: 175, spirit_low: 4, spirit_mid: 10, spirit_high: 17, none: 0 },
-  lunch:        { '9a': 300, '9b': 400, '9c': 500, '9d': 700, '9e': 900, '9f': 1300 },
-  dinner:       { '10a': 300, '10b': 400, '10c': 500, '10d': 700, '10e': 900, '10f': 1300 },
-  bottledWater: { '13a': 200, '13b': 80, '13c': 0 },
-  // Hábitos alimentarios (reducciones, multi)
-  foodHabits:   { localFood: -80, composting: -60, noFoodWaste: -120, organic: -90, noPlastic: -50 },
+  lunch:        { '9a': 110, '9b': 186, '9c': 317, '9d': 293, '9e': 1087, '9f': 2296, '9g': 745 },
+  dinner:       { '10a': 110, '10b': 186, '10c': 317, '10d': 293, '10e': 1087, '10f': 2296, '10g': 745 },
+  bottledWater: { '13a': 97, '13b': 49, '13c': 0 },
+  foodHabits:   { localFood: -75, composting: -146, noFoodWaste: -80, none: 0 },
 
-  // Consumo — ropa
-  clothes:     { '15a': 80, '15b': 200, '15c': 380, '15d': 550, '15e': 730, '15f': 900, '15g': 30 },
-  // Dispositivos electrónicos comprados (multi)
-  electronics: { '16a': 350, '16b': 80, '16c': 280, '16d': 100, '16e': 150, '16f': 50, '16g': 80, '16h': 60, '16i': 0 },
-  // Electrodomésticos comprados (multi)
-  appliances:  { '19a': 180, '19b': 120, '19c': 100, '19d': 90, '19e': 80, '19f': 50, '19g': 60, '19h': 100, '19i': 0 },
-  // Mascotas (multi, kgCO2e anual)
-  pets:        { bigDog: 720, smallDog: 330, cat: 280, rabbit: 100, bird: 80 },
-  // Higiene y limpieza
-  hygiene:     { '22a': 30, '22b': 100, '22c': 250 },
-  // Tabaco
-  smoking:     { '23a': 0, '23b': 80, '23c': 180, '23d': 300, '23e': 480 },
+  // ── CONSUMO ──
+  clothes:     { '15a': 75, '15b': 99, '15c': 187, '15d': 396, '15e': 594, '15f': 891, '15g': 15 },
+  electronics: { '16a': 86, '16b': 63, '16c': 194, '16d': 302, '16e': 375, '16f': 73, '16g': 24, '16h': 10, '16i': 0 },
+  appliances:  { '19a': 340, '19b': 302, '19c': 270, '19d': 257, '19e': 217, '19f': 415, '19g': 98, '19h': 375, '19i': 0 },
+  pets:        { bigDog: 1100, medDog: 770, smallDog: 400, cat: 310, none: 0 },
+  hygiene:     { '22a': 13, '22b': 18, '22c': 39 },
+  smoking:     { '23a': 0, '23b': 20, '23c': 11, '23d': 46, '23e': 102 },
 
-  // Digital
-  videoCalls:  { none: 0, less1h: 8, '1to2h': 20, more2h: 50 },
-  streaming:   { none: 0, less1h: 12, '1to4h': 35, more4h: 80 },
-  socialMedia: { less1h: 7, '1to2h': 18, more2h: 40 },
+  // ── DIGITAL ──
+  videoCalls:  { none: 0, less1h: 8, '1to2h': 18, more2h: 38 },
+  streaming:   { none: 0, '1to2h': 16, '2to4h': 34, more4h: 69 },
+  socialMedia: { none: 0, less1h: 16, '1to2h': 39, more2h: 82 },
   aiUsage:     { none: 0, low: 25, medium: 100, high: 250 },
+}
+
+// Bebidas alcohólicas — kgCO2e por unidad/semana × 52 semanas
+const ALCOHOL_FACTORS = {
+  soda:    0.472 * 0.25 * 52, // ~6.1 kg/unidad/año
+  wine:    1.19  * 0.15 * 52, // ~9.3 kg/copa/año
+  beer:    1.12  * 0.33 * 52, // ~19.2 kg/botellín/año
+  spirits: 1.12  * 0.05 * 52, // ~2.9 kg/copa/año
+}
+
+export function calcAlcohol(alcohol = {}) {
+  if (!alcohol || typeof alcohol !== 'object' || Array.isArray(alcohol)) return 0
+  return Math.round(
+    (alcohol.soda    || 0) * ALCOHOL_FACTORS.soda    +
+    (alcohol.wine    || 0) * ALCOHOL_FACTORS.wine    +
+    (alcohol.beer    || 0) * ALCOHOL_FACTORS.beer    +
+    (alcohol.spirits || 0) * ALCOHOL_FACTORS.spirits
+  )
 }
 
 function get(key, val) {
@@ -68,32 +70,53 @@ function sum(key, vals) {
 
 export function calculator(answers) {
   // ── Transporte ──────────────────────────────────────────────────────────────
-  const carKg      = get('car', answers.car) * (MAP.electricCar[answers.electricCar] ?? 1.0)
-  const flightsKg  = (answers.flights?.includes('flightShort')  ? 600  : 0)
-                   + (answers.flights?.includes('flightMedium') ? 1500 : 0)
-                   + (answers.flights?.includes('flightLong')   ? 3500 : 0)
-  const transportKg = carKg + flightsKg
+  const carKg     = get('car', answers.car)
+  const evKg      = get('electricCar', answers.electricCar)
+  const flightsKg = (answers.flights?.includes('flightShort')  ? 824  : 0)
+                  + (answers.flights?.includes('flightMedium') ? 1879 : 0)
+                  + (answers.flights?.includes('flightLong')   ? 2627 : 0)
+  const transportKg = carKg + evKg + flightsKg
     + get('train', answers.train)
     + get('moto', answers.moto)
     + get('urbanMobility', answers.urbanMobility)
 
   // ── Hogar ───────────────────────────────────────────────────────────────────
-  const div       = MAP.householdSize[answers.householdSize] ?? 2
-  const rf        = MAP.renewable[answers.renewable] ?? 1.0
-  const homeBase  = get('homeType', answers.homeType) + get('heating', answers.heating) + get('hasAC', answers.hasAC)
-  const housingKg = Math.max(0, (homeBase / div) * rf + sum('homeHabits', answers.homeHabits))
-    + (answers.hotelNights   || 0) * 8
-    + (answers.hostelNights  || 0) * 1
-    + (answers.campingNights || 0) * 1
-    + (answers.airbnbNights  || 0) * 5
-    + (answers.secondHome    ? 250 : 0)
+  const div = MAP.householdSize[answers.householdSize] ?? 2
+
+  let heatingKg = 0
+  if (answers.homeType === '25a')      heatingKg = MAP.heatingSmall[answers.heating]  ?? 0
+  else if (answers.homeType === '25b') heatingKg = MAP.heatingMedium[answers.heating] ?? 0
+  else if (answers.homeType === '25c') heatingKg = MAP.heatingLarge[answers.heating]  ?? 0
+
+  let acKg = 0
+  if (answers.hasAC === 'yes') {
+    if (answers.homeType === '25a')      acKg = 350
+    else if (answers.homeType === '25b') acKg = 420
+    else if (answers.homeType === '25c') acKg = 438
+  }
+
+  const renewableKg = MAP.renewable[answers.renewable] ?? 0
+  const poolKg      = sum('pool', answers.pool)
+
+  const housingKg = Math.max(0,
+    (heatingKg / div) +
+    acKg +
+    renewableKg +
+    sum('homeHabits', answers.homeHabits) +
+    poolKg +
+    (answers.hotelNights   || 0) * 8 +
+    (answers.hostelNights  || 0) * 1 +
+    (answers.campingNights || 0) * 1 +
+    (answers.airbnbNights  || 0) * 5 +
+    (answers.secondHome    ? 250 : 0)
+  )
 
   // ── Alimentación ────────────────────────────────────────────────────────────
   const foodKg = Math.max(0,
     get('breakfast', answers.breakfast) +
     get('milkType', answers.milkType) +
     sum('hotDrinks', answers.hotDrinks) +
-    sum('alcohol', answers.alcohol) +
+    calcAlcohol(answers.alcohol) +
     get('lunch', answers.lunch) +
     get('dinner', answers.dinner) +
     get('bottledWater', answers.bottledWater) +
@@ -125,11 +148,11 @@ export function calculator(answers) {
     carbonTons,
     carbonKg: Math.round(totalKg),
     areas: {
-      transport:   parseFloat((transportKg / 1000).toFixed(2)),
-      energy:      parseFloat((housingKg / 1000).toFixed(2)),
-      food:        parseFloat((foodKg / 1000).toFixed(2)),
+      transport:   parseFloat((transportKg   / 1000).toFixed(2)),
+      energy:      parseFloat((housingKg     / 1000).toFixed(2)),
+      food:        parseFloat((foodKg        / 1000).toFixed(2)),
       consumption: parseFloat((consumptionKg / 1000).toFixed(2)),
-      waste:       parseFloat((digitalKg / 1000).toFixed(2)),
+      waste:       parseFloat((digitalKg     / 1000).toFixed(2)),
     },
     category: carbonTons < 4 ? 'bajo' : carbonTons < 7 ? 'medio' : carbonTons < 10 ? 'alto' : 'muy alto',
   }

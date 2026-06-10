@@ -90,6 +90,71 @@ function NightsInput({ question, answers, onChange }) {
   )
 }
 
+function DrinksInput({ question, answers, onChange }) {
+  const handleChange = (value, delta) => {
+    const current = answers[value] || 0
+    const newVal = Math.max(0, current + delta)
+    onChange({ ...answers, [value]: newVal })
+  }
+
+  const total = question.options.reduce((s, o) => s + (answers[o.value] || 0), 0)
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {question.options.map(opt => {
+        const val = answers[opt.value] || 0
+        const active = val > 0
+        return (
+          <div key={opt.value} style={{
+            background: '#fff',
+            border: `1px solid ${active ? '#1a1a1a' : '#E8E4DF'}`,
+            borderRadius: 12,
+            padding: '10px 12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+          }}>
+            <span style={{ fontSize: 18, width: 24, textAlign: 'center', flexShrink: 0 }}>{opt.emoji}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 12, fontWeight: 500, color: '#1a1a1a' }}>{opt.label}</div>
+              <div style={{ fontSize: 10, color: '#aaa', marginTop: 1 }}>{opt.sublabel}</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+              <button onClick={() => handleChange(opt.value, -1)} style={{
+                width: 26, height: 26, borderRadius: '50%',
+                border: '1.5px solid #1a1a1a', background: 'transparent',
+                color: '#1a1a1a', fontSize: 14, fontWeight: 600,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: val === 0 ? 'default' : 'pointer', opacity: val === 0 ? 0.3 : 1,
+              }}>−</button>
+              <div style={{ textAlign: 'center', minWidth: 20 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: '#1a1a1a' }}>{val}</div>
+                <div style={{ fontSize: 9, color: '#aaa' }}>por sem.</div>
+              </div>
+              <button onClick={() => handleChange(opt.value, 1)} style={{
+                width: 26, height: 26, borderRadius: '50%',
+                border: '1.5px solid #1a1a1a', background: 'transparent',
+                color: '#1a1a1a', fontSize: 14, fontWeight: 600,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer',
+              }}>+</button>
+            </div>
+          </div>
+        )
+      })}
+      {total > 0 && (
+        <div style={{
+          background: '#F7F4F0', borderRadius: 8, padding: '7px 12px',
+          display: 'flex', justifyContent: 'space-between', marginTop: 2,
+        }}>
+          <span style={{ fontSize: 11, color: '#aaa' }}>Total por semana</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{total} bebidas</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // Grotesk card style — black on select, white on cream background
 const CREAM = '#F7F4F0'
 const BORDER = '#E8E4DF'
@@ -276,10 +341,10 @@ export default function Step2Calculator() {
   const question = area.questions[questionIndex]
   const isFirst  = areaIndex === 0 && questionIndex === 0
   const isLast   = areaIndex === AREAS.length - 1 && questionIndex === area.questions.length - 1
-  const canNext  = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.isSensibilization || answers[question.id] !== undefined
+  const canNext  = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.type === 'drinks' || question.isSensibilization || answers[question.id] !== undefined
 
   function isAreaDone(ai) {
-    return AREAS[ai].questions.every(q => isSkipped(q) || q.type === 'multi' || q.type === 'nights' || q.isSensibilization || answers[q.id] !== undefined)
+    return AREAS[ai].questions.every(q => isSkipped(q) || q.type === 'multi' || q.type === 'nights' || q.type === 'drinks' || q.isSensibilization || answers[q.id] !== undefined)
   }
 
   function getAreaStatus(ai) {
@@ -320,7 +385,7 @@ export default function Step2Calculator() {
   function handleNext(overrideAnswers = null) {
     const currentAnswers = overrideAnswers ?? answers
     // Recompute canNext with the actual answers (avoids stale state in timeouts)
-    const currentCanNext = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.isSensibilization || currentAnswers[question.id] !== undefined
+    const currentCanNext = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.type === 'drinks' || question.isSensibilization || currentAnswers[question.id] !== undefined
     if (!currentCanNext) return
     if (isLast) {
       const calcResult = calculator(currentAnswers)
@@ -392,7 +457,7 @@ export default function Step2Calculator() {
       <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
         {a.questions.map((q, qi) => {
           if (isSkipped(q)) return null
-          const done   = q.type === 'multi' || q.type === 'nights' || q.isSensibilization || answers[q.id] !== undefined
+          const done   = q.type === 'multi' || q.type === 'nights' || q.type === 'drinks' || q.isSensibilization || answers[q.id] !== undefined
           const active = aIdx === areaIndex && qi === activeQIdx
           return (
             <div key={qi} style={{
@@ -508,7 +573,9 @@ export default function Step2Calculator() {
 
           {/* Options */}
           <div style={{ padding: '0 28px 16px', maxWidth: 640, flex: 1, overflowY: 'auto' }}>
-            {question.type === 'nights' ? (
+            {question.type === 'drinks' ? (
+              <DrinksInput question={question} answers={answers} onChange={setAnswers} />
+            ) : question.type === 'nights' ? (
               <div style={{ '--area-color': '#2d5a27', '--area-bg': '#f0f7ee' }}>
                 <NightsInput question={question} answers={answers} onChange={setAnswers} />
               </div>
@@ -602,7 +669,9 @@ export default function Step2Calculator() {
 
         {/* Options — flex 1, tarjetas blancas sobre crema */}
         <div style={{ padding: '0 16px 8px', flex: 1, overflowY: 'auto', background: CREAM }}>
-          {question.type === 'nights' ? (
+          {question.type === 'drinks' ? (
+            <DrinksInput question={question} answers={answers} onChange={setAnswers} />
+          ) : question.type === 'nights' ? (
             <div style={{ '--area-color': '#2d5a27', '--area-bg': '#f0f7ee' }}>
               <NightsInput question={question} answers={answers} onChange={setAnswers} />
             </div>
