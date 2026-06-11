@@ -87,11 +87,11 @@ const SUBCATS = {
 }
 
 const AREA_META = [
-  { id: 'transport',   label: 'Transporte',        emoji: '🚗', color: '#4a90d9' },
-  { id: 'energy',      label: 'Vivienda y energía', emoji: '🏡', color: '#e8a020' },
-  { id: 'food',        label: 'Alimentación',       emoji: '🥗', color: '#5aab5a' },
-  { id: 'consumption', label: 'Consumo',             emoji: '🛍️', color: '#b07a30' },
-  { id: 'waste',       label: 'Huella digital',      emoji: '📱', color: '#7a7aaa' },
+  { id: 'transport',   label: 'Transporte',        emoji: '🚗', color: '#38bdf8' },
+  { id: 'energy',      label: 'Vivienda y energía', emoji: '🏡', color: '#f59e0b' },
+  { id: 'food',        label: 'Alimentación',       emoji: '🥗', color: '#4ade80' },
+  { id: 'consumption', label: 'Consumo',             emoji: '🛍️', color: '#a855f7' },
+  { id: 'waste',       label: 'Huella digital',      emoji: '📱', color: '#f472b6' },
 ]
 
 // ── Email route ───────────────────────────────────────────────────────────────
@@ -145,43 +145,51 @@ router.post('/send-email', async (req, res) => {
       </div>`
   }).join('')
 
+  const CATEGORY_MESSAGES = {
+    bajo:       '🌿 ¡Genial! Tu huella está muy por debajo de la media',
+    medio:      '🌱 Tu huella es moderada, hay margen de mejora',
+    alto:       '🌍 Tu huella está por encima de lo sostenible',
+    'muy alto': '🔥 Tu huella es alta — este taller es para ti',
+  }
+  const categoryMsg = CATEGORY_MESSAGES[category] || category
+
   try {
     const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({
-      from: 'CO2 Sprint <noreply@apps.threeoclock.co>',
+      from: 'Drop. <noreply@apps.threeoclock.co>',
       to: email,
       subject: `Tu huella de carbono — ${Number(carbonTons).toFixed(1)} t CO₂/año`,
       html: `
         <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-          <h1 style="color: #2d5a27; font-size: 28px; margin-bottom: 8px;">Tu huella de carbono</h1>
-          <p style="color: #666; margin-bottom: 32px;">Resultado del taller CO2 Sprint</p>
+          <h1 style="color: #000000; font-size: 28px; margin-bottom: 8px;">Tu huella de carbono</h1>
+          <p style="color: #666; margin-bottom: 32px;">Resultado del taller Drop.</p>
 
-          <div style="background: #2d5a27; border-radius: 12px; padding: 32px; text-align: center; margin-bottom: 24px;">
-            <p style="color: #c8e6c0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px;">Tu huella total</p>
-            <h2 style="color: #fff; font-size: 52px; font-weight: 700; margin: 0;">${Number(carbonTons).toFixed(1)} t <span style="font-size: 20px; color: #c8e6c0;">CO₂/año</span></h2>
-            <span style="background: rgba(255,255,255,0.15); color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 13px; display: inline-block; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.08em;">${category}</span>
+          <div style="background: #000000; border-radius: 12px; padding: 32px; text-align: center; margin-bottom: 24px;">
+            <p style="color: rgba(255,255,255,0.55); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px;">Tu huella total</p>
+            <h2 style="color: #fff; font-size: 52px; font-weight: 700; margin: 0;">${Number(carbonTons).toFixed(1)} t <span style="font-size: 20px; color: rgba(255,255,255,0.55);">CO₂/año</span></h2>
+            <span style="background: rgba(255,255,255,0.15); color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 13px; display: inline-block; margin-top: 12px; letter-spacing: 0.04em;">${categoryMsg}</span>
           </div>
 
           <h3 style="color: #1a1a1a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;">Desglose por áreas</h3>
           <table style="width: 100%; border-collapse: collapse;">
             <tr style="border-bottom: 1px solid #f0f0f0;">
-              <td style="padding: 10px 0; color: #555;">🚗 Transporte</td>
+              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#38bdf8;margin-right:6px;vertical-align:middle;"></span>🚗 Transporte</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.transport || 0).toFixed(1)} t</td>
             </tr>
             <tr style="border-bottom: 1px solid #f0f0f0;">
-              <td style="padding: 10px 0; color: #555;">🏡 Vivienda y energía</td>
+              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f59e0b;margin-right:6px;vertical-align:middle;"></span>🏡 Vivienda y energía</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.energy || 0).toFixed(1)} t</td>
             </tr>
             <tr style="border-bottom: 1px solid #f0f0f0;">
-              <td style="padding: 10px 0; color: #555;">🥗 Alimentación</td>
+              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#4ade80;margin-right:6px;vertical-align:middle;"></span>🥗 Alimentación</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.food || 0).toFixed(1)} t</td>
             </tr>
             <tr style="border-bottom: 1px solid #f0f0f0;">
-              <td style="padding: 10px 0; color: #555;">🛍️ Consumo</td>
+              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#a855f7;margin-right:6px;vertical-align:middle;"></span>🛍️ Consumo</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.consumption || 0).toFixed(1)} t</td>
             </tr>
             <tr>
-              <td style="padding: 10px 0; color: #555;">📱 Huella digital</td>
+              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f472b6;margin-right:6px;vertical-align:middle;"></span>📱 Huella digital</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.waste || 0).toFixed(1)} t</td>
             </tr>
           </table>
@@ -189,7 +197,8 @@ router.post('/send-email', async (req, res) => {
           <h3 style="color: #1a1a1a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; margin: 32px 0 16px;">Detalle por categoría</h3>
           ${subcatHtml}
 
-          <div style="background: #f5f5f0; border-radius: 8px; padding: 12px 16px; margin-top: 8px; margin-bottom: 32px;">
+          <p style="font-size: 13px; color: #888; font-style: italic; margin: 24px 0 8px;">...y a esto hay que sumarle lo que pagamos entre todos 🏛️</p>
+          <div style="background: #f5f5f5; border-radius: 8px; padding: 12px 16px; margin-top: 8px; margin-bottom: 32px;">
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="font-size: 13px; font-weight: 700; color: #555;">🏛️ Servicios públicos</td>
@@ -199,8 +208,8 @@ router.post('/send-email', async (req, res) => {
             </table>
           </div>
 
-          <p style="color: #aaa; font-size: 11px; margin-top: 32px; text-align: center;">
-            CO2 Sprint · Taller de huella de carbono
+          <p style="color: #888; font-size: 11px; margin-top: 32px; text-align: center;">
+            Drop. · Taller de huella de carbono
           </p>
         </div>
       `,
