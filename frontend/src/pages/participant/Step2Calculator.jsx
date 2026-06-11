@@ -278,6 +278,7 @@ export default function Step2Calculator() {
   const navigate = useNavigate()
   const { participantGroup, participantName } = useSession()
 
+  const [showIntro, setShowIntro]         = useState(true)
   const [areaIndex, setAreaIndex]         = useState(0)
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answers, setAnswers]             = useState({})
@@ -301,8 +302,10 @@ export default function Step2Calculator() {
       const { answers: a, areaIndex: ai, questionIndex: qi, submitted: sub } = JSON.parse(saved)
       if (sub) {
         setSubmitted(true) // already submitted — skip back to waiting screen
+        setShowIntro(false)
         return
       }
+      if (a && Object.keys(a).length > 0) setShowIntro(false)
       setAnswers(a || {})
       setAreaIndex(ai || 0)
       setQuestionIndex(qi || 0)
@@ -467,6 +470,36 @@ export default function Step2Calculator() {
   }
 
   const nextIcon = isLast ? '✓' : '→'
+
+  // ── intro screen ─────────────────────────────────────────────────────────────
+  if (showIntro) return (
+    <div>
+      <SessionClosedBanner onViewPartial={handleViewPartial} />
+      <div style={{
+        minHeight: 'calc(100dvh - 52px)', background: '#f5f5f5',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        padding: '2rem', textAlign: 'center',
+        fontFamily: "'Instrument Sans', sans-serif",
+      }}>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 32, fontSize: 24 }}>
+          {AREAS.map(a => <span key={a.id}>{a.emoji}</span>)}
+        </div>
+        <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.02em', color: '#0a0a0a', marginBottom: 16 }}>
+          Tu huella personal
+        </h1>
+        <p style={{ fontSize: 15, lineHeight: 1.6, color: '#666', maxWidth: 320, marginBottom: 36 }}>
+          Responde pensando solo en ti — no en tu familia ni compañeros de piso. Son 5 áreas, unos 3 minutos.
+        </p>
+        <button
+          onClick={() => setShowIntro(false)}
+          style={{ background: '#0a0a0a', color: '#f5f5f5', border: 'none', borderRadius: 999, padding: '14px 32px', fontSize: 15, fontWeight: 500, cursor: 'pointer', letterSpacing: '-0.01em' }}
+        >
+          Empezar →
+        </button>
+      </div>
+    </div>
+  )
 
   // ── submitted waiting screen ─────────────────────────────────────────────────
   if (submitted) return (
