@@ -58,11 +58,26 @@ export default function Home() {
 
             {/* Left */}
             <div>
-              <p className="hero-tag">• TALLER DE HUELLA DE CARBONO</p>
-              <h1 className="hero-h1">
-                ¿Cuánto<br />
-                CO₂ <span>emites</span><br />
-                tú?
+              <p className="hero-tag" style={{ color: '#888' }}>· TALLER DE HUELLA DE CARBONO</p>
+              <h1 style={{
+                fontWeight: 900,
+                color: '#000',
+                lineHeight: 1.05,
+                letterSpacing: '-0.02em',
+                marginBottom: 24,
+                fontSize: 'clamp(38px, 5vw, 58px)',
+                textTransform: 'none',
+              }}>
+                tu estilo de vida<br />
+                tiene un{' '}
+                <span style={{
+                  fontStyle: 'italic',
+                  textDecoration: 'underline',
+                  textDecorationThickness: '3px',
+                  textUnderlineOffset: '4px',
+                }}>
+                  coste.
+                </span>
               </h1>
               <p className="hero-sub">
                 Descubre el impacto real de tu estilo de vida en el planeta.
@@ -72,13 +87,13 @@ export default function Home() {
                 onClick={scrollToHow}
                 style={{
                   background: 'transparent',
-                  border: '1.5px solid #1a1a1a',
+                  border: '1.5px solid #000',
                   borderRadius: 8,
                   padding: '11px 20px',
                   fontSize: 13,
                   fontWeight: 600,
                   letterSpacing: '0.05em',
-                  color: '#1a1a1a',
+                  color: '#000',
                 }}
               >
                 ¿Cómo funciona? →
@@ -87,15 +102,15 @@ export default function Home() {
             </div>
 
             {/* Right — join box */}
-            <div className="join-box">
+            <div className="join-box" style={{ background: '#fafafa', border: '1.5px solid #e5e5e5', borderRadius: 16 }}>
               <div style={{ marginBottom: 18 }}>
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
-                  fontSize: 10, fontWeight: 600, color: '#3b6d11',
-                  background: '#eaf3de', borderRadius: 999,
+                  fontSize: 10, fontWeight: 600, color: '#000',
+                  background: '#f0f0f0', borderRadius: 999, border: '1px solid #e5e5e5',
                   padding: '4px 10px', letterSpacing: '0.08em', textTransform: 'uppercase',
                 }}>
-                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#3b6d11', flexShrink: 0 }} />
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
                   Sesión activa
                 </span>
               </div>
@@ -162,9 +177,9 @@ export default function Home() {
       {/* ── STATS ────────────────────────────────────────────── */}
       <div className="stats">
         {[
-          { bg: '#c8e6c0', numColor: '#1e3d1a', textColor: '#2d5a27',              big: '4.7 t', text: 'Media de CO₂ por persona al año en España' },
-          { bg: '#2d5a27', numColor: '#fff',     textColor: 'rgba(255,255,255,0.7)', big: '2×',   text: 'El doble de lo que el planeta puede absorber' },
-          { bg: '#f5f5f0', numColor: '#1a1a1a',  textColor: '#666',                 big: "5'",    text: 'Minutos para calcular tu huella y empezar a cambiar' },
+          { bg: '#f5f5f5', numColor: '#000', textColor: '#555', big: '4.7 t', text: 'Media de CO₂ por persona al año en España' },
+          { bg: '#000',    numColor: '#fff', textColor: 'rgba(255,255,255,0.6)', big: '2×', text: 'El doble de lo que el planeta puede absorber' },
+          { bg: '#f5f5f5', numColor: '#000', textColor: '#555', big: "5'", text: 'Minutos para calcular tu huella y empezar a cambiar' },
         ].map(({ bg, numColor, textColor, big, text }) => (
           <div key={big} className="stat" style={{ background: bg }}>
             <div style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 900, color: numColor, lineHeight: 1, marginBottom: 12 }}>
@@ -204,7 +219,7 @@ export default function Home() {
               <div key={n}>
                 <div style={{
                   width: 38, height: 38, borderRadius: '50%',
-                  background: '#2d5a27', color: '#fff',
+                  background: '#000', color: '#fff',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 16, fontWeight: 700, marginBottom: 16, flexShrink: 0,
                 }}>

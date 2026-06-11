@@ -8,15 +8,15 @@
   --border-soft: #E8E4DF;
   --text-primary: #1a1a1a;
   --text-muted: #aaa;
-  --verde: #2d5a27;
-  --verde-medio: #7db87a;
-  --verde-oscuro: #1e3d1a;
-  --verde-claro: #c8e6c0;
+  --verde: #000000;
+  --verde-medio: #666666;
+  --verde-oscuro: #111111;
+  --verde-claro: #e5e5e5;
   --naranja: #b07a30;
   --negro: #1a1a1a;
   --blanco: #ffffff;
-  --gris-claro: #f5f5f0;
-  --gris-borde: #e0e0d8;
+  --gris-claro: #f5f5f5;
+  --gris-borde: #e5e5e5;
 }
 
 *, *::before, *::after {
@@ -100,14 +100,14 @@ a {
 
 .hero-h1 {
   font-weight: 900;
-  color: #1a1a1a;
+  color: #000;
   line-height: 1.02;
   letter-spacing: -0.02em;
-  text-transform: uppercase;
+  text-transform: none;
   margin-bottom: 20px;
 }
 
-.hero-h1 span { color: var(--verde); }
+.hero-h1 span { color: #000; }
 
 .hero-sub {
   font-size: 15px;
@@ -150,10 +150,10 @@ a {
 }
 
 .join-input::placeholder { text-transform: uppercase; letter-spacing: 0.1em; color: #ccc; }
-.join-input:focus { border-color: var(--verde); outline: none; }
+.join-input:focus { border-color: #000; outline: none; }
 
 .join-btn {
-  background: var(--verde);
+  background: #000;
   color: #fff;
   border-radius: 8px;
   font-weight: 600;
