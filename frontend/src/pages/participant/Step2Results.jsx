@@ -492,9 +492,9 @@ export default function Step2Results() {
                   t CO₂/año
                 </span>
               </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: '0.8rem', background: 'rgba(255,255,255,0.15)', padding: '0.35rem 0.8rem', borderRadius: 4, fontSize: '0.82rem', fontWeight: 600, color: '#fff' }}>
-                {CATEGORY_MESSAGES[category]}
-              </div>
+              <p style={{ marginTop: '0.6rem', fontSize: 'clamp(1rem, 3.5vw, 1.3rem)', fontWeight: 500, color: 'rgba(255,255,255,0.85)', lineHeight: 1.3 }}>
+  {CATEGORY_MESSAGES[category]}
+</p>
             </div>
           </div>
         </div>
@@ -525,8 +525,8 @@ export default function Step2Results() {
                     </Pie>
                   </PieChart>
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                    <span style={{ fontWeight: 900, fontSize: '1.2rem', lineHeight: 1, color: '#0a0a0a' }}>{carbonTons.toFixed(1)}</span>
-                    <span style={{ fontSize: '0.58rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em' }}>t CO₂</span>
+                    <span style={{ fontWeight: 900, fontSize: '1.3rem', lineHeight: 1.1, color: '#0a0a0a' }}>{carbonTons.toFixed(1)}</span>
+                    <span style={{ fontSize: '0.8rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em' }}>t CO₂</span>
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem 1rem', justifyContent: 'center' }}>
@@ -572,15 +572,17 @@ export default function Step2Results() {
 
         {/* ── public services card ── */}
         <p style={{ fontSize: '0.88rem', color: '#888', marginBottom: '0.6rem', fontStyle: 'italic' }}>
-          ...y a esto hay que sumarle lo que pagamos entre todos 🏛️
+          ...y a esto hay que sumarle lo que pagamos entre todos...
         </p>
-        <div style={{ background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: 8, padding: '1rem 1.25rem', marginBottom: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
-            <span style={{ fontSize: '0.95rem' }}>🏛️</span>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0a0a0a' }}>
-              Servicios públicos — 1,5 t CO₂/año (fijo)
-            </span>
-          </div>
+        <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 8, padding: '10px 12px', marginBottom: '1rem' }}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+    <span style={{ fontSize: 18, width: 22, textAlign: 'center' }}>🏛️</span>
+    <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: '#0a0a0a' }}>Servicios públicos</span>
+    <span style={{ fontSize: 13, fontWeight: 700, color: '#888' }}>1.5t</span>
+    <span style={{ fontSize: 10, color: '#aaa' }}>
+      {carbonTons > 0 ? Math.round((1.5 / (carbonTons + 1.5)) * 100) : 0}%
+    </span>
+  </div>
           <p style={{ fontSize: '0.88rem', color: '#555', margin: 0, lineHeight: 1.65 }}>
             Una parte de tu huella proviene de los servicios que usamos colectivamente: sanidad, educación,
             infraestructuras, administración y defensa. Este coste —estimado en{' '}
