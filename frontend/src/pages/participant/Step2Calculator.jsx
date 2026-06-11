@@ -435,7 +435,6 @@ export default function Step2Calculator() {
   }
 
   function handlePrev() {
-    // Disable auto-advance and cancel any pending timeout when navigating back
     autoAdvanceEnabled.current = false
     if (autoAdvanceRef.current) { clearTimeout(autoAdvanceRef.current); autoAdvanceRef.current = null }
     if (isFirst) return
@@ -445,6 +444,16 @@ export default function Step2Calculator() {
     while (prevA >= 0 && isSkipped(AREAS[prevA].questions[prevQ])) {
       prevQ--
       if (prevQ < 0) { prevA--; if (prevA >= 0) prevQ = AREAS[prevA].questions.length - 1 }
+    }
+    // Clear the answer for the previous single question so the user must
+    // re-select it — this disables the → button and re-enables auto-advance on tap
+    const prevQuestion = AREAS[prevA]?.questions[prevQ]
+    if (prevQuestion?.type === 'single') {
+      setAnswers(prev => {
+        const next = { ...prev }
+        delete next[prevQuestion.id]
+        return next
+      })
     }
     setAreaIndex(prevA)
     setQuestionIndex(prevQ)
