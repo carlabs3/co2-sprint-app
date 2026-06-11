@@ -671,50 +671,6 @@ export default function Step2Results() {
             )}
           </div>
 
-          {/* Team */}
-          <div style={{ flex: '1 1 220px', background: '#fff', borderRadius: 8, border: '1px solid #e5e5e5', padding: '1.25rem 1.5rem', minWidth: 0 }}>
-            <CardTitle>Tu equipo{myGroup ? ` · ${myGroup}` : ''}</CardTitle>
-            {isTeamAlone ? (
-              <p style={{ fontSize: '0.78rem', color: '#aaa', lineHeight: 1.6, margin: 0 }}>
-                Eres el primero de tu equipo en completarla
-              </p>
-            ) : (
-              <>
-                {/* avatars */}
-                <div style={{ display: 'flex', gap: '0.3rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#0a0a0a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.58rem', fontWeight: 700, flexShrink: 0 }}>Tú</div>
-                  {Array.from({ length: Math.min(teamResults.length - 1, 6) }).map((_, i) => (
-                    <div key={i} style={{ width: 32, height: 32, borderRadius: '50%', background: '#f5f5f5', color: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 700, flexShrink: 0 }}>
-                      {String.fromCharCode(65 + i)}
-                    </div>
-                  ))}
-                  {teamResults.length - 1 > 6 && (
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#eee', color: '#888', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700, flexShrink: 0 }}>
-                      +{teamResults.length - 7}
-                    </div>
-                  )}
-                </div>
-                {/* donut + stats */}
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <div style={{ position: 'relative', flexShrink: 0, width: 80, height: 80 }}>
-                    <DonutChart pct={myContrib} color={cfg.color} size={80} />
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                      <span style={{ fontWeight: 900, fontSize: '1rem', lineHeight: 1, color: '#0a0a0a' }}>{myContrib}%</span>
-                      <span style={{ fontSize: '0.52rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: 'center', lineHeight: 1.3 }}>tu parte</span>
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 900, fontSize: '1.35rem', lineHeight: 1, color: '#0a0a0a' }}>{teamAvg.toFixed(1)} t</div>
-                    <div style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>media del equipo</div>
-                    <div style={{ fontSize: '0.88rem', color: '#666', lineHeight: 1.7 }}>
-                      Tu huella: <strong style={{ color: '#0a0a0a' }}>{carbonTons.toFixed(1)} t</strong><br />
-                      Total equipo: <strong style={{ color: '#0a0a0a' }}>{teamTotal.toFixed(1)} t</strong>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
 
           {/* Email */}
           <div style={{ flex: '1 1 200px', background: '#fff', borderRadius: 8, border: '1px solid #e5e5e5', padding: '1.25rem 1.5rem', minWidth: 0 }}>
@@ -762,16 +718,6 @@ export default function Step2Results() {
           </p>
         </div>
 
-        {/* Next phase banner */}
-        {!step3Started ? (
-          <WaitingForFacilitator message="El facilitador está preparando la fase de acciones..." />
-        ) : (
-          <div style={{ background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: 8, padding: '1rem 1.25rem', marginTop: '1rem', textAlign: 'center' }}>
-            <p style={{ fontSize: '0.85rem', color: '#0a0a0a', fontWeight: 600, margin: 0 }}>
-              🌱 La fase de acciones ha comenzado — ve a la pantalla de equipo.
-            </p>
-          </div>
-        )}
       </div>
     </div>
   )
