@@ -83,7 +83,7 @@ function NightsInput({ question, answers, onChange }) {
       {totalNights > 0 && (
         <div style={{ background: '#f5f5f5', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
           <span style={{ fontSize: '11px', color: '#888' }}>Total noches</span>
-          <span style={{ fontSize: '13px', fontWeight: 600, color: '#0a0a0a' }}>{totalNights} noches</span>
+          <span style={{ fontSize: '12px', fontWeight: 600, color: '#0a0a0a' }}>{totalNights} noches</span>
         </div>
       )}
     </div>
@@ -148,7 +148,7 @@ function DrinksInput({ question, answers, onChange }) {
           display: 'flex', justifyContent: 'space-between', marginTop: 2,
         }}>
           <span style={{ fontSize: 11, color: '#aaa' }}>Total por semana</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#0a0a0a' }}>{total} bebidas</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#0a0a0a' }}>{total} bebidas</span>
         </div>
       )}
     </div>
@@ -170,6 +170,7 @@ function groteskCard(isSel, isNone = false, areaColor = '#0a0a0a', extra = {}) {
     fontWeight: isSel ? 500 : 400,
     color: isSel ? 'rgba(0,0,0,0.75)' : isNone ? '#bbb' : '#0a0a0a',
     lineHeight: 1.3,
+    letterSpacing: '-0.01em',
     textAlign: 'center',
     cursor: 'pointer',
     display: 'flex',
@@ -219,7 +220,7 @@ function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
               <div style={{ width: 16, height: 16, borderRadius: 4, flexShrink: 0, border: `1.5px solid ${isSel ? area.color : '#ccc'}`, background: isSel ? area.color : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {isSel && <span style={{ color: 'rgba(0,0,0,0.75)', fontSize: 10, fontWeight: 700, lineHeight: 1 }}>✓</span>}
               </div>
-              <span style={{ fontSize: 14, fontWeight: isSel ? 500 : 400, color: isSel ? 'rgba(0,0,0,0.75)' : '#666', lineHeight: 1.4 }}>{opt.label}</span>
+              <span style={{ fontSize: 14, fontWeight: isSel ? 500 : 400, color: isSel ? 'rgba(0,0,0,0.75)' : '#666', lineHeight: 1.4, letterSpacing: '-0.01em' }}>{opt.label}</span>
             </button>
           )
         })}
@@ -496,11 +497,11 @@ export default function Step2Calculator() {
   if (!isMobile) return (
     <div>
       <SessionClosedBanner onViewPartial={handleViewPartial} />
-      <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', height: 'calc(100dvh - 52px)', overflow: 'hidden' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', height: 'calc(100dvh - 52px)', overflow: 'hidden', fontFamily: "'Instrument Sans', sans-serif" }}>
 
         {/* Sidebar */}
         <div style={{ background: '#ffffff', borderRight: `1px solid ${BORDER}`, padding: '24px 14px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
-          <div style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#bbb', marginBottom: 10, paddingLeft: 8 }}>
+          <div style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#bbb', marginBottom: 10, paddingLeft: 8 }}>
             Áreas
           </div>
           {AREAS.map((a, ai) => {
@@ -520,7 +521,7 @@ export default function Step2Calculator() {
               >
                 <span style={{ fontSize: 17, flexShrink: 0 }}>{a.emoji}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: isAct ? 500 : 400, color: isDone ? '#0a0a0a' : '#0a0a0a' }}>
+                  <div style={{ fontSize: 12.5, fontWeight: isAct ? 500 : 400, color: isDone ? '#0a0a0a' : '#0a0a0a', letterSpacing: '-0.01em' }}>
                     {a.label}
                   </div>
                   {isAct && (
@@ -541,7 +542,7 @@ export default function Step2Calculator() {
         <div style={{ background: '#f5f5f5', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Progress */}
           <div style={{ padding: '20px 28px 0', flexShrink: 0 }}>
-            <p style={{ fontSize: 11, color: '#999', marginBottom: 6, fontWeight: 400 }}>
+            <p style={{ fontSize: 12, color: '#999', marginBottom: 6, fontWeight: 400, letterSpacing: '0.01em' }}>
               Pregunta {questionIndex + 1} de {area.questions.filter(q => !isSkipped(q)).length}
             </p>
             <div style={{ display: 'flex', gap: 4 }}>
@@ -553,7 +554,7 @@ export default function Step2Calculator() {
 
           {/* Question */}
           <div style={{ padding: '22px 28px 14px', flexShrink: 0 }}>
-            <p style={{ fontSize: 22, fontWeight: 800, maxWidth: 560, lineHeight: 1.25, color: '#0a0a0a', margin: 0 }}>
+            <p style={{ fontSize: 22, fontWeight: 700, maxWidth: 560, lineHeight: 1.4, letterSpacing: '-0.01em', color: '#0a0a0a', margin: 0 }}>
               {question.text}
             </p>
             {question.id === 'heating' && answers.homeType && (
@@ -562,7 +563,7 @@ export default function Step2Calculator() {
               </p>
             )}
             {question.info && (
-              <p style={{ fontSize: 12, color: '#999', margin: '6px 0 0', fontWeight: 400 }}>{question.info}</p>
+              <p style={{ fontSize: 14, color: '#999', margin: '6px 0 0', fontWeight: 400, lineHeight: 1.4 }}>{question.info}</p>
             )}
           </div>
 
@@ -601,7 +602,7 @@ export default function Step2Calculator() {
   return (
     <div>
       <SessionClosedBanner onViewPartial={handleViewPartial} />
-      <div style={{ height: 'calc(100dvh - 52px)', background: '#f5f5f5', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ height: 'calc(100dvh - 52px)', background: '#f5f5f5', display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: "'Instrument Sans', sans-serif" }}>
 
         {/* Area tabs — emoji only */}
         <div style={{ display: 'flex', padding: '0 16px', borderBottom: `1px solid ${BORDER}`, background: '#f5f5f5', flexShrink: 0 }}>
@@ -632,7 +633,7 @@ export default function Step2Calculator() {
 
         {/* Progress — "Pregunta X de Y" + bar */}
         <div style={{ padding: '18px 18px 0', flexShrink: 0, background: '#f5f5f5', marginBottom: 20 }}>
-          <p style={{ fontSize: 16, color: '#999', marginBottom: 6, fontWeight: 400 }}>
+          <p style={{ fontSize: 12, color: '#999', marginBottom: 6, fontWeight: 400, letterSpacing: '0.01em' }}>
             Pregunta {questionIndex + 1} de {area.questions.filter(q => !isSkipped(q)).length}
           </p>
           <div style={{ display: 'flex', gap: 4 }}>
@@ -642,22 +643,22 @@ export default function Step2Calculator() {
           </div>
         </div>
 
-        {/* Question */}
-        <div style={{ padding: '18px 18px 18px', flexShrink: 0, background: '#f5f5f5' }}>
-          <p style={{ fontSize: 22, fontWeight: 600, color: '#0a0a0a', lineHeight: 1.25, margin: 0 }}>
-            {question.text}
-          </p>
-          {question.info && (
-            <p style={{ fontSize: 16, color: '#999', marginTop: 6, fontWeight: 400 }}>
-              {question.info}
-            </p>
-          )}
-          {question.id === 'heating' && answers.homeType && (
-            <p style={{ fontSize: 12, color: area.color, marginTop: 4, fontWeight: 400 }}>
-              Para tu {homeTypeLabels[answers.homeType]}
-            </p>
-          )}
-        </div>
+      {/* Question */}
+<div style={{ padding: '18px 18px 18px', flexShrink: 0, background: '#f5f5f5' }}>
+  <p style={{ fontSize: 22, fontWeight: 700, color: '#0a0a0a', lineHeight: 1.4, margin: 0, letterSpacing: '-0.01em' }}>
+    {question.text}
+  </p>
+  {question.info && (
+    <p style={{ fontSize: 14, color: '#999', marginTop: 6, fontWeight: 400, lineHeight: 1.4 }}>
+      {question.info}
+    </p>
+  )}
+  {question.id === 'heating' && answers.homeType && (
+    <p style={{ fontSize: 12, color: area.color, marginTop: 4, fontWeight: 400 }}>
+      Para tu {homeTypeLabels[answers.homeType]}
+    </p>
+  )}
+</div>
 
         {/* Banner individual — solo en primera pregunta */}
         {isFirst && (
