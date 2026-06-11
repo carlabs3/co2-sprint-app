@@ -283,7 +283,8 @@ export default function Step2Calculator() {
   const [submitted, setSubmitted]         = useState(false)
   const [isMobile, setIsMobile]           = useState(() => window.innerWidth <= 768)
   const submittedResultRef                = useRef(null)
-  const autoAdvanceRef                    = useRef(null) // pending auto-advance timeout
+  const autoAdvanceRef                    = useRef(null)   // pending auto-advance timeout id
+  const autoAdvanceEnabled                = useRef(false)  // true only after a manual selection
   const STORAGE_KEY                       = `co2sprint_progress_${code}`
   const PARTICIPANT_KEY                   = `co2sprint_participant_${code}`
 
@@ -355,16 +356,18 @@ export default function Step2Calculator() {
   }
 
   function handleSelect(questionId, value) {
+    autoAdvanceEnabled.current = true // user made a manual selection
     const newAnswers = { ...answers, [questionId]: value }
     setAnswers(newAnswers)
-    // Auto-advance for all single questions (including last → auto-submits)
-    // Cancel any previous pending advance before scheduling a new one
     if (question.type === 'single') {
       if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current)
       autoAdvanceRef.current = setTimeout(() => {
         autoAdvanceRef.current = null
-        handleNext(newAnswers)
-      }, 500)
+        if (autoAdvanceEnabled.current) {
+          autoAdvanceEnabled.current = false
+          handleNext(newAnswers)
+        }
+      }, 400)
     }
   }
 
@@ -432,7 +435,8 @@ export default function Step2Calculator() {
   }
 
   function handlePrev() {
-    // Cancel any pending auto-advance before navigating back
+    // Disable auto-advance and cancel any pending timeout when navigating back
+    autoAdvanceEnabled.current = false
     if (autoAdvanceRef.current) { clearTimeout(autoAdvanceRef.current); autoAdvanceRef.current = null }
     if (isFirst) return
     let prevQ = questionIndex - 1
