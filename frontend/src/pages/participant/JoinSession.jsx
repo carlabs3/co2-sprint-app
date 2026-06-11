@@ -9,7 +9,7 @@ const GENDERS    = ['Mujer', 'Hombre', 'No binario', 'Prefiero no decirlo']
 const s = {
   page: {
     flex: 1,
-    background: '#f5f5f0',
+    background: '#f5f5f5',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -17,11 +17,12 @@ const s = {
     minHeight: 'calc(100vh - 60px)',
   },
   card: {
-    background: '#fff',
+    background: '#ffffff',
     width: '100%',
     maxWidth: '390px',
-    borderRadius: '12px',
-    padding: '2.5rem 2rem',
+    borderRadius: '16px',
+    border: '1px solid #e5e5e5',
+    padding: '32px',
   },
   logo: {
     fontWeight: 900,
@@ -29,8 +30,9 @@ const s = {
     letterSpacing: '-0.02em',
     marginBottom: '0.3rem',
     textTransform: 'uppercase',
+    color: '#0a0a0a',
   },
-  asterisk: { color: '#2d5a27' },
+  asterisk: { color: '#0a0a0a' },
   tagline: {
     fontSize: '0.75rem',
     color: '#999',
@@ -41,7 +43,7 @@ const s = {
   field: { marginBottom: '1.8rem' },
   label: {
     display: 'block',
-    fontSize: '0.72rem',
+    fontSize: '11px',
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: '0.1em',
@@ -56,27 +58,29 @@ const s = {
   },
   input: {
     width: '100%',
-    border: 'none',
-    borderBottom: '1px solid #e0e0d8',
-    padding: '0.6rem 0',
+    border: '1px solid #e5e5e5',
+    borderRadius: '12px',
+    padding: '0.6rem 0.75rem',
     fontSize: '1.1rem',
-    background: 'transparent',
+    background: '#ffffff',
     outline: 'none',
     letterSpacing: '0.05em',
     fontWeight: 700,
+    color: '#0a0a0a',
+    boxSizing: 'border-box',
   },
   select: {
     width: '100%',
-    border: 'none',
-    borderBottom: '1px solid #e0e0d8',
-    padding: '0.6rem 0',
+    border: '1px solid #e5e5e5',
+    borderRadius: '12px',
+    padding: '0.6rem 0.75rem',
     fontSize: '1rem',
-    background: 'transparent',
+    background: '#ffffff',
     outline: 'none',
     letterSpacing: '0.03em',
     fontWeight: 700,
     appearance: 'none',
-    paddingRight: '1rem',
+    boxSizing: 'border-box',
   },
   groupRow: {
     display: 'flex',
@@ -89,21 +93,23 @@ const s = {
     fontWeight: 700,
     letterSpacing: '0.06em',
     borderRadius: '999px',
-    background: active ? '#2d5a27' : '#f0f0f0',
-    color: active ? '#fff' : '#666',
-    border: 'none',
+    background: active ? '#0a0a0a' : '#f5f5f5',
+    color: active ? '#fff' : '#0a0a0a',
+    border: '1px solid #e5e5e5',
     cursor: 'pointer',
     transition: 'all 0.15s',
   }),
   btn: {
     width: '100%',
-    background: '#2d5a27',
+    background: '#0a0a0a',
     color: '#fff',
     padding: '1rem',
     fontSize: '0.9rem',
     letterSpacing: '0.1em',
-    borderRadius: '2px',
+    borderRadius: '999px',
     marginTop: '0.5rem',
+    border: 'none',
+    cursor: 'pointer',
   },
   error: {
     fontSize: '0.78rem',
@@ -111,7 +117,7 @@ const s = {
     marginTop: '0.35rem',
   },
   fieldError: {
-    borderBottom: '1px solid #cc4444',
+    border: '1px solid #cc4444',
   },
 }
 
@@ -203,7 +209,7 @@ export default function JoinSession() {
           CO2 Sprint <span style={s.asterisk}>*</span>
         </div>
         <p style={s.tagline}>Calculadora de huella de carbono</p>
-        <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px', lineHeight: 1.5 }}>
+        <p style={{ fontSize: '12px', color: '#666', marginBottom: '16px', lineHeight: 1.5 }}>
           Esta calculadora mide tu huella de carbono individual — no la de tu familia ni tu hogar compartido.
         </p>
 
@@ -252,7 +258,7 @@ export default function JoinSession() {
                 id="age"
                 value={age}
                 onChange={e => { setAge(e.target.value); setAgeError('') }}
-                style={{ ...s.select, color: age ? '#1a1a1a' : '#aaa', ...(ageError ? s.fieldError : {}) }}
+                style={{ ...s.select, color: age ? '#0a0a0a' : '#aaa', ...(ageError ? s.fieldError : {}) }}
               >
                 <option value="">—</option>
                 {AGE_RANGES.map(r => <option key={r} value={r}>{r}</option>)}
@@ -265,7 +271,7 @@ export default function JoinSession() {
                 id="gender"
                 value={gender}
                 onChange={e => { setGender(e.target.value); setGenderError('') }}
-                style={{ ...s.select, color: gender ? '#1a1a1a' : '#aaa', ...(genderError ? s.fieldError : {}) }}
+                style={{ ...s.select, color: gender ? '#0a0a0a' : '#aaa', ...(genderError ? s.fieldError : {}) }}
               >
                 <option value="">—</option>
                 {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
@@ -274,7 +280,7 @@ export default function JoinSession() {
             </div>
           </div>
 
-          <p style={{ fontSize: '11px', color: '#888', lineHeight: 1.5, marginBottom: '16px', marginTop: 0 }}>
+          <p style={{ fontSize: '11px', color: '#999', lineHeight: 1.5, marginBottom: '16px', marginTop: 0 }}>
             Los datos de edad, género y huella de carbono se recogen de forma anónima
             para los resultados del taller. No se asocian a ningún nombre ni se comparten
             con terceros.

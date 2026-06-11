@@ -166,15 +166,15 @@ export default function Step2Rankings() {
 
   // ── Draft ─────────────────────────────────────────────────────────────────────
   if (sessionStatus === 'draft') return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 52px)', background: '#fff', gap: '1.5rem', padding: '2.5rem 2rem', textAlign: 'center' }}>
-      <div style={{ padding: '16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: '12px' }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 52px)', background: '#f5f5f5', gap: '1.5rem', padding: '2.5rem 2rem', textAlign: 'center' }}>
+      <div style={{ padding: '16px', background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '16px' }}>
         <QRCodeSVG value={joinUrl} size={180} fgColor="#000000" bgColor="#ffffff" level="M" />
       </div>
-      <div style={{ fontWeight: 900, fontSize: 'clamp(2rem, 6vw, 3.5rem)', letterSpacing: '0.1em', color: '#000', lineHeight: 1 }}>{code}</div>
-      <p style={{ fontSize: '0.9rem', color: '#888', maxWidth: 360, lineHeight: 1.65 }}>
+      <div style={{ fontWeight: 900, fontSize: 'clamp(2rem, 6vw, 3.5rem)', letterSpacing: '0.1em', color: '#0a0a0a', lineHeight: 1 }}>{code}</div>
+      <p style={{ fontSize: '0.9rem', color: '#999', maxWidth: 360, lineHeight: 1.65 }}>
         La sesión está en borrador. Actívala para que los participantes puedan entrar.
       </p>
-      <button onClick={handleActivate} style={{ background: '#000', color: '#fff', border: 'none', padding: '0.9rem 2.5rem', fontSize: '0.85rem', fontWeight: 600, borderRadius: '8px', cursor: 'pointer' }}>
+      <button onClick={handleActivate} style={{ background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.9rem 2.5rem', fontSize: '0.85rem', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' }}>
         Activar sesión →
       </button>
     </div>
@@ -223,127 +223,129 @@ export default function Step2Rankings() {
       }
 
       return (
-        <div style={{ flex: 1, padding: '2rem', overflow: 'auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-            <h1 style={{ fontWeight: 900, fontSize: '1.4rem', color: '#000' }}>Fase de acciones</h1>
-            <span style={{ fontSize: '0.75rem', color: '#888', background: '#f5f5f5', padding: '0.3rem 0.85rem', borderRadius: 999, border: '1px solid #e5e5e5' }}>
-              {confirmedCount}/{sessionGroups.length} equipos confirmados
-            </span>
-          </div>
+        <div style={{ flex: 1, padding: '2rem', overflow: 'auto', background: '#f5f5f5' }}>
+          <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e5e5e5', padding: '2rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+              <h1 style={{ fontWeight: 900, fontSize: '1.4rem', color: '#0a0a0a' }}>Fase de acciones</h1>
+              <span style={{ fontSize: '0.75rem', color: '#666', background: '#f5f5f5', padding: '0.3rem 0.85rem', borderRadius: 999, border: '1px solid #e5e5e5' }}>
+                {confirmedCount}/{sessionGroups.length} equipos confirmados
+              </span>
+            </div>
 
-          {/* Team tabs */}
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-            {sessionGroups.map(g => {
-              const isActive = activeTeamTab === g
-              const isConf = teamConfirmations[g]?.confirmed
+            {/* Team tabs */}
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+              {sessionGroups.map(g => {
+                const isActive = activeTeamTab === g
+                const isConf = teamConfirmations[g]?.confirmed
+                return (
+                  <button key={g} onClick={() => setActiveTeamTab(g)} style={{
+                    padding: '0.4rem 1rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600,
+                    background: isActive ? '#0a0a0a' : '#ffffff',
+                    color: isActive ? '#fff' : (isConf ? '#16a34a' : '#666'),
+                    border: `1px solid ${isActive ? '#0a0a0a' : (isConf ? '#bbf7d0' : '#e5e5e5')}`,
+                    cursor: 'pointer',
+                  }}>
+                    {isConf ? '✓ ' : ''}{g}
+                  </button>
+                )
+              })}
+            </div>
+
+            {activeTeamTab && (() => {
+              const teamData = step3Data?.teams?.find(t => t.group === activeTeamTab)
+              const selected = teamSelections[activeTeamTab] || []
+              const conf = teamConfirmations[activeTeamTab]
+              const budget = selected.reduce((s, id) => { const a = ACTIONS.find(x => x.id === id); return s + (a?.cost || 0) }, 0)
+
               return (
-                <button key={g} onClick={() => setActiveTeamTab(g)} style={{
-                  padding: '0.4rem 1rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600,
-                  background: isActive ? '#000' : '#fff',
-                  color: isActive ? '#fff' : (isConf ? '#16a34a' : '#555'),
-                  border: `1.5px solid ${isActive ? '#000' : (isConf ? '#bbf7d0' : '#e5e5e5')}`,
-                  cursor: 'pointer',
-                }}>
-                  {isConf ? '✓ ' : ''}{g}
-                </button>
-              )
-            })}
-          </div>
-
-          {activeTeamTab && (() => {
-            const teamData = step3Data?.teams?.find(t => t.group === activeTeamTab)
-            const selected = teamSelections[activeTeamTab] || []
-            const conf = teamConfirmations[activeTeamTab]
-            const budget = selected.reduce((s, id) => { const a = ACTIONS.find(x => x.id === id); return s + (a?.cost || 0) }, 0)
-
-            return (
-              <div style={{ maxWidth: 680 }}>
-                {/* Budget bar */}
-                <div style={{ background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: 10, padding: '0.85rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <span style={{ fontSize: '0.72rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Puntos usados</span>
-                  <div style={{ flex: 1, height: 8, background: '#e5e5e5', borderRadius: 4, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${(budget / MAX_POINTS) * 100}%`, background: budget >= MAX_POINTS ? '#ef4444' : '#000', borderRadius: 4, transition: 'width 0.3s ease' }} />
+                <div style={{ maxWidth: 680 }}>
+                  {/* Budget bar */}
+                  <div style={{ background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '0.85rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Puntos usados</span>
+                    <div style={{ flex: 1, height: 8, background: '#e5e5e5', borderRadius: 4, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${(budget / MAX_POINTS) * 100}%`, background: budget >= MAX_POINTS ? '#ef4444' : '#0a0a0a', borderRadius: 4, transition: 'width 0.3s ease' }} />
+                    </div>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: budget >= MAX_POINTS ? '#ef4444' : '#0a0a0a' }}>{budget}/{MAX_POINTS}</span>
                   </div>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: budget >= MAX_POINTS ? '#ef4444' : '#000' }}>{budget}/{MAX_POINTS}</span>
-                </div>
 
-                {/* Area filter */}
-                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                  {[{ id: 'all', label: 'Todas' }, ...['transport','energy','food','consumption','waste'].map(a => ({ id: a, label: AREA_LABEL[a] }))].map(f => (
-                    <button key={f.id} onClick={() => setFilter3Area(f.id)} style={{
-                      padding: '0.25rem 0.75rem', borderRadius: 999, fontSize: '0.7rem', fontWeight: 600,
-                      background: filter3Area === f.id ? '#000' : '#fff',
-                      color: filter3Area === f.id ? '#fff' : '#666',
-                      border: `1px solid ${filter3Area === f.id ? '#000' : '#e5e5e5'}`,
-                      cursor: 'pointer',
-                    }}>{f.label}</button>
-                  ))}
-                </div>
+                  {/* Area filter */}
+                  <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                    {[{ id: 'all', label: 'Todas' }, ...['transport','energy','food','consumption','waste'].map(a => ({ id: a, label: AREA_LABEL[a] }))].map(f => (
+                      <button key={f.id} onClick={() => setFilter3Area(f.id)} style={{
+                        padding: '0.25rem 0.75rem', borderRadius: 999, fontSize: '0.7rem', fontWeight: 600,
+                        background: filter3Area === f.id ? '#0a0a0a' : 'transparent',
+                        color: filter3Area === f.id ? '#fff' : '#666',
+                        border: `1px solid ${filter3Area === f.id ? '#0a0a0a' : '#e5e5e5'}`,
+                        cursor: 'pointer',
+                      }}>{f.label}</button>
+                    ))}
+                  </div>
 
-                {/* Actions list */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                  {ACTIONS.filter(a => filter3Area === 'all' || a.area === filter3Area).map(a => {
-                    const isSel = selected.includes(a.id)
-                    const wouldExceed = !isSel && (budget + a.cost) > MAX_POINTS
-                    return (
-                      <div key={a.id}
-                        onClick={() => {
-                          if (wouldExceed) return
-                          setTeamSelections(prev => {
-                            const cur = prev[activeTeamTab] || []
-                            return { ...prev, [activeTeamTab]: isSel ? cur.filter(x => x !== a.id) : [...cur, a.id] }
-                          })
-                        }}
-                        style={{
-                          padding: '0.85rem 1rem', borderRadius: 10, cursor: wouldExceed ? 'default' : 'pointer',
-                          border: `1.5px solid ${isSel ? '#000' : '#e5e5e5'}`,
-                          background: isSel ? '#000' : (wouldExceed ? '#fafafa' : '#fff'),
-                          opacity: wouldExceed ? 0.45 : 1,
-                          display: 'flex', alignItems: 'center', gap: '0.75rem',
-                          transition: 'all 0.15s ease',
-                        }}
-                      >
-                        <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: '0.8rem', fontWeight: 600, color: isSel ? '#fff' : '#000', lineHeight: 1.3 }}>{a.label}</div>
-                          {a.description && <div style={{ fontSize: '0.68rem', color: isSel ? 'rgba(255,255,255,0.65)' : '#aaa', marginTop: '0.2rem' }}>{a.description}</div>}
+                  {/* Actions list */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                    {ACTIONS.filter(a => filter3Area === 'all' || a.area === filter3Area).map(a => {
+                      const isSel = selected.includes(a.id)
+                      const wouldExceed = !isSel && (budget + a.cost) > MAX_POINTS
+                      return (
+                        <div key={a.id}
+                          onClick={() => {
+                            if (wouldExceed) return
+                            setTeamSelections(prev => {
+                              const cur = prev[activeTeamTab] || []
+                              return { ...prev, [activeTeamTab]: isSel ? cur.filter(x => x !== a.id) : [...cur, a.id] }
+                            })
+                          }}
+                          style={{
+                            padding: '0.85rem 1rem', borderRadius: '12px', cursor: wouldExceed ? 'default' : 'pointer',
+                            border: `1px solid ${isSel ? '#0a0a0a' : '#e5e5e5'}`,
+                            background: isSel ? '#f5f5f5' : (wouldExceed ? '#fafafa' : '#ffffff'),
+                            opacity: wouldExceed ? 0.45 : 1,
+                            display: 'flex', alignItems: 'center', gap: '0.75rem',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</div>
+                            {a.description && <div style={{ fontSize: '0.68rem', color: '#666', marginTop: '0.2rem' }}>{a.description}</div>}
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, flexShrink: 0 }}>
+                            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#666' }}>{'★'.repeat(a.cost)}</span>
+                            <span style={{ fontSize: '0.65rem', color: '#666' }}>−{a.co2Reduction} kg</span>
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, flexShrink: 0 }}>
-                          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: isSel ? 'rgba(255,255,255,0.8)' : '#888' }}>{'★'.repeat(a.cost)}</span>
-                          <span style={{ fontSize: '0.65rem', color: isSel ? 'rgba(255,255,255,0.65)' : '#aaa' }}>−{a.co2Reduction} kg</span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+                      )
+                    })}
+                  </div>
 
+                  <button
+                    onClick={() => handleConfirmTeam(activeTeamTab)}
+                    disabled={selected.length === 0}
+                    style={{
+                      width: '100%', padding: '0.9rem', borderRadius: '999px', border: 'none',
+                      background: selected.length > 0 ? '#0a0a0a' : '#f5f5f5',
+                      color: selected.length > 0 ? '#fff' : '#999',
+                      fontWeight: 600, fontSize: '0.85rem', cursor: selected.length > 0 ? 'pointer' : 'default',
+                    }}
+                  >
+                    {conf?.confirmed ? '✓ Confirmar de nuevo — ' : ''}
+                    Confirmar acciones de {activeTeamTab} →
+                  </button>
+                </div>
+              )
+            })()}
+
+            {allConfirmed && (
+              <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e5e5' }}>
                 <button
-                  onClick={() => handleConfirmTeam(activeTeamTab)}
-                  disabled={selected.length === 0}
-                  style={{
-                    width: '100%', padding: '0.9rem', borderRadius: 8, border: 'none',
-                    background: selected.length > 0 ? '#000' : '#e5e5e5',
-                    color: selected.length > 0 ? '#fff' : '#aaa',
-                    fontWeight: 600, fontSize: '0.85rem', cursor: selected.length > 0 ? 'pointer' : 'default',
-                  }}
+                  onClick={handleRevealStep3}
+                  style={{ width: '100%', maxWidth: 680, padding: '1rem', background: '#0a0a0a', color: '#fff', border: 'none', borderRadius: '999px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
                 >
-                  {conf?.confirmed ? '✓ Confirmar de nuevo — ' : ''}
-                  Confirmar acciones de {activeTeamTab} →
+                  Revelar huella a todos los equipos →
                 </button>
               </div>
-            )
-          })()}
-
-          {allConfirmed && (
-            <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e5e5' }}>
-              <button
-                onClick={handleRevealStep3}
-                style={{ width: '100%', maxWidth: 680, padding: '1rem', background: '#000', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
-              >
-                Revelar huella a todos los equipos →
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )
     }
@@ -409,22 +411,22 @@ export default function Step2Rankings() {
     }, {})
 
     return (
-      <div style={{ flex: 1, padding: '2rem', overflow: 'auto' }}>
-        <h1 style={{ fontWeight: 900, fontSize: '1.4rem', color: '#000', marginBottom: '1.5rem' }}>Resultados por equipo</h1>
+      <div style={{ flex: 1, padding: '2rem', overflow: 'auto', background: '#f5f5f5' }}>
+        <h1 style={{ fontWeight: 900, fontSize: '1.4rem', color: '#0a0a0a', marginBottom: '1.5rem' }}>Resultados por equipo</h1>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
           {/* Column 1: Teams */}
           <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', marginBottom: '0.85rem' }}>Equipos</div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', marginBottom: '0.85rem' }}>Equipos</div>
             {sortedTeams.map((team, i) => {
               const areaAvg  = getGroupAreaAvg(team.group)
               const areaAfter = getGroupAreaAfter(team.group, areaAvg)
               return (
-                <div key={team.group} style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 10, padding: '0.85rem 0.9rem', marginBottom: '0.6rem' }}>
+                <div key={team.group} style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '0.85rem 0.9rem', marginBottom: '0.6rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: 900, fontSize: '1rem', color: '#000', width: 22 }}>#{i + 1}</span>
-                    <span style={{ fontWeight: 700, fontSize: '0.9rem', flex: 1, color: '#000' }}>{team.group}</span>
+                    <span style={{ fontWeight: 900, fontSize: '1rem', color: '#0a0a0a', width: 22 }}>#{i + 1}</span>
+                    <span style={{ fontWeight: 700, fontSize: '0.9rem', flex: 1, color: '#0a0a0a' }}>{team.group}</span>
                     {team.totalReduction > 0 && (
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#16a34a', background: '#f0fdf4', padding: '0.2rem 0.65rem', borderRadius: 999, border: '1px solid #bbf7d0' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#16a34a', background: 'rgba(74,222,128,0.1)', padding: '0.2rem 0.65rem', borderRadius: '999px' }}>
                         −{(team.totalReduction / 1000).toFixed(1)} t
                       </span>
                     )}
@@ -438,11 +440,11 @@ export default function Step2Rankings() {
 
           {/* Column 2: Global distribution */}
           <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', marginBottom: '0.85rem' }}>Distribución global</div>
-            <div style={{ padding: '0.85rem 0.9rem', background: '#fafafa', borderRadius: '10px', border: '1px solid #e5e5e5', marginBottom: '0.75rem' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', marginBottom: '0.85rem' }}>Distribución global</div>
+            <div style={{ padding: '0.85rem 0.9rem', background: '#ffffff', borderRadius: '12px', border: '1px solid #e5e5e5', marginBottom: '0.75rem' }}>
               <StackedBar areaAvg={globalAreaAvg} total={globalBefore} maxVal={globalBefore} label="Media antes" />
               <StackedBar areaAvg={globalAreaAvg} total={globalAfter}  maxVal={globalBefore} label="Media después" muted />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', padding: '0.5rem', background: '#f0fdf4', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', padding: '0.5rem', background: 'rgba(74,222,128,0.1)', borderRadius: '999px' }}>
                 <span style={{ fontWeight: 700, fontSize: '1rem', color: '#16a34a' }}>−{(globalBefore - globalAfter).toFixed(1)} t</span>
                 <span style={{ fontSize: '0.65rem', color: '#16a34a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ahorro medio</span>
               </div>
@@ -451,7 +453,7 @@ export default function Step2Rankings() {
               {AREA_ORDER.map(area => (
                 <div key={area} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.72rem' }}>
                   <div style={{ width: 10, height: 10, borderRadius: 2, background: A_COLORS[area], flexShrink: 0 }} />
-                  <span style={{ flex: 1, color: '#555' }}>{AREA_LABEL[area]}</span>
+                  <span style={{ flex: 1, color: '#666' }}>{AREA_LABEL[area]}</span>
                 </div>
               ))}
             </div>
@@ -459,7 +461,7 @@ export default function Step2Rankings() {
             {!winnersRevealed && step3Data.allConfirmedFinal && (
               <button
                 onClick={handleRevealWinners}
-                style={{ width: '100%', marginTop: '1.5rem', padding: '0.9rem', background: '#000', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer' }}
+                style={{ width: '100%', marginTop: '1.5rem', padding: '0.9rem', background: '#0a0a0a', color: '#fff', border: 'none', borderRadius: '999px', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer' }}
               >
                 Revelar ganadores →
               </button>
@@ -468,12 +470,12 @@ export default function Step2Rankings() {
             {/* Action stats */}
             {step3Data.actionStats?.length > 0 && (
               <div style={{ marginTop: '1.5rem' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', marginBottom: '0.6rem' }}>Acciones más elegidas</div>
+                <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', marginBottom: '0.6rem' }}>Acciones más elegidas</div>
                 {step3Data.actionStats.slice(0, 6).map(a => (
-                  <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '5px 0', borderBottom: '0.5px solid #f0f0f0' }}>
+                  <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '5px 0', borderBottom: '1px solid #f5f5f5' }}>
                     <span style={{ fontSize: '1rem' }}>{AREA_EMOJI[a.area]}</span>
-                    <span style={{ flex: 1, fontSize: '0.72rem', color: '#333' }}>{a.label}</span>
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700, background: '#f5f5f5', padding: '2px 8px', borderRadius: 999, border: '1px solid #e5e5e5', color: '#555' }}>
+                    <span style={{ flex: 1, fontSize: '0.72rem', color: '#0a0a0a' }}>{a.label}</span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, background: '#f5f5f5', padding: '2px 8px', borderRadius: '999px', color: '#0a0a0a' }}>
                       {a.count}/{sessionGroups.length}
                     </span>
                   </div>
@@ -488,20 +490,20 @@ export default function Step2Rankings() {
 
   // ── Sidebar ───────────────────────────────────────────────────────────────────
   const sidebar = (
-    <div style={{ width: '280px', flexShrink: 0, borderRight: '1px solid #e5e5e5', padding: '2rem 1.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', background: '#fff' }}>
+    <div style={{ width: '280px', flexShrink: 0, borderRight: '1px solid #e5e5e5', padding: '2rem 1.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', background: '#ffffff' }}>
       {/* QR */}
-      <div style={{ padding: '12px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: '12px' }}>
+      <div style={{ padding: '12px', background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '12px' }}>
         <QRCodeSVG value={joinUrl} size={160} fgColor="#000000" bgColor="#ffffff" level="M" />
       </div>
-      <div style={{ fontWeight: 900, fontSize: '1.5rem', letterSpacing: '0.1em', color: '#000' }}>{code}</div>
-      <div style={{ fontSize: '0.62rem', color: '#bbb', textAlign: 'center', letterSpacing: '0.04em', wordBreak: 'break-all' }}>{joinUrl}</div>
+      <div style={{ fontWeight: 900, fontSize: '1.5rem', letterSpacing: '0.1em', color: '#0a0a0a' }}>{code}</div>
+      <div style={{ fontSize: '0.62rem', color: '#999', textAlign: 'center', letterSpacing: '0.04em', wordBreak: 'break-all' }}>{joinUrl}</div>
 
       <div style={{ width: '100%', borderTop: '1px solid #e5e5e5' }} />
 
       {/* Counter */}
       <div style={{ textAlign: 'center', padding: '0.25rem 0' }}>
-        <div style={{ fontSize: 32, fontWeight: 900, color: '#000', lineHeight: 1 }}>{completed}</div>
-        <div style={{ fontSize: 10, color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>
+        <div style={{ fontSize: 32, fontWeight: 900, color: '#0a0a0a', lineHeight: 1 }}>{completed}</div>
+        <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>
           Huellas recibidas
         </div>
       </div>
@@ -510,14 +512,15 @@ export default function Step2Rankings() {
 
       {/* Step toggle */}
       {revealed && (
-        <div style={{ display: 'flex', gap: '0.4rem', width: '100%', background: '#f5f5f5', borderRadius: 999, padding: '3px' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', width: '100%' }}>
           <button
             onClick={() => setActiveStep(2)}
             style={{
               flex: 1, padding: '0.45rem', fontSize: '0.72rem', fontWeight: 700,
-              background: activeStep === 2 ? '#000' : 'transparent',
-              color: activeStep === 2 ? '#fff' : '#888',
-              border: 'none', borderRadius: 999, cursor: 'pointer',
+              background: activeStep === 2 ? '#0a0a0a' : 'transparent',
+              color: activeStep === 2 ? '#fff' : '#666',
+              border: `1px solid ${activeStep === 2 ? '#0a0a0a' : '#e5e5e5'}`,
+              borderRadius: '999px', cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
           >
@@ -527,9 +530,10 @@ export default function Step2Rankings() {
             onClick={() => { setActiveStep(3); if (!step3Started) handleStartStep3() }}
             style={{
               flex: 1, padding: '0.45rem', fontSize: '0.72rem', fontWeight: 700,
-              background: activeStep === 3 ? '#000' : 'transparent',
-              color: activeStep === 3 ? '#fff' : '#888',
-              border: 'none', borderRadius: 999, cursor: 'pointer',
+              background: activeStep === 3 ? '#0a0a0a' : 'transparent',
+              color: activeStep === 3 ? '#fff' : '#666',
+              border: `1px solid ${activeStep === 3 ? '#0a0a0a' : '#e5e5e5'}`,
+              borderRadius: '999px', cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
           >
@@ -543,7 +547,7 @@ export default function Step2Rankings() {
         <>
           <button
             disabled
-            style={{ width: '100%', background: '#f5f5f5', color: '#888', border: '1px solid #e5e5e5', padding: '0.8rem', fontSize: '0.78rem', fontWeight: 600, borderRadius: '8px', cursor: 'default' }}
+            style={{ width: '100%', background: '#f5f5f5', color: '#999', border: '1px solid #e5e5e5', padding: '0.8rem', fontSize: '0.78rem', fontWeight: 600, borderRadius: '999px', cursor: 'default' }}
           >
             Calculadora activa
           </button>
@@ -553,11 +557,11 @@ export default function Step2Rankings() {
             disabled={revealed}
             style={{
               width: '100%',
-              background: revealed ? '#f5f5f5' : '#000',
-              color: revealed ? '#888' : '#fff',
+              background: revealed ? '#f5f5f5' : '#0a0a0a',
+              color: revealed ? '#999' : '#fff',
               border: revealed ? '1px solid #e5e5e5' : 'none',
               padding: '0.8rem', fontSize: '0.78rem', fontWeight: 600,
-              borderRadius: '8px', cursor: revealed ? 'default' : 'pointer',
+              borderRadius: '999px', cursor: revealed ? 'default' : 'pointer',
             }}
           >
             {revealed ? 'Resultados revelados' : `Revelar resultados (${completed})`}
@@ -566,7 +570,7 @@ export default function Step2Rankings() {
           {revealed && !step3Started && (
             <button
               onClick={() => { setActiveStep(3); handleStartStep3() }}
-              style={{ width: '100%', background: '#000', color: '#fff', border: 'none', padding: '0.85rem', fontSize: '0.78rem', fontWeight: 600, borderRadius: '8px', cursor: 'pointer' }}
+              style={{ width: '100%', background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.85rem', fontSize: '0.78rem', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' }}
             >
               → Iniciar fase de acciones
             </button>
@@ -578,7 +582,7 @@ export default function Step2Rankings() {
       {activeStep === 3 && (
         <>
           <div style={{ width: '100%' }}>
-            <div style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
+            <div style={{ fontSize: '0.68rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
               Equipos
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
@@ -588,7 +592,7 @@ export default function Step2Rankings() {
                   <span key={g} style={{
                     padding: '0.3rem 0.65rem', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700,
                     background: conf ? '#f0fdf4' : '#f5f5f5',
-                    color: conf ? '#16a34a' : '#aaa',
+                    color: conf ? '#16a34a' : '#999',
                     border: `1px solid ${conf ? '#bbf7d0' : '#e5e5e5'}`,
                   }}>
                     {conf ? '✓ ' : ''}{g}
@@ -601,21 +605,21 @@ export default function Step2Rankings() {
           {!step3Revealed && allConfirmed && (
             <button
               onClick={handleRevealStep3}
-              style={{ width: '100%', background: '#000', color: '#fff', border: 'none', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '8px', cursor: 'pointer' }}
+              style={{ width: '100%', background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' }}
             >
               Revelar a todos →
             </button>
           )}
 
           {step3Revealed && (
-            <button disabled style={{ width: '100%', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '8px', cursor: 'default' }}>
+            <button disabled style={{ width: '100%', background: '#f5f5f5', color: '#999', border: '1px solid #e5e5e5', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '999px', cursor: 'default' }}>
               ✓ Acciones reveladas
             </button>
           )}
         </>
       )}
 
-      <button onClick={handleClose} style={{ width: '100%', background: 'transparent', color: '#bbb', border: '1px solid #e5e5e5', padding: '0.7rem', fontSize: '0.72rem', borderRadius: '8px', marginTop: 'auto', cursor: 'pointer' }}>
+      <button onClick={handleClose} style={{ width: '100%', background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.7rem', fontSize: '0.72rem', fontWeight: 600, borderRadius: '999px', marginTop: 'auto', cursor: 'pointer' }}>
         Cerrar sesión
       </button>
     </div>
@@ -623,11 +627,11 @@ export default function Step2Rankings() {
 
   // ── Phase 1: waiting for results ─────────────────────────────────────────────
   if (!showRanking) return (
-    <div style={{ flex: 1, display: 'flex', background: '#ffffff', minHeight: 'calc(100vh - 52px)' }}>
+    <div style={{ flex: 1, display: 'flex', background: '#f5f5f5', minHeight: 'calc(100vh - 52px)' }}>
       {sidebar}
       {activeStep === 3 ? (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2.5rem' }}>
-          <div style={{ textAlign: 'center', color: '#aaa' }}>
+          <div style={{ textAlign: 'center', color: '#666' }}>
             <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>⏳</div>
             <div style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
               Espera a que terminen la calculadora
@@ -637,15 +641,15 @@ export default function Step2Rankings() {
       ) : (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2.5rem' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontWeight: 900, fontSize: 'clamp(5rem, 12vw, 9rem)', lineHeight: 1, color: '#000', letterSpacing: '-0.02em' }}>
+            <div style={{ fontWeight: 900, fontSize: 'clamp(5rem, 12vw, 9rem)', lineHeight: 1, color: '#0a0a0a', letterSpacing: '-0.02em' }}>
               {total === 0 ? '–' : `${completed}/${total}`}
             </div>
-            <div style={{ fontSize: '0.85rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '0.75rem' }}>
+            <div style={{ fontSize: '0.85rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '0.75rem' }}>
               {total === 0 ? 'Esperando respuestas...' : completed === total && total > 0 ? 'Todos han completado' : 'han completado la calculadora'}
             </div>
             {total > 0 && (
-              <div style={{ height: 6, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden', width: 260, margin: '1.5rem auto 0' }}>
-                <div style={{ height: '100%', width: `${progressPct}%`, background: completed >= total ? '#000' : '#888', borderRadius: 3, transition: 'width 0.5s ease' }} />
+              <div style={{ height: 6, background: '#e5e5e5', borderRadius: 3, overflow: 'hidden', width: 260, margin: '1.5rem auto 0' }}>
+                <div style={{ height: '100%', width: `${progressPct}%`, background: completed >= total ? '#0a0a0a' : '#666', borderRadius: 3, transition: 'width 0.5s ease' }} />
               </div>
             )}
           </div>
@@ -656,24 +660,24 @@ export default function Step2Rankings() {
 
   // ── Phase 2 / 3: results revealed ────────────────────────────────────────────
   return (
-    <div style={{ flex: 1, display: 'flex', background: '#ffffff', minHeight: 'calc(100vh - 52px)' }}>
+    <div style={{ flex: 1, display: 'flex', background: '#f5f5f5', minHeight: 'calc(100vh - 52px)' }}>
       {sidebar}
 
       {activeStep === 3 ? step3Panel : (
         <div style={{ flex: 1, padding: '2.5rem', overflow: 'auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <h1 style={{ fontWeight: 900, fontSize: '1.6rem', color: '#000' }}>
+            <h1 style={{ fontWeight: 900, fontSize: '1.6rem', color: '#0a0a0a' }}>
               {view === 'individual' ? 'Distribución' : 'Ranking por Equipo'}
             </h1>
             {/* Global / Equipos toggle pill */}
-            <div style={{ display: 'flex', background: '#f5f5f5', borderRadius: 999, padding: '3px', gap: '2px' }}>
+            <div style={{ display: 'flex', gap: '0.4rem' }}>
               {[{ id: 'individual', label: 'Global' }, { id: 'groups', label: 'Equipos' }].map(v => (
                 <button key={v.id} onClick={() => setView(v.id)} style={{
-                  background: view === v.id ? '#000' : 'transparent',
+                  background: view === v.id ? '#0a0a0a' : 'transparent',
                   color: view === v.id ? '#fff' : '#666',
-                  border: 'none',
+                  border: `1px solid ${view === v.id ? '#0a0a0a' : '#e5e5e5'}`,
                   padding: '0.4rem 1.1rem', fontSize: '0.78rem', fontWeight: 600,
-                  borderRadius: 999, cursor: 'pointer',
+                  borderRadius: '999px', cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}>
                   {v.label}

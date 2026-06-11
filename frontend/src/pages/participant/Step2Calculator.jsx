@@ -8,11 +8,11 @@ import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
 import { calculator } from '../../utils/calculator.js'
 
 const AREA_VISUAL = {
-  transport:   { color: '#4a90d9', bg: '#e8f2fd', iconBg: '#d0e8f8' },
-  energy:      { color: '#e8a020', bg: '#fff8ec', iconBg: '#fff3d6' },
-  food:        { color: '#5aab5a', bg: '#f0f7ee', iconBg: '#e0f0dc' },
-  consumption: { color: '#b07a30', bg: '#fdf4e8', iconBg: '#f5e6cc' },
-  waste:       { color: '#7a7aaa', bg: '#f0f0f8', iconBg: '#e0e0f0' },
+  transport:   { color: '#38bdf8', bg: '#e8f2fd', iconBg: '#d0e8f8' },
+  energy:      { color: '#f59e0b', bg: '#fff8ec', iconBg: '#fff3d6' },
+  food:        { color: '#4ade80', bg: '#f0f7ee', iconBg: '#e0f0dc' },
+  consumption: { color: '#a855f7', bg: '#fdf4e8', iconBg: '#f5e6cc' },
+  waste:       { color: '#f472b6', bg: '#f0f0f8', iconBg: '#e0e0f0' },
 }
 
 const AREAS = AREA_QUESTIONS.map(a => ({
@@ -28,7 +28,7 @@ function DotsLoader() {
     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
       {[0, 1, 2].map(i => (
         <div key={i} style={{
-          width: 8, height: 8, borderRadius: '50%', background: '#c8e6c0',
+          width: 8, height: 8, borderRadius: '50%', background: '#0a0a0a',
           animation: `calcdot 1.2s ease-in-out ${i * 0.2}s infinite`,
         }} />
       ))}
@@ -62,28 +62,28 @@ function NightsInput({ question, answers, onChange }) {
       {question.options.map(opt => (
         <div key={opt.value} style={{
           display: 'flex', alignItems: 'center', gap: '10px',
-          padding: '10px 12px', borderRadius: '10px', marginBottom: '6px',
-          border: `1.5px solid ${(answers[opt.value] || 0) > 0 ? 'var(--area-color)' : '#ebebeb'}`,
-          background: (answers[opt.value] || 0) > 0 ? 'var(--area-bg)' : '#fafafa',
+          padding: '10px 12px', borderRadius: '12px', marginBottom: '6px',
+          border: `1px solid ${(answers[opt.value] || 0) > 0 ? '#0a0a0a' : '#e5e5e5'}`,
+          background: '#ffffff',
         }}>
           <span style={{ fontSize: '18px', width: '24px', textAlign: 'center' }}>{opt.emoji}</span>
-          <span style={{ flex: 1, fontSize: '12px', fontWeight: 500, color: '#1a1a1a' }}>{opt.label}</span>
+          <span style={{ flex: 1, fontSize: '12px', fontWeight: 500, color: '#0a0a0a' }}>{opt.label}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <button onClick={() => handleChange(opt.value, -1)}
-              style={{ width: '26px', height: '26px', borderRadius: '50%', border: '1.5px solid var(--area-color)', background: 'transparent', color: 'var(--area-color)', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+              style={{ width: '26px', height: '26px', borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
             <span style={{ fontSize: '15px', fontWeight: 700, width: '24px', textAlign: 'center' }}>
               {answers[opt.value] || 0}
             </span>
             <button onClick={() => handleChange(opt.value, 1)}
-              style={{ width: '26px', height: '26px', borderRadius: '50%', border: '1.5px solid var(--area-color)', background: 'transparent', color: 'var(--area-color)', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+              style={{ width: '26px', height: '26px', borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
           </div>
           <span style={{ fontSize: '10px', color: '#aaa', width: '32px' }}>noches</span>
         </div>
       ))}
       {totalNights > 0 && (
-        <div style={{ background: '#f5f5f0', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ background: '#f5f5f5', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
           <span style={{ fontSize: '11px', color: '#888' }}>Total noches</span>
-          <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a' }}>{totalNights} noches</span>
+          <span style={{ fontSize: '13px', fontWeight: 600, color: '#0a0a0a' }}>{totalNights} noches</span>
         </div>
       )}
     </div>
@@ -107,7 +107,7 @@ function DrinksInput({ question, answers, onChange }) {
         return (
           <div key={opt.value} style={{
             background: '#fff',
-            border: `1px solid ${active ? '#1a1a1a' : '#E8E4DF'}`,
+            border: `1px solid ${active ? '#0a0a0a' : '#e5e5e5'}`,
             borderRadius: 12,
             padding: '10px 12px',
             display: 'flex',
@@ -116,25 +116,25 @@ function DrinksInput({ question, answers, onChange }) {
           }}>
             <span style={{ fontSize: 18, width: 24, textAlign: 'center', flexShrink: 0 }}>{opt.emoji}</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, fontWeight: 500, color: '#1a1a1a' }}>{opt.label}</div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: '#0a0a0a' }}>{opt.label}</div>
               <div style={{ fontSize: 10, color: '#aaa', marginTop: 1 }}>{opt.sublabel}</div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
               <button onClick={() => handleChange(opt.value, -1)} style={{
                 width: 26, height: 26, borderRadius: '50%',
-                border: '1.5px solid #1a1a1a', background: 'transparent',
-                color: '#1a1a1a', fontSize: 14, fontWeight: 600,
+                border: '1.5px solid #0a0a0a', background: 'transparent',
+                color: '#0a0a0a', fontSize: 14, fontWeight: 600,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: val === 0 ? 'default' : 'pointer', opacity: val === 0 ? 0.3 : 1,
               }}>−</button>
               <div style={{ textAlign: 'center', minWidth: 20 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#1a1a1a' }}>{val}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: '#0a0a0a' }}>{val}</div>
                 <div style={{ fontSize: 9, color: '#aaa' }}>por sem.</div>
               </div>
               <button onClick={() => handleChange(opt.value, 1)} style={{
                 width: 26, height: 26, borderRadius: '50%',
-                border: '1.5px solid #1a1a1a', background: 'transparent',
-                color: '#1a1a1a', fontSize: 14, fontWeight: 600,
+                border: '1.5px solid #0a0a0a', background: 'transparent',
+                color: '#0a0a0a', fontSize: 14, fontWeight: 600,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer',
               }}>+</button>
@@ -144,31 +144,31 @@ function DrinksInput({ question, answers, onChange }) {
       })}
       {total > 0 && (
         <div style={{
-          background: '#F7F4F0', borderRadius: 8, padding: '7px 12px',
+          background: '#f5f5f5', borderRadius: 8, padding: '7px 12px',
           display: 'flex', justifyContent: 'space-between', marginTop: 2,
         }}>
           <span style={{ fontSize: 11, color: '#aaa' }}>Total por semana</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{total} bebidas</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#0a0a0a' }}>{total} bebidas</span>
         </div>
       )}
     </div>
   )
 }
 
-// Grotesk card style — black on select, white on cream background
-const CREAM = '#F7F4F0'
-const BORDER = '#E8E4DF'
+// Grotesk card style — black on select, white on light background
+const CREAM = '#f5f5f5'
+const BORDER = '#e5e5e5'
 
 function groteskCard(isSel, isNone = false, extra = {}) {
   return {
     gridColumn: isNone ? 'span 2' : 'span 1',
-    background: isSel ? '#1a1a1a' : '#ffffff',
-    border: `1px solid ${isSel ? '#1a1a1a' : BORDER}`,
+    background: isSel ? '#0a0a0a' : '#ffffff',
+    border: `1px solid ${isSel ? '#0a0a0a' : BORDER}`,
     borderRadius: 14,
     padding: '12px 8px',
     fontSize: 12,
     fontWeight: isSel ? 500 : 400,
-    color: isSel ? CREAM : isNone ? '#bbb' : '#1a1a1a',
+    color: isSel ? '#f5f5f5' : isNone ? '#bbb' : '#0a0a0a',
     lineHeight: 1.3,
     textAlign: 'center',
     cursor: 'pointer',
@@ -214,12 +214,12 @@ function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
           const isSel = selected.includes(opt.value)
           return (
             <button key={opt.value} onClick={() => onToggle(question.id, opt.value)}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderRadius: 12, width: '100%', textAlign: 'left', border: `1px solid ${isSel ? '#1a1a1a' : BORDER}`, background: isSel ? '#1a1a1a' : '#fff', cursor: 'pointer' }}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderRadius: 12, width: '100%', textAlign: 'left', border: `1px solid ${isSel ? '#0a0a0a' : BORDER}`, background: isSel ? '#0a0a0a' : '#fff', cursor: 'pointer' }}
             >
-              <div style={{ width: 16, height: 16, borderRadius: 4, flexShrink: 0, border: `1.5px solid ${isSel ? CREAM : '#ccc'}`, background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {isSel && <span style={{ color: CREAM, fontSize: 10, fontWeight: 700, lineHeight: 1 }}>✓</span>}
+              <div style={{ width: 16, height: 16, borderRadius: 4, flexShrink: 0, border: `1.5px solid ${isSel ? '#f5f5f5' : '#ccc'}`, background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {isSel && <span style={{ color: '#f5f5f5', fontSize: 10, fontWeight: 700, lineHeight: 1 }}>✓</span>}
               </div>
-              <span style={{ fontSize: 13, fontWeight: isSel ? 500 : 400, color: isSel ? CREAM : '#1a1a1a', lineHeight: 1.4 }}>{opt.label}</span>
+              <span style={{ fontSize: 13, fontWeight: isSel ? 500 : 400, color: isSel ? '#f5f5f5' : '#666', lineHeight: 1.4 }}>{opt.label}</span>
             </button>
           )
         })}
@@ -259,12 +259,12 @@ function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
         const isSel = currentAnswer === opt.value
         return (
           <button key={opt.value} onClick={() => onSelect(question.id, opt.value)}
-            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderRadius: 12, width: '100%', textAlign: 'left', border: `1px solid ${isSel ? '#1a1a1a' : BORDER}`, background: isSel ? '#1a1a1a' : '#fff', cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderRadius: 12, width: '100%', textAlign: 'left', border: `1px solid ${isSel ? '#0a0a0a' : BORDER}`, background: isSel ? '#0a0a0a' : '#fff', cursor: 'pointer' }}
           >
-            <div style={{ width: 16, height: 16, borderRadius: '50%', flexShrink: 0, border: `1.5px solid ${isSel ? CREAM : '#ccc'}`, background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {isSel && <div style={{ width: 6, height: 6, borderRadius: '50%', background: CREAM }} />}
+            <div style={{ width: 16, height: 16, borderRadius: '50%', flexShrink: 0, border: `1.5px solid ${isSel ? '#f5f5f5' : '#ccc'}`, background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {isSel && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#f5f5f5' }} />}
             </div>
-            <span style={{ fontSize: 13, fontWeight: isSel ? 500 : 400, color: isSel ? CREAM : '#1a1a1a', lineHeight: 1.4 }}>{opt.label}</span>
+            <span style={{ fontSize: 13, fontWeight: isSel ? 500 : 400, color: isSel ? '#f5f5f5' : '#666', lineHeight: 1.4 }}>{opt.label}</span>
           </button>
         )
       })}
@@ -457,7 +457,7 @@ export default function Step2Calculator() {
           return (
             <div key={qi} style={{
               height: 4, width: 20, borderRadius: 2,
-              background: active ? a.color + '88' : done ? a.color : '#ddd',
+              background: active ? a.color + '88' : done ? a.color : '#e5e5e5',
             }} />
           )
         })}
@@ -472,16 +472,16 @@ export default function Step2Calculator() {
     <div>
       <SessionClosedBanner onViewPartial={handleViewPartial} />
       <div style={{
-        minHeight: 'calc(100vh - 52px)', background: '#ffffff',
+        minHeight: 'calc(100vh - 52px)', background: '#f5f5f5',
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
         padding: '2rem', textAlign: 'center',
       }}>
         <div style={{ fontSize: '3.5rem', marginBottom: '1.25rem', lineHeight: 1 }}>✅</div>
-        <h1 style={{ fontWeight: 900, fontSize: '1.6rem', textTransform: 'uppercase', marginBottom: '0.6rem', color: '#1a1a1a' }}>
+        <h1 style={{ fontWeight: 900, fontSize: '1.6rem', textTransform: 'uppercase', marginBottom: '0.6rem', color: '#0a0a0a' }}>
           ¡Listo!
         </h1>
-        <p style={{ fontSize: '1rem', fontWeight: 600, color: '#2d5a27', marginBottom: '0.6rem' }}>
+        <p style={{ fontSize: '1rem', fontWeight: 600, color: '#666', marginBottom: '0.6rem' }}>
           Tu huella ha sido calculada
         </p>
         <p style={{ fontSize: '0.85rem', color: '#888', maxWidth: 300, lineHeight: 1.65, margin: '0 0 2rem' }}>
@@ -499,7 +499,7 @@ export default function Step2Calculator() {
       <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', height: 'calc(100dvh - 52px)', overflow: 'hidden' }}>
 
         {/* Sidebar */}
-        <div style={{ background: CREAM, borderRight: `1px solid ${BORDER}`, padding: '24px 14px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
+        <div style={{ background: '#ffffff', borderRight: `1px solid ${BORDER}`, padding: '24px 14px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
           <div style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#bbb', marginBottom: 10, paddingLeft: 8 }}>
             Áreas
           </div>
@@ -512,7 +512,7 @@ export default function Step2Calculator() {
                 style={{
                   display: 'flex', alignItems: 'center', gap: 10,
                   padding: '9px 10px', borderRadius: 10,
-                  background: isAct ? '#fff' : 'transparent',
+                  background: isAct ? '#f5f5f5' : 'transparent',
                   border: isAct ? `1px solid ${BORDER}` : '1px solid transparent',
                   opacity: status === 'inactive' ? 0.3 : 1,
                   cursor: status !== 'inactive' ? 'pointer' : 'default',
@@ -520,49 +520,49 @@ export default function Step2Calculator() {
               >
                 <span style={{ fontSize: 17, flexShrink: 0 }}>{a.emoji}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: isAct ? 500 : 400, color: isDone ? '#2d5a27' : '#1a1a1a' }}>
+                  <div style={{ fontSize: 12.5, fontWeight: isAct ? 500 : 400, color: isDone ? '#0a0a0a' : '#0a0a0a' }}>
                     {a.label}
                   </div>
                   {isAct && (
                     <div style={{ display: 'flex', gap: 3, marginTop: 4 }}>
                       {a.questions.filter(q => !isSkipped(q)).map((q, qi) => (
-                        <div key={qi} style={{ flex: 1, height: 2, borderRadius: 1, background: qi <= questionIndex ? '#2d5a27' : BORDER }} />
+                        <div key={qi} style={{ flex: 1, height: 2, borderRadius: 1, background: qi <= questionIndex ? a.color : BORDER }} />
                       ))}
                     </div>
                   )}
                 </div>
-                {isDone && <span style={{ fontSize: 12, color: '#2d5a27', fontWeight: 500, flexShrink: 0 }}>✓</span>}
+                {isDone && <span style={{ fontSize: 12, color: '#0a0a0a', fontWeight: 500, flexShrink: 0 }}>✓</span>}
               </div>
             )
           })}
         </div>
 
         {/* Main */}
-        <div style={{ background: CREAM, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ background: '#f5f5f5', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Progress */}
           <div style={{ padding: '20px 28px 0', flexShrink: 0 }}>
-            <p style={{ fontSize: 11, color: '#aaa', marginBottom: 6, fontWeight: 400 }}>
+            <p style={{ fontSize: 11, color: '#999', marginBottom: 6, fontWeight: 400 }}>
               Pregunta {questionIndex + 1} de {area.questions.filter(q => !isSkipped(q)).length}
             </p>
             <div style={{ display: 'flex', gap: 4 }}>
               {area.questions.filter(q => !isSkipped(q)).map((q, qi) => (
-                <div key={qi} style={{ flex: 1, height: 2.5, borderRadius: 2, background: qi <= questionIndex ? '#2d5a27' : BORDER }} />
+                <div key={qi} style={{ flex: 1, height: 2.5, borderRadius: 2, background: qi <= questionIndex ? area.color : BORDER }} />
               ))}
             </div>
           </div>
 
           {/* Question */}
           <div style={{ padding: '18px 28px 14px', flexShrink: 0 }}>
-            <p style={{ fontSize: 20, fontWeight: 700, maxWidth: 560, lineHeight: 1.25, color: '#1a1a1a', margin: 0 }}>
+            <p style={{ fontSize: 20, fontWeight: 700, maxWidth: 560, lineHeight: 1.25, color: '#0a0a0a', margin: 0 }}>
               {question.text}
             </p>
             {question.id === 'heating' && answers.homeType && (
-              <p style={{ fontSize: 13, color: '#2d5a27', margin: '4px 0 0', fontWeight: 400 }}>
+              <p style={{ fontSize: 13, color: area.color, margin: '4px 0 0', fontWeight: 400 }}>
                 Para tu {homeTypeLabels[answers.homeType]}
               </p>
             )}
             {question.info && (
-              <p style={{ fontSize: 12, color: '#aaa', margin: '6px 0 0', fontWeight: 400 }}>{question.info}</p>
+              <p style={{ fontSize: 12, color: '#999', margin: '6px 0 0', fontWeight: 400 }}>{question.info}</p>
             )}
           </div>
 
@@ -571,7 +571,7 @@ export default function Step2Calculator() {
             {question.type === 'drinks' ? (
               <DrinksInput question={question} answers={answers} onChange={setAnswers} />
             ) : question.type === 'nights' ? (
-              <div style={{ '--area-color': '#2d5a27', '--area-bg': '#f0f7ee' }}>
+              <div style={{ '--area-color': '#0a0a0a', '--area-bg': '#f5f5f5' }}>
                 <NightsInput question={question} answers={answers} onChange={setAnswers} />
               </div>
             ) : (
@@ -583,13 +583,13 @@ export default function Step2Calculator() {
           </div>
 
           {/* Footer */}
-          <div style={{ padding: '14px 28px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, borderTop: `1px solid ${BORDER}`, background: CREAM }}>
+          <div style={{ padding: '14px 28px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, borderTop: `1px solid ${BORDER}`, background: '#f5f5f5' }}>
             <button onClick={handlePrev} disabled={isFirst}
-              style={{ width: 48, height: 48, borderRadius: 14, fontSize: 16, background: '#fff', border: `1px solid ${isFirst ? BORDER : BORDER}`, color: isFirst ? BORDER : '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isFirst ? 'default' : 'pointer' }}
+              style={{ width: 48, height: 48, borderRadius: 999, fontSize: 16, background: '#fff', border: `1px solid ${isFirst ? BORDER : BORDER}`, color: isFirst ? '#e5e5e5' : '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isFirst ? 'default' : 'pointer' }}
             >←</button>
             <div style={{ flex: 1 }} />
             <button onClick={() => handleNext()} disabled={!canNext}
-              style={{ width: 48, height: 48, borderRadius: 14, border: 'none', fontSize: 16, fontWeight: 500, background: canNext ? '#1a1a1a' : BORDER, color: canNext ? CREAM : '#bbb', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: canNext ? 'pointer' : 'default' }}
+              style={{ width: 48, height: 48, borderRadius: 999, border: 'none', fontSize: 16, fontWeight: 500, background: canNext ? '#0a0a0a' : '#e5e5e5', color: canNext ? '#f5f5f5' : '#bbb', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: canNext ? 'pointer' : 'default' }}
             >{nextIcon}</button>
           </div>
         </div>
@@ -601,10 +601,10 @@ export default function Step2Calculator() {
   return (
     <div>
       <SessionClosedBanner onViewPartial={handleViewPartial} />
-      <div style={{ height: 'calc(100dvh - 52px)', background: CREAM, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ height: 'calc(100dvh - 52px)', background: '#f5f5f5', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* Area tabs — emoji only */}
-        <div style={{ display: 'flex', padding: '0 16px', borderBottom: `1px solid ${BORDER}`, background: CREAM, flexShrink: 0 }}>
+        <div style={{ display: 'flex', padding: '0 16px', borderBottom: `1px solid ${BORDER}`, background: '#f5f5f5', flexShrink: 0 }}>
           {AREAS.map((a, ai) => {
             const status = getAreaStatus(ai)
             return (
@@ -613,7 +613,7 @@ export default function Step2Calculator() {
                   flex: 1, display: 'flex', justifyContent: 'center',
                   padding: '8px 0 9px',
                   fontSize: 19,
-                  borderBottom: `2.5px solid ${status === 'active' || status === 'done' ? '#2d5a27' : 'transparent'}`,
+                  borderBottom: `2.5px solid ${status === 'active' ? a.color : status === 'done' ? a.color : 'transparent'}`,
                   opacity: status === 'inactive' ? 0.18 : status === 'done' ? 0.35 : 1,
                   cursor: status !== 'inactive' ? 'pointer' : 'default',
                 }}
@@ -625,29 +625,29 @@ export default function Step2Calculator() {
         </div>
 
         {/* Progress — "Pregunta X de Y" + bar */}
-        <div style={{ padding: '12px 18px 0', flexShrink: 0, background: CREAM }}>
-          <p style={{ fontSize: 11, color: '#aaa', marginBottom: 6, fontWeight: 400 }}>
+        <div style={{ padding: '12px 18px 0', flexShrink: 0, background: '#f5f5f5' }}>
+          <p style={{ fontSize: 11, color: '#999', marginBottom: 6, fontWeight: 400 }}>
             Pregunta {questionIndex + 1} de {area.questions.filter(q => !isSkipped(q)).length}
           </p>
           <div style={{ display: 'flex', gap: 4 }}>
             {area.questions.filter(q => !isSkipped(q)).map((q, qi) => (
-              <div key={qi} style={{ flex: 1, height: 2.5, borderRadius: 2, background: qi <= questionIndex ? '#2d5a27' : BORDER }} />
+              <div key={qi} style={{ flex: 1, height: 2.5, borderRadius: 2, background: qi <= questionIndex ? area.color : BORDER }} />
             ))}
           </div>
         </div>
 
         {/* Question */}
-        <div style={{ padding: '16px 18px 18px', flexShrink: 0, background: CREAM }}>
-          <p style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a', lineHeight: 1.25, margin: 0 }}>
+        <div style={{ padding: '16px 18px 18px', flexShrink: 0, background: '#f5f5f5' }}>
+          <p style={{ fontSize: 18, fontWeight: 700, color: '#0a0a0a', lineHeight: 1.25, margin: 0 }}>
             {question.text}
           </p>
           {question.info && (
-            <p style={{ fontSize: 11, color: '#aaa', marginTop: 6, fontWeight: 400 }}>
+            <p style={{ fontSize: 11, color: '#999', marginTop: 6, fontWeight: 400 }}>
               {question.info}
             </p>
           )}
           {question.id === 'heating' && answers.homeType && (
-            <p style={{ fontSize: 12, color: '#2d5a27', marginTop: 4, fontWeight: 400 }}>
+            <p style={{ fontSize: 12, color: area.color, marginTop: 4, fontWeight: 400 }}>
               Para tu {homeTypeLabels[answers.homeType]}
             </p>
           )}
@@ -655,19 +655,19 @@ export default function Step2Calculator() {
 
         {/* Banner individual — solo en primera pregunta */}
         {isFirst && (
-          <div style={{ margin: '0 16px 6px', padding: '7px 12px', background: '#f0f7ee', borderRadius: 8, border: '1px solid #c8e6c0', flexShrink: 0 }}>
-            <p style={{ fontSize: 11, color: '#2d5a27', margin: 0, lineHeight: 1.45 }}>
+          <div style={{ margin: '0 16px 6px', padding: '7px 12px', background: '#f5f5f5', borderRadius: 8, border: `1px solid ${BORDER}`, flexShrink: 0 }}>
+            <p style={{ fontSize: 11, color: '#0a0a0a', margin: 0, lineHeight: 1.45 }}>
               Responde pensando en ti — no en tu familia ni compañeros de piso.
             </p>
           </div>
         )}
 
-        {/* Options — flex 1, tarjetas blancas sobre crema */}
-        <div style={{ padding: '0 16px 8px', flex: 1, overflowY: 'auto', background: CREAM }}>
+        {/* Options — flex 1, tarjetas blancas sobre fondo claro */}
+        <div style={{ padding: '0 16px 8px', flex: 1, overflowY: 'auto', background: '#f5f5f5' }}>
           {question.type === 'drinks' ? (
             <DrinksInput question={question} answers={answers} onChange={setAnswers} />
           ) : question.type === 'nights' ? (
-            <div style={{ '--area-color': '#2d5a27', '--area-bg': '#f0f7ee' }}>
+            <div style={{ '--area-color': '#0a0a0a', '--area-bg': '#f5f5f5' }}>
               <NightsInput question={question} answers={answers} onChange={setAnswers} />
             </div>
           ) : (
@@ -679,12 +679,12 @@ export default function Step2Calculator() {
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '10px 16px 14px', display: 'flex', gap: 8, flexShrink: 0, background: CREAM, borderTop: `1px solid ${BORDER}` }}>
+        <div style={{ padding: '10px 16px 14px', display: 'flex', gap: 8, flexShrink: 0, background: '#f5f5f5', borderTop: `1px solid ${BORDER}` }}>
           <button onClick={handlePrev} disabled={isFirst}
-            style={{ width: 48, height: 48, borderRadius: 14, border: `1px solid ${BORDER}`, background: '#fff', color: isFirst ? BORDER : '#1a1a1a', fontSize: 16, cursor: isFirst ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+            style={{ width: 48, height: 48, borderRadius: 999, border: `1px solid ${BORDER}`, background: '#fff', color: isFirst ? '#e5e5e5' : '#0a0a0a', fontSize: 16, cursor: isFirst ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
           >←</button>
           <button onClick={() => handleNext()} disabled={!canNext}
-            style={{ flex: 1, height: 48, borderRadius: 14, border: 'none', background: canNext ? '#1a1a1a' : BORDER, color: canNext ? CREAM : '#bbb', fontSize: 16, fontWeight: 500, cursor: canNext ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ flex: 1, height: 48, borderRadius: 999, border: 'none', background: canNext ? '#0a0a0a' : '#e5e5e5', color: canNext ? '#f5f5f5' : '#bbb', fontSize: 16, fontWeight: 500, cursor: canNext ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >{nextIcon}</button>
         </div>
       </div>

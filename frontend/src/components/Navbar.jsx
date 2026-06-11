@@ -28,7 +28,7 @@ const styles = {
     fontFamily: "'Inter', sans-serif",
     fontWeight: 500,
     fontSize: '0.85rem',
-    color: 'rgba(255,255,255,0.85)',
+    color: 'rgba(255,255,255,0.6)',
     textDecoration: 'none',
   },
   btnPill: {
@@ -43,12 +43,12 @@ const styles = {
   },
   btnSalir: {
     background: 'transparent',
-    color: 'rgba(255,255,255,0.55)',
+    color: 'rgba(255,255,255,0.5)',
     padding: '0.4rem 0.75rem',
     fontSize: '0.82rem',
     borderRadius: '6px',
     fontWeight: 500,
-    border: '1px solid rgba(255,255,255,0.15)',
+    border: 'none',
     cursor: 'pointer',
   },
 }

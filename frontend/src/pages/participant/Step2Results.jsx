@@ -14,10 +14,10 @@ const SPAIN_AVG = 8.1
 const BAR_MAX_H = 120
 
 const CATEGORY_CONFIG = {
-  bajo:       { label: 'Huella reducida 🌿',    color: '#3b6d11', bg: '#eaf3de' },
-  medio:      { label: 'Huella moderada 🌱',    color: '#8a6d00', bg: '#fff8e0' },
-  alto:       { label: 'Huella elevada 🌍',     color: '#b07a30', bg: '#fff0e0' },
-  'muy alto': { label: 'Huella muy elevada 🔥', color: '#cc4444', bg: '#fce8e8' },
+  bajo:       { label: 'Huella reducida 🌿',    color: '#38bdf8', bg: '#eaf3de' },
+  medio:      { label: 'Huella moderada 🌱',    color: '#f59e0b', bg: '#fff8e0' },
+  alto:       { label: 'Huella elevada 🌍',     color: '#a855f7', bg: '#fff0e0' },
+  'muy alto': { label: 'Huella muy elevada 🔥', color: '#f472b6', bg: '#fce8e8' },
 }
 
 const AREA_LABELS = {
@@ -29,11 +29,11 @@ const AREA_LABELS = {
 }
 
 const AREA_COLORS = {
-  transport:   '#4a90d9',
-  energy:      '#e8a020',
-  food:        '#5aab5a',
-  consumption: '#b07a30',
-  waste:       '#7a7aaa',
+  transport:   '#38bdf8',
+  energy:      '#f59e0b',
+  food:        '#4ade80',
+  consumption: '#a855f7',
+  waste:       '#f472b6',
 }
 
 function getCategory(tons) {
@@ -45,11 +45,11 @@ function getCategory(tons) {
 
 // Areas ordered for the detail section
 const AREAS = [
-  { id: 'transport',   label: 'Transporte',   emoji: '🚗', color: '#4a90d9' },
-  { id: 'energy',      label: 'Hogar',        emoji: '🏠', color: '#e8a020' },
-  { id: 'food',        label: 'Alimentación', emoji: '🥗', color: '#5aab5a' },
-  { id: 'consumption', label: 'Consumo',      emoji: '🛍️', color: '#b07a30' },
-  { id: 'waste',       label: 'Digital',      emoji: '📱', color: '#7a7aaa' },
+  { id: 'transport',   label: 'Transporte',   emoji: '🚗', color: '#38bdf8' },
+  { id: 'energy',      label: 'Hogar',        emoji: '🏠', color: '#f59e0b' },
+  { id: 'food',        label: 'Alimentación', emoji: '🥗', color: '#4ade80' },
+  { id: 'consumption', label: 'Consumo',      emoji: '🛍️', color: '#a855f7' },
+  { id: 'waste',       label: 'Digital',      emoji: '📱', color: '#f472b6' },
 ]
 
 const SUBCATEGORIES = {
@@ -181,34 +181,34 @@ function AreaDetailCard({ areaId, areaLabel, areaEmoji, areaColor, areaTons, sub
   const maxVal = Math.max(...subcatValues.filter(s => !s.negative).map(s => Math.abs(s.tons)), 0.01)
 
   return (
-    <div style={{ background: '#fff', border: '1px solid #E8E4DF', borderRadius: 12, overflow: 'hidden', marginBottom: 8 }}>
+    <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 8, overflow: 'hidden', marginBottom: 8 }}>
       <div onClick={() => setExpanded(e => !e)}
         style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', gap: 10, cursor: 'pointer' }}>
         <span style={{ fontSize: 18, width: 22, textAlign: 'center' }}>{areaEmoji}</span>
-        <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{areaLabel}</span>
+        <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#0a0a0a' }}>{areaLabel}</span>
         <span style={{ fontSize: 13, fontWeight: 700, color: areaColor }}>{areaTons.toFixed(1)}t</span>
         <span style={{ fontSize: 10, color: '#aaa', marginLeft: 4 }}>
           {totalTons > 0 ? Math.round((areaTons / totalTons) * 100) : 0}%
         </span>
         <span style={{ fontSize: 9, color: '#bbb', marginLeft: 4 }}>{expanded ? '▲' : '▼'}</span>
       </div>
-      <div style={{ height: 3, margin: '0 12px', background: '#E8E4DF', borderRadius: 2, overflow: 'hidden', marginBottom: expanded ? 0 : 10 }}>
+      <div style={{ height: 3, margin: '0 12px', background: '#e5e5e5', borderRadius: 2, overflow: 'hidden', marginBottom: expanded ? 0 : 10 }}>
         <div style={{ height: '100%', width: `${maxAreaTons > 0 ? Math.min((areaTons / maxAreaTons) * 100, 100) : 0}%`, background: areaColor, borderRadius: 2 }} />
       </div>
       {expanded && (
         <div style={{ padding: '4px 12px 10px' }}>
           {subcatValues.map((sub, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderTop: '0.5px solid #F0EDE8' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderTop: '0.5px solid #e5e5e5' }}>
               <span style={{ flex: 1, fontSize: 11, color: '#555' }}>{sub.label}</span>
-              <div style={{ width: 70, height: 4, background: '#F0EDE8', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ width: 70, height: 4, background: '#e5e5e5', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{
                   height: '100%',
                   width: `${Math.min((Math.abs(sub.tons) / maxVal) * 100, 100)}%`,
-                  background: sub.negative ? '#3b6d11' : areaColor,
+                  background: sub.negative ? '#16a34a' : areaColor,
                   borderRadius: 2,
                 }} />
               </div>
-              <span style={{ fontSize: 11, fontWeight: 600, width: 36, textAlign: 'right', color: sub.negative ? '#3b6d11' : areaColor }}>
+              <span style={{ fontSize: 11, fontWeight: 600, width: 36, textAlign: 'right', color: sub.negative ? '#16a34a' : areaColor }}>
                 {sub.tons.toFixed(2)}t
               </span>
             </div>
@@ -253,7 +253,7 @@ function CardTitle({ children, dark = false }) {
       display: 'flex', alignItems: 'center', gap: 6,
       fontSize: '0.68rem', fontWeight: 700,
       textTransform: 'uppercase', letterSpacing: '0.12em',
-      color: dark ? 'rgba(255,255,255,0.55)' : '#aaa',
+      color: dark ? 'rgba(255,255,255,0.55)' : '#999',
       marginBottom: '1rem',
     }}>
       {dark ? <SquareWhite /> : <Square />}
@@ -426,13 +426,13 @@ export default function Step2Results() {
   // ── render ────────────────────────────────────────────────────
   if (!revealed) return (
     <div style={{
-      minHeight: 'calc(100vh - 52px)', background: '#f5f5f0',
+      minHeight: 'calc(100vh - 52px)', background: '#f5f5f5',
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
       padding: '2rem', textAlign: 'center',
     }}>
       <div style={{ fontSize: '3rem', marginBottom: '1.25rem', lineHeight: 1 }}>⏳</div>
-      <h1 style={{ fontWeight: 900, fontSize: '1.35rem', textTransform: 'uppercase', marginBottom: '0.75rem', color: '#1a1a1a' }}>
+      <h1 style={{ fontWeight: 900, fontSize: '1.35rem', textTransform: 'uppercase', marginBottom: '0.75rem', color: '#0a0a0a' }}>
         Espera al facilitador
       </h1>
       <p style={{ fontSize: '0.85rem', color: '#888', maxWidth: 300, lineHeight: 1.65, margin: '0 0 2rem' }}>
@@ -441,7 +441,7 @@ export default function Step2Results() {
       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
         {[0, 1, 2].map(i => (
           <div key={i} style={{
-            width: 8, height: 8, borderRadius: '50%', background: '#c8e6c0',
+            width: 8, height: 8, borderRadius: '50%', background: '#0a0a0a',
             animation: `resdot 1.2s ease-in-out ${i * 0.2}s infinite`,
           }} />
         ))}
@@ -456,7 +456,7 @@ export default function Step2Results() {
   )
 
   return (
-    <div style={{ background: '#f5f5f0', minHeight: 'calc(100vh - 52px)', animation: 'resReveal 0.4s ease both' }}>
+    <div style={{ background: '#f5f5f5', minHeight: 'calc(100vh - 52px)', animation: 'resReveal 0.4s ease both' }}>
       <style>{`
         @keyframes resReveal {
           from { opacity: 0; transform: translateY(20px); }
@@ -466,7 +466,7 @@ export default function Step2Results() {
       <SessionClosedBanner />
 
       {/* ═══ HEADER ════════════════════════════════════════════ */}
-      <div style={{ background: '#2d5a27', color: '#fff' }}>
+      <div style={{ background: '#0a0a0a', color: '#fff' }}>
         <div style={{ maxWidth: 880, margin: '0 auto', padding: '1.25rem 1.5rem 0' }}>
 
           {/* top bar */}
@@ -475,9 +475,9 @@ export default function Step2Results() {
               CO2 SPRINT *
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <span style={{ fontSize: '0.78rem', opacity: 0.7 }}>Sesión {code}</span>
+              <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)' }}>Sesión {code}</span>
               {myGroup && (
-                <span style={{ background: 'rgba(255,255,255,0.18)', padding: '0.25rem 0.7rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.04em' }}>
+                <span style={{ background: 'rgba(255,255,255,0.15)', padding: '0.25rem 0.7rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.04em', color: 'rgba(255,255,255,0.8)' }}>
                   {myGroup}
                 </span>
               )}
@@ -485,7 +485,7 @@ export default function Step2Results() {
           </div>
 
           {/* eyebrow */}
-          <p style={{ margin: '0 0 0.65rem', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.16em', opacity: 0.55 }}>
+          <p style={{ margin: '0 0 0.65rem', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.55)' }}>
             Tu huella de carbono
           </p>
 
@@ -495,14 +495,14 @@ export default function Step2Results() {
             {/* big number */}
             <div style={{ flex: '1 1 160px', minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem', flexWrap: 'wrap' }}>
-                <span style={{ fontWeight: 900, fontSize: 'clamp(3.2rem, 11vw, 4.8rem)', lineHeight: 1 }}>
+                <span style={{ fontWeight: 900, fontSize: 'clamp(3.2rem, 11vw, 4.8rem)', lineHeight: 1, color: '#fff' }}>
                   {carbonTons.toFixed(1)}
                 </span>
-                <span style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1.05rem)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', opacity: 0.75 }}>
+                <span style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1.05rem)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#fff', opacity: 0.75 }}>
                   t CO₂/año
                 </span>
               </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: '0.8rem', background: 'rgba(255,255,255,0.14)', padding: '0.35rem 0.8rem', borderRadius: 4, fontSize: '0.78rem', fontWeight: 700 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: '0.8rem', background: 'rgba(255,255,255,0.15)', padding: '0.35rem 0.8rem', borderRadius: 4, fontSize: '0.78rem', fontWeight: 700, color: '#fff' }}>
                 <SquareWhite size={7} />
                 Categoría {cfg.label}
               </div>
@@ -528,9 +528,9 @@ export default function Step2Results() {
                 },
               ].map(({ big, label, sub }) => (
                 <div key={label}>
-                  <span style={{ fontWeight: 900, fontSize: 'clamp(1.5rem, 4.5vw, 2rem)', display: 'block', lineHeight: 1, marginBottom: '0.2rem' }}>{big}</span>
-                  <span style={{ fontSize: '0.63rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.55, display: 'block' }}>{label}</span>
-                  <span style={{ fontSize: '0.72rem', opacity: 0.8, display: 'block', marginTop: '0.1rem' }}>{sub}</span>
+                  <span style={{ fontWeight: 900, fontSize: 'clamp(1.5rem, 4.5vw, 2rem)', display: 'block', lineHeight: 1, marginBottom: '0.2rem', color: '#fff' }}>{big}</span>
+                  <span style={{ fontSize: '0.63rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#fff', opacity: 0.55, display: 'block' }}>{label}</span>
+                  <span style={{ fontSize: '0.72rem', color: '#fff', opacity: 0.8, display: 'block', marginTop: '0.1rem' }}>{sub}</span>
                 </div>
               ))}
             </div>
@@ -539,7 +539,7 @@ export default function Step2Results() {
 
         {/* wave */}
         <svg viewBox="0 0 100 12" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: 28 }}>
-          <path d="M0,0 Q50,12 100,0 L100,12 L0,12 Z" fill="#f5f5f0" />
+          <path d="M0,0 Q50,12 100,0 L100,12 L0,12 Z" fill="#f5f5f5" />
         </svg>
       </div>
 
@@ -553,7 +553,7 @@ export default function Step2Results() {
             .filter(d => d.value > 0.001)
           const total = pieData.reduce((s, d) => s + d.value, 0)
           return (
-            <div style={{ background: '#fff', borderRadius: 8, padding: '1.25rem 1.5rem', marginBottom: '1rem' }}>
+            <div style={{ background: '#fff', borderRadius: 8, border: '1px solid #e5e5e5', padding: '1.25rem 1.5rem', marginBottom: '1rem' }}>
               <CardTitle>Distribución por áreas</CardTitle>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -563,7 +563,7 @@ export default function Step2Results() {
                     </Pie>
                   </PieChart>
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                    <span style={{ fontWeight: 900, fontSize: '1.2rem', lineHeight: 1, color: '#1a1a1a' }}>{carbonTons.toFixed(1)}</span>
+                    <span style={{ fontWeight: 900, fontSize: '1.2rem', lineHeight: 1, color: '#0a0a0a' }}>{carbonTons.toFixed(1)}</span>
                     <span style={{ fontSize: '0.58rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em' }}>t CO₂</span>
                   </div>
                 </div>
@@ -572,7 +572,7 @@ export default function Step2Results() {
                     <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <div style={{ width: 9, height: 9, background: d.color, borderRadius: 2, flexShrink: 0 }} />
                       <span style={{ fontSize: '0.75rem', color: '#555', flex: 1 }}>{d.name}</span>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1a1a1a' }}>{d.value.toFixed(1)} t</span>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0a0a0a' }}>{d.value.toFixed(1)} t</span>
                       <span style={{ fontSize: '0.68rem', color: '#bbb', minWidth: 30, textAlign: 'right' }}>{total > 0 ? Math.round((d.value / total) * 100) : 0}%</span>
                     </div>
                   ))}
@@ -587,7 +587,7 @@ export default function Step2Results() {
           const maxAreaTons = Math.max(...AREAS.map(a => areas[a.id] || 0), 0.01)
           return (
             <div style={{ marginBottom: '1rem' }}>
-              <p style={{ fontSize: '0.68rem', fontWeight: 600, color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+              <p style={{ fontSize: '0.68rem', fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
                 Detalle por categoría
               </p>
               {AREAS.map(area => (
@@ -604,7 +604,7 @@ export default function Step2Results() {
                   maxAreaTons={maxAreaTons}
                 />
               ))}
-              <div style={{ background: '#F0EDE8', borderRadius: 10, padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: 10, padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#555' }}>🏛️ Servicios públicos</div>
                   <div style={{ fontSize: '0.65rem', color: '#aaa', marginTop: 2 }}>Fijo para todos en España — infraestructuras, sanidad, educación...</div>
@@ -616,10 +616,10 @@ export default function Step2Results() {
         })()}
 
         {/* ── public services card ── */}
-        <div style={{ background: '#f0f7ee', border: '1px solid #c8e6c0', borderRadius: 8, padding: '1rem 1.25rem', marginBottom: '1rem' }}>
+        <div style={{ background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: 8, padding: '1rem 1.25rem', marginBottom: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
             <span style={{ fontSize: '0.95rem' }}>🏛️</span>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#2d5a27' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0a0a0a' }}>
               Servicios públicos — 1,5 t CO₂/año (fijo)
             </span>
           </div>
@@ -635,7 +635,7 @@ export default function Step2Results() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
 
           {/* Spain comparison */}
-          <div style={{ flex: '1 1 240px', background: '#fff', borderRadius: 8, padding: '1.25rem 1.5rem', minWidth: 0 }}>
+          <div style={{ flex: '1 1 240px', background: '#fff', borderRadius: 8, border: '1px solid #e5e5e5', padding: '1.25rem 1.5rem', minWidth: 0 }}>
             <CardTitle>Comparativa con España</CardTitle>
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '1.25rem', marginBottom: '1rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
@@ -646,19 +646,19 @@ export default function Step2Results() {
               <div style={{ paddingBottom: 24, fontSize: '0.7rem', color: '#ccc', fontWeight: 700 }}>VS</div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontWeight: 900, fontSize: '0.95rem', color: '#888' }}>{SPAIN_AVG.toFixed(1)} t</span>
-                <div style={{ width: 80, height: spainBarH, background: '#cacaca', borderRadius: '3px 3px 0 0' }} />
+                <div style={{ width: 80, height: spainBarH, background: '#d4d4d4', borderRadius: '3px 3px 0 0' }} />
                 <span style={{ fontSize: '0.72rem', color: '#888' }}>Media España</span>
               </div>
             </div>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               background: isBelow ? '#f0f7ef' : '#faf3e8',
-              color: isBelow ? '#2d5a27' : '#b07a30',
+              color: isBelow ? '#16a34a' : '#b07a30',
               padding: '0.45rem 0.8rem', borderRadius: 4,
               fontSize: '0.76rem', fontWeight: 700, marginBottom: '0.5rem',
             }}>
               <Square size={7} opacity={0} />
-              <span style={{ display: 'inline-block', width: 7, height: 7, border: `1.5px solid ${isBelow ? '#2d5a27' : '#b07a30'}`, flexShrink: 0 }} />
+              <span style={{ display: 'inline-block', width: 7, height: 7, border: `1.5px solid ${isBelow ? '#16a34a' : '#b07a30'}`, flexShrink: 0 }} />
               {diffPct}% {isBelow ? 'por debajo de la media' : 'por encima de la media'}
             </div>
             <p style={{ fontSize: '0.68rem', color: '#bbb', margin: 0 }}>
@@ -671,7 +671,7 @@ export default function Step2Results() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
 
           {/* Percentile — dark card */}
-          <div style={{ flex: '1 1 190px', background: '#2d5a27', borderRadius: 8, padding: '1.25rem 1.5rem', color: '#fff', minWidth: 0 }}>
+          <div style={{ flex: '1 1 190px', background: '#0a0a0a', borderRadius: 8, padding: '1.25rem 1.5rem', color: '#fff', minWidth: 0 }}>
             <CardTitle dark>Posición en la sesión</CardTitle>
             {!hasMany ? (
               <p style={{ fontSize: '0.78rem', opacity: 0.7, lineHeight: 1.6, margin: 0 }}>
@@ -701,7 +701,7 @@ export default function Step2Results() {
           </div>
 
           {/* Team */}
-          <div style={{ flex: '1 1 220px', background: '#fff', borderRadius: 8, padding: '1.25rem 1.5rem', minWidth: 0 }}>
+          <div style={{ flex: '1 1 220px', background: '#fff', borderRadius: 8, border: '1px solid #e5e5e5', padding: '1.25rem 1.5rem', minWidth: 0 }}>
             <CardTitle>Tu equipo{myGroup ? ` · ${myGroup}` : ''}</CardTitle>
             {isTeamAlone ? (
               <p style={{ fontSize: '0.78rem', color: '#aaa', lineHeight: 1.6, margin: 0 }}>
@@ -711,9 +711,9 @@ export default function Step2Results() {
               <>
                 {/* avatars */}
                 <div style={{ display: 'flex', gap: '0.3rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#2d5a27', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.58rem', fontWeight: 700, flexShrink: 0 }}>Tú</div>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#0a0a0a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.58rem', fontWeight: 700, flexShrink: 0 }}>Tú</div>
                   {Array.from({ length: Math.min(teamResults.length - 1, 6) }).map((_, i) => (
-                    <div key={i} style={{ width: 32, height: 32, borderRadius: '50%', background: '#c8e6c0', color: '#2d5a27', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 700, flexShrink: 0 }}>
+                    <div key={i} style={{ width: 32, height: 32, borderRadius: '50%', background: '#f5f5f5', color: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 700, flexShrink: 0 }}>
                       {String.fromCharCode(65 + i)}
                     </div>
                   ))}
@@ -728,16 +728,16 @@ export default function Step2Results() {
                   <div style={{ position: 'relative', flexShrink: 0, width: 80, height: 80 }}>
                     <DonutChart pct={myContrib} color={cfg.color} size={80} />
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                      <span style={{ fontWeight: 900, fontSize: '1rem', lineHeight: 1, color: '#1a1a1a' }}>{myContrib}%</span>
+                      <span style={{ fontWeight: 900, fontSize: '1rem', lineHeight: 1, color: '#0a0a0a' }}>{myContrib}%</span>
                       <span style={{ fontSize: '0.52rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: 'center', lineHeight: 1.3 }}>tu parte</span>
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontWeight: 900, fontSize: '1.35rem', lineHeight: 1, color: '#1a1a1a' }}>{teamAvg.toFixed(1)} t</div>
+                    <div style={{ fontWeight: 900, fontSize: '1.35rem', lineHeight: 1, color: '#0a0a0a' }}>{teamAvg.toFixed(1)} t</div>
                     <div style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>media del equipo</div>
                     <div style={{ fontSize: '0.73rem', color: '#666', lineHeight: 1.7 }}>
-                      Tu huella: <strong style={{ color: '#1a1a1a' }}>{carbonTons.toFixed(1)} t</strong><br />
-                      Total equipo: <strong style={{ color: '#1a1a1a' }}>{teamTotal.toFixed(1)} t</strong>
+                      Tu huella: <strong style={{ color: '#0a0a0a' }}>{carbonTons.toFixed(1)} t</strong><br />
+                      Total equipo: <strong style={{ color: '#0a0a0a' }}>{teamTotal.toFixed(1)} t</strong>
                     </div>
                   </div>
                 </div>
@@ -746,10 +746,10 @@ export default function Step2Results() {
           </div>
 
           {/* Email */}
-          <div style={{ flex: '1 1 200px', background: '#fff', borderRadius: 8, padding: '1.25rem 1.5rem', minWidth: 0 }}>
+          <div style={{ flex: '1 1 200px', background: '#fff', borderRadius: 8, border: '1px solid #e5e5e5', padding: '1.25rem 1.5rem', minWidth: 0 }}>
             <CardTitle>Recibe tus resultados</CardTitle>
             {emailStatus === 'success' ? (
-              <p style={{ fontSize: '0.8rem', color: '#2d5a27', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'center', padding: '1.25rem 0', margin: 0 }}>
+              <p style={{ fontSize: '0.8rem', color: '#16a34a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'center', padding: '1.25rem 0', margin: 0 }}>
                 ✓ Revisa tu bandeja de entrada
               </p>
             ) : (
@@ -763,7 +763,7 @@ export default function Step2Results() {
                     placeholder="tu@email.com"
                     value={emailInput}
                     onChange={e => { setEmailInput(e.target.value); setEmailStatus('idle') }}
-                    style={{ width: '100%', border: '1.5px solid #e0e0e0', borderRadius: 4, padding: '0.6rem 0.75rem', fontSize: '0.85rem', outline: 'none', marginBottom: '0.55rem', boxSizing: 'border-box', background: '#fff', color: '#1a1a1a' }}
+                    style={{ width: '100%', border: '1.5px solid #e5e5e5', borderRadius: 4, padding: '0.6rem 0.75rem', fontSize: '0.85rem', outline: 'none', marginBottom: '0.55rem', boxSizing: 'border-box', background: '#fff', color: '#0a0a0a' }}
                   />
                   {(emailStatus === 'invalid' || emailStatus === 'error') && (
                     <p style={{ fontSize: '0.7rem', color: '#cc4444', margin: '-0.15rem 0 0.5rem' }}>
@@ -773,7 +773,7 @@ export default function Step2Results() {
                   <button
                     type="submit"
                     disabled={emailStatus === 'sending'}
-                    style={{ width: '100%', background: emailStatus === 'sending' ? '#aaa' : '#2d5a27', color: '#fff', padding: '0.85rem', fontSize: '0.73rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, borderRadius: 4, cursor: emailStatus === 'sending' ? 'default' : 'pointer', border: 'none' }}
+                    style={{ width: '100%', background: emailStatus === 'sending' ? '#aaa' : '#0a0a0a', color: '#fff', padding: '0.85rem', fontSize: '0.73rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, borderRadius: 999, cursor: emailStatus === 'sending' ? 'default' : 'pointer', border: 'none' }}
                   >
                     {emailStatus === 'sending' ? 'Enviando...' : 'Enviarme mis resultados'}
                   </button>
@@ -785,7 +785,7 @@ export default function Step2Results() {
 
         {/* footer */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.7rem', paddingTop: '0.5rem' }}>
-          <div style={{ width: 32, height: 3, background: '#2d5a27', borderRadius: 2 }} />
+          <div style={{ width: 32, height: 3, background: '#0a0a0a', borderRadius: 2 }} />
           <p style={{ fontSize: '0.85rem', fontStyle: 'italic', color: '#888', margin: 0, textAlign: 'center' }}>
             Tu huella forma parte del resultado colectivo del taller
           </p>
@@ -795,8 +795,8 @@ export default function Step2Results() {
         {!step3Started ? (
           <WaitingForFacilitator message="El facilitador está preparando la fase de acciones..." />
         ) : (
-          <div style={{ background: '#f0f7ee', border: '1px solid #c8e6c0', borderRadius: 8, padding: '1rem 1.25rem', marginTop: '1rem', textAlign: 'center' }}>
-            <p style={{ fontSize: '0.85rem', color: '#2d5a27', fontWeight: 600, margin: 0 }}>
+          <div style={{ background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: 8, padding: '1rem 1.25rem', marginTop: '1rem', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.85rem', color: '#0a0a0a', fontWeight: 600, margin: 0 }}>
               🌱 La fase de acciones ha comenzado — ve a la pantalla de equipo.
             </p>
           </div>

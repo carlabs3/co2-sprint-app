@@ -1,14 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;900&display=swap');
 
 :root {
-  --font-sans: 'DM Sans', sans-serif;
+  --font-sans: 'Inter', sans-serif;
   --bg-cream: #F7F4F0;
   --bg-white: #ffffff;
   --border-soft: #E8E4DF;
   --text-primary: #1a1a1a;
   --text-muted: #aaa;
-  --verde: #000000;
+  --verde: #0a0a0a;
   --verde-medio: #666666;
   --verde-oscuro: #111111;
   --verde-claro: #e5e5e5;
@@ -23,7 +22,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 400;
 }
 
@@ -32,9 +31,9 @@ html, body {
 }
 
 body {
-  background-color: var(--blanco);
+  background-color: #f5f5f5;
   color: var(--negro);
-  font-size: 1.1875rem; /* 19px base (era 16px) */
+  font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -87,7 +86,7 @@ a {
 .hero-tag {
   font-size: 10px;
   font-weight: 600;
-  color: var(--verde);
+  color: rgba(0,0,0,0.4);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   margin-bottom: 16px;
@@ -100,14 +99,14 @@ a {
 
 .hero-h1 {
   font-weight: 900;
-  color: #000;
+  color: #0a0a0a;
   line-height: 1.02;
   letter-spacing: -0.02em;
-  text-transform: none;
+  text-transform: uppercase;
   margin-bottom: 20px;
 }
 
-.hero-h1 span { color: #000; }
+.hero-h1 span { color: #0a0a0a; }
 
 .hero-sub {
   font-size: 15px;
@@ -124,9 +123,9 @@ a {
 }
 
 .join-box {
-  background: #f5f5f0;
-  border: 1.5px solid var(--gris-borde);
+  background: #0a0a0a;
   border-radius: 16px;
+  border: none;
   align-self: start;
 }
 
@@ -137,25 +136,25 @@ a {
 }
 
 .join-input {
-  border: 1.5px solid var(--gris-borde);
-  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 12px 14px;
   width: 100%;
-  background: #fff;
-  color: #1a1a1a;
+  background: rgba(255,255,255,0.07);
+  color: #fff;
 }
 
-.join-input::placeholder { text-transform: uppercase; letter-spacing: 0.1em; color: #ccc; }
-.join-input:focus { border-color: #000; outline: none; }
+.join-input::placeholder { text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); }
+.join-input:focus { border-color: rgba(255,255,255,0.4); outline: none; }
 
 .join-btn {
-  background: #000;
-  color: #fff;
-  border-radius: 8px;
+  background: #fff;
+  color: #0a0a0a;
+  border-radius: 999px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;

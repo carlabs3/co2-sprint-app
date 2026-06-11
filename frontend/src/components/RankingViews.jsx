@@ -275,21 +275,21 @@ export function DistributionView({ ranking }) {
   return (
     <div>
       {ranking.length < 3 && (
-        <div style={{ background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 8, padding: '0.65rem 1rem', marginBottom: '1.5rem', fontSize: '0.78rem', color: '#888' }}>
+        <div style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '0.65rem 1rem', marginBottom: '1.5rem', fontSize: '0.78rem', color: '#666' }}>
           Con pocos datos la distribución puede no ser representativa.
         </div>
       )}
 
       {/* Histogram card */}
-      <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '1.5rem', marginBottom: '1.25rem' }}>
+      <div style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.25rem' }}>
         {/* Category tabs */}
         <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
           {HISTOGRAM_TABS.map(t => (
             <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-              padding: '0.3rem 0.9rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 600,
-              border: `1.5px solid ${activeTab === t.id ? '#000' : '#e5e5e5'}`,
-              background: activeTab === t.id ? '#000' : '#fff',
-              color: activeTab === t.id ? '#fff' : '#555',
+              padding: '0.3rem 0.9rem', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 600,
+              border: `1.5px solid ${activeTab === t.id ? t.color : '#e5e5e5'}`,
+              background: activeTab === t.id ? t.color : '#ffffff',
+              color: activeTab === t.id ? (t.id === 'total' ? '#fff' : '#0a0a0a') : '#666',
               cursor: 'pointer', whiteSpace: 'nowrap',
               transition: 'all 0.15s ease',
             }}>
@@ -307,7 +307,7 @@ export function DistributionView({ ranking }) {
               if (!active || !payload?.length) return null
               const d = payload[0].payload
               return (
-                <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 6, padding: '0.4rem 0.75rem', fontSize: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                <div style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                   <strong>{d.range} t</strong> — {d.count} participante{d.count !== 1 ? 's' : ''}
                 </div>
               )
@@ -367,7 +367,7 @@ export function DistributionView({ ranking }) {
         </ResponsiveContainer>
 
         {/* Legend */}
-        <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginTop: '0.75rem', fontSize: '0.68rem', color: '#888', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginTop: '0.75rem', fontSize: '0.68rem', color: '#666', alignItems: 'center' }}>
           {[
             { label: 'Media grupo',   line: '2px dashed #aaa',     box: null,      border: null },
             { label: 'Mínimo',        line: '2px dashed #22c55e',  box: null,      border: null },
@@ -395,8 +395,8 @@ export function DistributionView({ ranking }) {
           { label: 'Más frecuente', value: mostFrequent !== '–' ? `${mostFrequent} t` : '–' },
           { label: 'Total emitido', value: values.length ? `${values.reduce((s, v) => s + v, 0).toFixed(0)} t` : '–' },
         ].map(({ label, value }) => (
-          <div key={label} style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '1rem', textAlign: 'center' }}>
-            <div style={{ fontWeight: 900, fontSize: '1.4rem', color: '#000', lineHeight: 1, marginBottom: '0.3rem' }}>{value}</div>
+          <div key={label} style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
+            <div style={{ fontWeight: 900, fontSize: '1.4rem', color: '#0a0a0a', lineHeight: 1, marginBottom: '0.3rem' }}>{value}</div>
             <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#aaa' }}>{label}</div>
           </div>
         ))}
@@ -404,14 +404,14 @@ export function DistributionView({ ranking }) {
 
       {/* Area breakdown */}
       {areaTotal > 0 && (
-        <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '1.5rem', marginBottom: '1.25rem' }}>
+        <div style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.25rem' }}>
           {activeTab === 'total' ? (
             <>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#000', marginBottom: '1rem' }}>
                 Media por categorías
               </div>
               {/* Stacked bar */}
-              <div style={{ display: 'flex', height: 32, borderRadius: 8, overflow: 'hidden', marginBottom: '0.85rem' }}>
+              <div style={{ display: 'flex', height: 32, borderRadius: '12px', overflow: 'hidden', marginBottom: '0.85rem' }}>
                 {Object.entries(AREA_COLORS).map(([key, color]) => {
                   const w = areaAvg[key] / areaTotal * 100
                   return w > 0 ? (
@@ -469,7 +469,7 @@ export function DistributionView({ ranking }) {
               Distribución de respuestas
             </div>
             {dist.map(({ question, distribution, total: qTotal, maxCount }) => (
-              <div key={question.id} style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '1.5rem', marginBottom: '1rem' }}>
+              <div key={question.id} style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
                 <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#333', marginBottom: '0.25rem', lineHeight: 1.4 }}>
                   {question.text}
                 </div>
@@ -490,7 +490,7 @@ export function DistributionView({ ranking }) {
                         </span>
                       </div>
                       <div style={{ height: 6, background: '#f5f5f5', borderRadius: 3, overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${opt.pct}%`, background: isMost ? '#000' : '#d4d4d4', borderRadius: 3, transition: 'width 0.5s ease' }} />
+                        <div style={{ height: '100%', width: `${opt.pct}%`, background: isMost ? '#0a0a0a' : '#d4d4d4', borderRadius: 3, transition: 'width 0.5s ease' }} />
                       </div>
                     </div>
                   )
@@ -523,17 +523,17 @@ export function GroupsView({ groups }) {
   return (
     <div>
       {groups.map((g, i) => (
-        <div key={g.name} style={{ background: '#fafafa', border: '1px solid #e5e5e5', padding: '1rem 1.25rem', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '1.5rem', borderRadius: '12px' }}>
-          <span style={{ fontWeight: 900, fontSize: '1.2rem', width: '2rem', color: '#000' }}>#{i + 1}</span>
-          <span style={{ fontWeight: 700, fontSize: '1rem', flex: 1, color: '#000' }}>{g.name}</span>
+        <div key={g.name} style={{ background: '#ffffff', border: '1px solid #e5e5e5', padding: '1rem 1.25rem', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '1.5rem', borderRadius: '16px' }}>
+          <span style={{ fontWeight: 900, fontSize: '1.2rem', width: '2rem', color: '#0a0a0a' }}>#{i + 1}</span>
+          <span style={{ fontWeight: 700, fontSize: '1rem', flex: 1, color: '#0a0a0a' }}>{g.name}</span>
           <div style={{ flex: 2, height: '6px', background: '#e5e5e5', position: 'relative', overflow: 'hidden', borderRadius: '3px' }}>
-            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${(g.avg / maxGroupAvg) * 100}%`, background: '#000', borderRadius: '3px', transition: 'width 0.5s ease' }} />
+            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${(g.avg / maxGroupAvg) * 100}%`, background: '#0a0a0a', borderRadius: '3px', transition: 'width 0.5s ease' }} />
           </div>
-          <span style={{ fontWeight: 900, fontSize: '1.05rem', width: '60px', textAlign: 'right', color: '#000' }}>{Number(g.avg).toFixed(1)} t</span>
-          <span style={{ background: CATEGORY_BG[g.category] || '#f5f5f5', color: CATEGORY_COLORS[g.category] || '#888', padding: '0.2rem 0.65rem', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '999px', border: '1px solid #e5e5e5' }}>
+          <span style={{ fontWeight: 900, fontSize: '1.05rem', width: '60px', textAlign: 'right', color: '#0a0a0a' }}>{Number(g.avg).toFixed(1)} t</span>
+          <span style={{ background: CATEGORY_BG[g.category] || '#f5f5f5', color: CATEGORY_COLORS[g.category] || '#666', padding: '0.2rem 0.65rem', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '999px', border: '1px solid #e5e5e5' }}>
             {CATEGORY_LABELS[g.category]}
           </span>
-          <span style={{ fontSize: '0.72rem', color: '#bbb' }}>{g.count} pers.</span>
+          <span style={{ fontSize: '0.72rem', color: '#666' }}>{g.count} pers.</span>
         </div>
       ))}
     </div>

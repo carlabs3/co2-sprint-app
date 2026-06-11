@@ -14,11 +14,11 @@ const AREA_LABELS = {
 
 const STATUS_LABEL = { draft: 'Borrador', waiting: 'En espera', active: 'Activa', actions: 'Fase acciones', closed: 'Cerrada' }
 const STATUS_STYLE = {
-  draft:   { background: '#f5f5f5', color: '#999' },
-  waiting: { background: '#f5f5f5', color: '#888' },
-  active:  { background: '#000000', color: '#ffffff' },
-  actions: { background: '#f0f0f0', color: '#444' },
-  closed:  { background: '#f5f5f5', color: '#bbb' },
+  draft:   { background: '#f5f5f5', color: '#999', border: '1px solid #e5e5e5' },
+  waiting: { background: 'rgba(74,222,128,0.1)', color: '#16a34a', border: '1px solid rgba(74,222,128,0.3)' },
+  active:  { background: 'rgba(74,222,128,0.1)', color: '#16a34a', border: '1px solid rgba(74,222,128,0.3)' },
+  actions: { background: 'rgba(74,222,128,0.1)', color: '#16a34a', border: '1px solid rgba(74,222,128,0.3)' },
+  closed:  { background: '#f5f5f5', color: '#999', border: '1px solid #e5e5e5' },
 }
 
 const s = {
@@ -28,20 +28,20 @@ const s = {
     display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
     marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem',
   },
-  title:    { fontWeight: 900, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: '#000000' },
-  subtitle: { fontSize: '0.85rem', color: '#888', marginTop: '0.3rem' },
+  title:    { fontWeight: 900, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: '#0a0a0a' },
+  subtitle: { fontSize: '0.85rem', color: '#666', marginTop: '0.3rem' },
   btnNew: {
-    background: '#000000', color: '#fff', padding: '0.75rem 1.5rem',
-    fontSize: '0.85rem', borderRadius: '8px', fontWeight: 600, border: 'none', cursor: 'pointer',
+    background: '#0a0a0a', color: '#fff', padding: '0.75rem 1.5rem',
+    fontSize: '0.85rem', borderRadius: '999px', fontWeight: 600, border: 'none', cursor: 'pointer',
   },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' },
-  card: { background: '#fff', borderRadius: '12px', padding: '1.5rem', border: '1px solid #e5e5e5' },
-  cardCode: { fontWeight: 900, fontSize: '1.4rem', letterSpacing: '0.05em', marginBottom: '0.4rem', color: '#000' },
-  cardMeta: { fontSize: '0.8rem', color: '#999', marginBottom: '0.3rem' },
+  card: { background: '#ffffff', borderRadius: '16px', padding: '1.5rem', border: '1px solid #e5e5e5' },
+  cardCode: { fontWeight: 900, fontSize: '1.4rem', letterSpacing: '0.05em', marginBottom: '0.4rem', color: '#0a0a0a' },
+  cardMeta: { fontSize: '0.8rem', color: '#666', marginBottom: '0.3rem' },
   groupsRow: { display: 'flex', flexWrap: 'wrap', gap: '0.35rem', margin: '0.75rem 0' },
   groupPill: {
     fontSize: '11px', fontWeight: 500, padding: '3px 10px', borderRadius: 999,
-    background: '#f5f5f5', color: '#444', border: '1px solid #e5e5e5',
+    background: '#f5f5f5', color: '#0a0a0a', border: '1px solid #e5e5e5',
   },
   badge: (status) => ({
     display: 'inline-block', padding: '3px 10px',
@@ -52,13 +52,13 @@ const s = {
   }),
   cardActions: { display: 'flex', gap: '0.5rem', marginTop: '0.25rem' },
   btnOpen: {
-    flex: 1, background: '#000000', color: '#fff', padding: '0.55rem',
-    fontSize: '0.73rem', borderRadius: '8px', textAlign: 'center',
+    flex: 1, background: '#0a0a0a', color: '#fff', padding: '0.55rem',
+    fontSize: '0.73rem', borderRadius: '999px', textAlign: 'center',
     border: 'none', cursor: 'pointer', fontWeight: 600,
   },
   btnDelete: {
-    background: 'transparent', color: '#bbb', padding: '0.55rem 0.75rem',
-    fontSize: '0.73rem', borderRadius: '8px',
+    background: 'transparent', color: '#999', padding: '0.55rem 0.75rem',
+    fontSize: '0.73rem', borderRadius: '999px',
     border: '1px solid #e5e5e5', cursor: 'pointer',
   },
   empty: {
@@ -66,8 +66,8 @@ const s = {
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem',
   },
   emptyBtn: {
-    background: '#000000', color: '#fff', padding: '0.85rem 2rem',
-    fontSize: '0.85rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600,
+    background: '#0a0a0a', color: '#fff', padding: '0.85rem 2rem',
+    fontSize: '0.85rem', borderRadius: '999px', border: 'none', cursor: 'pointer', fontWeight: 600,
   },
 }
 
@@ -128,9 +128,9 @@ export default function FacilitatorDashboard() {
 
         {/* Active session banner */}
         {activeBanner && (
-          <div style={{ background: '#f5f5f5', border: '1.5px solid #e5e5e5', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '12px 16px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
             <div>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: '#000', margin: 0 }}>
+              <p style={{ fontSize: '13px', fontWeight: 600, color: '#0a0a0a', margin: 0 }}>
                 🟢 Sesión activa: {activeBanner.code}
               </p>
               <p style={{ fontSize: '11px', color: '#666', margin: '2px 0 0' }}>
@@ -139,7 +139,7 @@ export default function FacilitatorDashboard() {
             </div>
             <button
               onClick={() => navigate(`/session/${activeBanner.code}/rankings`)}
-              style={{ background: '#000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.06em' }}
+              style={{ background: '#0a0a0a', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '999px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.06em' }}
             >
               RETOMAR SESIÓN →
             </button>
@@ -188,7 +188,7 @@ export default function FacilitatorDashboard() {
                     ? Object.entries(sm.byArea).sort((a, b) => b[1] - a[1])[0]
                     : null
                   return (
-                    <div style={{ background: '#f5f5f5', borderRadius: 8, padding: '0.9rem 1rem', marginBottom: '1rem', border: '1px solid #e5e5e5' }}>
+                    <div style={{ background: '#f5f5f5', borderRadius: '12px', padding: '0.9rem 1rem', marginBottom: '1rem', border: '1px solid #e5e5e5' }}>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '0.35rem' }}>
                         <span style={{ fontWeight: 900, fontSize: '1.7rem', lineHeight: 1, color: '#000' }}>
                           {sm.averageCarbonTons?.toFixed(1)}
@@ -227,7 +227,7 @@ export default function FacilitatorDashboard() {
                             </code>
                             <button
                               onClick={() => navigator.clipboard.writeText(url)}
-                              style={{ fontSize: '0.65rem', color: '#444', background: 'transparent', border: '1px solid #e5e5e5', borderRadius: 3, padding: '2px 7px', cursor: 'pointer', flexShrink: 0 }}
+                              style={{ fontSize: '0.65rem', color: '#0a0a0a', background: 'transparent', border: '1px solid #e5e5e5', borderRadius: '6px', padding: '2px 7px', cursor: 'pointer', flexShrink: 0 }}
                             >
                               Copiar
                             </button>

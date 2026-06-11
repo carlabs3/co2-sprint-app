@@ -58,15 +58,15 @@ export default function Home() {
 
             {/* Left */}
             <div>
-              <p className="hero-tag" style={{ color: '#888' }}>· TALLER DE HUELLA DE CARBONO</p>
+              <p className="hero-tag" style={{ color: 'rgba(0,0,0,0.4)' }}>· TALLER DE HUELLA DE CARBONO</p>
               <h1 style={{
+                color: '#0a0a0a',
                 fontWeight: 900,
-                color: '#000',
-                lineHeight: 1.05,
+                textTransform: 'uppercase',
                 letterSpacing: '-0.02em',
-                marginBottom: 24,
                 fontSize: 'clamp(38px, 5vw, 58px)',
-                textTransform: 'none',
+                lineHeight: 1.05,
+                marginBottom: 24,
               }}>
                 tu estilo de vida<br />
                 tiene un{' '}
@@ -80,45 +80,28 @@ export default function Home() {
                 </span>
               </h1>
               <p className="hero-sub">
-                Descubre el impacto real de tu estilo de vida en el planeta.
-                Calcula tu huella de carbono en menos de 5 minutos.
+                Transporte, alimentación, energía en casa… todo suma. En 5 minutos sabrás exactamente cuánto CO₂ genera tu vida — y cómo te comparas con tu equipo.
               </p>
-              <button
-                onClick={scrollToHow}
-                style={{
-                  background: 'transparent',
-                  border: '1.5px solid #000',
-                  borderRadius: 8,
-                  padding: '11px 20px',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  letterSpacing: '0.05em',
-                  color: '#000',
-                }}
-              >
-                ¿Cómo funciona? →
-              </button>
-              <p className="hero-note">Sin registro · Desde tu móvil · Resultados en tiempo real</p>
             </div>
 
             {/* Right — join box */}
-            <div className="join-box" style={{ background: '#fafafa', border: '1.5px solid #e5e5e5', borderRadius: 16 }}>
+            <div className="join-box" style={{ background: '#0a0a0a', borderRadius: 16, border: 'none' }}>
               <div style={{ marginBottom: 18 }}>
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
-                  fontSize: 10, fontWeight: 600, color: '#000',
-                  background: '#f0f0f0', borderRadius: 999, border: '1px solid #e5e5e5',
+                  fontSize: 10, fontWeight: 600, color: '#4ade80',
+                  background: 'rgba(74, 222, 128, 0.15)', borderRadius: 999, border: '1px solid rgba(74, 222, 128, 0.3)',
                   padding: '4px 10px', letterSpacing: '0.08em', textTransform: 'uppercase',
                 }}>
-                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#4ade80', flexShrink: 0 }} />
                   Sesión activa
                 </span>
               </div>
 
-              <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1a1a1a', marginBottom: 8, letterSpacing: '-0.01em' }}>
+              <h3 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 8, letterSpacing: '-0.01em' }}>
                 Únete al taller
               </h3>
-              <p style={{ fontSize: 13, color: '#888', lineHeight: 1.55, marginBottom: 20 }}>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.55, marginBottom: 20 }}>
                 Introduce el código que te ha dado tu facilitador para calcular tu huella.
               </p>
 
@@ -126,7 +109,7 @@ export default function Home() {
                 <label style={{
                   display: 'block', fontSize: 11, fontWeight: 600,
                   textTransform: 'uppercase', letterSpacing: '0.1em',
-                  color: '#888', marginBottom: 8,
+                  color: '#fff', marginBottom: 8,
                 }}>
                   Código de sesión
                 </label>
@@ -155,15 +138,15 @@ export default function Home() {
               <div style={{
                 display: 'flex', flexDirection: 'column', gap: 9,
                 marginTop: 20, paddingTop: 18,
-                borderTop: '1px solid var(--gris-borde)',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
               }}>
                 {[
-                  { icon: '📱', text: 'Sin registro ni instalación' },
-                  { icon: '⏱️', text: '5 minutos para completarlo' },
-                  { icon: '🏆', text: 'Resultados en tiempo real' },
-                ].map(({ icon, text }) => (
-                  <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: '#666' }}>
-                    <span style={{ fontSize: 15, lineHeight: 1, flexShrink: 0 }}>{icon}</span>
+                  { dot: '#38bdf8', text: 'Sin registro ni instalación' },
+                  { dot: '#f59e0b', text: '5 minutos para completarlo' },
+                  { dot: '#4ade80', text: 'Resultados en tiempo real' },
+                ].map(({ dot, text }) => (
+                  <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: dot, flexShrink: 0 }} />
                     {text}
                   </div>
                 ))}
@@ -177,11 +160,11 @@ export default function Home() {
       {/* ── STATS ────────────────────────────────────────────── */}
       <div className="stats">
         {[
-          { bg: '#f5f5f5', numColor: '#000', textColor: '#555', big: '4.7 t', text: 'Media de CO₂ por persona al año en España' },
-          { bg: '#000',    numColor: '#fff', textColor: 'rgba(255,255,255,0.6)', big: '2×', text: 'El doble de lo que el planeta puede absorber' },
-          { bg: '#f5f5f5', numColor: '#000', textColor: '#555', big: "5'", text: 'Minutos para calcular tu huella y empezar a cambiar' },
-        ].map(({ bg, numColor, textColor, big, text }) => (
-          <div key={big} className="stat" style={{ background: bg }}>
+          { bg: '#fff',    numColor: '#0a0a0a', textColor: '#555', big: '4.7 t', text: 'Media de CO₂ por persona al año en España' },
+          { bg: '#0a0a0a', numColor: '#fff',    textColor: 'rgba(255,255,255,0.6)', big: '2×', text: 'El doble de lo que el planeta puede absorber' },
+          { bg: '#fff',    numColor: '#0a0a0a', textColor: '#555', big: "5'", text: 'Minutos para calcular tu huella y empezar a cambiar' },
+        ].map(({ bg, numColor, textColor, big, text }, i) => (
+          <div key={big} className="stat" style={{ background: bg, borderRight: i < 2 ? '1px solid #e5e5e5' : 'none' }}>
             <div style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 900, color: numColor, lineHeight: 1, marginBottom: 12 }}>
               {big}
             </div>
@@ -219,7 +202,7 @@ export default function Home() {
               <div key={n}>
                 <div style={{
                   width: 38, height: 38, borderRadius: '50%',
-                  background: '#000', color: '#fff',
+                  background: '#0a0a0a', color: '#fff',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 16, fontWeight: 700, marginBottom: 16, flexShrink: 0,
                 }}>
