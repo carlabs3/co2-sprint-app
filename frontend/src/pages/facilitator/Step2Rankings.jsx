@@ -77,23 +77,16 @@ export default function Step2Rankings() {
   }, [code])
 
   useEffect(() => {
-    socket.emit('facilitator:join', { sessionCode: code })
+    socket.emit('facilitator:join', { code }) // backend expects { code }, not { sessionCode }
 
-    socket.on('participant:joined', ({ count }) => setTotalJoined(count))
-    socket.on('footprint:submitted', ({ count }) => {
-      setTotalJoined(prev => Math.max(prev, count))
-      api.get(`/api/results/${code}/ranking`).then(res => {
-        const items = res.data.map(r => ({
-          name: 'Anónimo',
-          group: r.group,
-          tons: r.carbonTons,
-          category: r.category,
-          areas: r.areas || {},
-          answers: r.answers || {},
-        }))
-        setRanking(items)
-        setGroups(computeGroups(items))
-      }).catch(() => {})
+    socket.on('participant:joined', ({ total, count }) => setTotalJoined(total ?? count ?? 0))
+    socket.on('ranking:update', ({ individual }) => {
+      if (individual) {
+        const sorted = [...individual].sort((a, b) => a.tons - b.tons)
+        setRanking(sorted)
+        setGroups(computeGroups(sorted))
+        setShowRanking(true)
+      }
     })
     socket.on('team:confirmed', ({ group, confirmed, confirmedFinal }) => {
       setTeamConfirmations(prev => ({ ...prev, [group]: { confirmed, confirmedFinal } }))
@@ -103,7 +96,7 @@ export default function Step2Rankings() {
 
     return () => {
       socket.off('participant:joined')
-      socket.off('footprint:submitted')
+      socket.off('ranking:update')
       socket.off('team:confirmed')
       socket.off('step3:revealed')
       socket.off('winners:revealed')
