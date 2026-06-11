@@ -20,6 +20,13 @@ const CATEGORY_CONFIG = {
   'muy alto': { label: 'Huella muy elevada 🔥', color: '#f472b6', bg: '#fce8e8' },
 }
 
+const CATEGORY_MESSAGES = {
+  bajo:       '🌿 ¡Genial! Tu huella está muy por debajo de la media',
+  medio:      '🌱 Tu huella es moderada, hay margen de mejora',
+  alto:       '🌍 Tu huella está por encima de lo sostenible',
+  'muy alto': '🔥 Tu huella es alta — este taller es para ti',
+}
+
 const AREA_LABELS = {
   transport:   'Transporte',
   energy:      'Hogar',
@@ -185,7 +192,7 @@ function AreaDetailCard({ areaId, areaLabel, areaEmoji, areaColor, areaTons, sub
       <div onClick={() => setExpanded(e => !e)}
         style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', gap: 10, cursor: 'pointer' }}>
         <span style={{ fontSize: 18, width: 22, textAlign: 'center' }}>{areaEmoji}</span>
-        <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#0a0a0a' }}>{areaLabel}</span>
+        <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: '#0a0a0a' }}>{areaLabel}</span>
         <span style={{ fontSize: 13, fontWeight: 700, color: areaColor }}>{areaTons.toFixed(1)}t</span>
         <span style={{ fontSize: 10, color: '#aaa', marginLeft: 4 }}>
           {totalTons > 0 ? Math.round((areaTons / totalTons) * 100) : 0}%
@@ -199,7 +206,7 @@ function AreaDetailCard({ areaId, areaLabel, areaEmoji, areaColor, areaTons, sub
         <div style={{ padding: '4px 12px 10px' }}>
           {subcatValues.map((sub, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderTop: '0.5px solid #e5e5e5' }}>
-              <span style={{ flex: 1, fontSize: 11, color: '#555' }}>{sub.label}</span>
+              <span style={{ flex: 1, fontSize: 13, color: '#555' }}>{sub.label}</span>
               <div style={{ width: 70, height: 4, background: '#e5e5e5', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{
                   height: '100%',
@@ -208,7 +215,7 @@ function AreaDetailCard({ areaId, areaLabel, areaEmoji, areaColor, areaTons, sub
                   borderRadius: 2,
                 }} />
               </div>
-              <span style={{ fontSize: 11, fontWeight: 600, width: 36, textAlign: 'right', color: sub.negative ? '#16a34a' : areaColor }}>
+              <span style={{ fontSize: 13, fontWeight: 600, width: 36, textAlign: 'right', color: sub.negative ? '#16a34a' : areaColor }}>
                 {sub.tons.toFixed(2)}t
               </span>
             </div>
@@ -250,13 +257,11 @@ function SquareWhite({ size = 8 }) {
 function CardTitle({ children, dark = false }) {
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: 6,
-      fontSize: '0.68rem', fontWeight: 700,
+      fontSize: '0.78rem', fontWeight: 700,
       textTransform: 'uppercase', letterSpacing: '0.12em',
       color: dark ? 'rgba(255,255,255,0.55)' : '#999',
       marginBottom: '1rem',
     }}>
-      {dark ? <SquareWhite /> : <Square />}
       {children}
     </div>
   )
@@ -469,23 +474,8 @@ export default function Step2Results() {
       <div style={{ background: '#0a0a0a', color: '#fff' }}>
         <div style={{ maxWidth: 880, margin: '0 auto', padding: '1.25rem 1.5rem 0' }}>
 
-          {/* top bar */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-            <span style={{ fontWeight: 900, fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-              CO2 SPRINT *
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)' }}>Sesión {code}</span>
-              {myGroup && (
-                <span style={{ background: 'rgba(255,255,255,0.15)', padding: '0.25rem 0.7rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.04em', color: 'rgba(255,255,255,0.8)' }}>
-                  {myGroup}
-                </span>
-              )}
-            </div>
-          </div>
-
           {/* eyebrow */}
-          <p style={{ margin: '0 0 0.65rem', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.55)' }}>
+          <p style={{ margin: '0 0 0.65rem', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.55)' }}>
             Tu huella de carbono
           </p>
 
@@ -502,37 +492,9 @@ export default function Step2Results() {
                   t CO₂/año
                 </span>
               </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: '0.8rem', background: 'rgba(255,255,255,0.15)', padding: '0.35rem 0.8rem', borderRadius: 4, fontSize: '0.78rem', fontWeight: 700, color: '#fff' }}>
-                <SquareWhite size={7} />
-                Categoría {cfg.label}
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: '0.8rem', background: 'rgba(255,255,255,0.15)', padding: '0.35rem 0.8rem', borderRadius: 4, fontSize: '0.82rem', fontWeight: 600, color: '#fff' }}>
+                {CATEGORY_MESSAGES[category]}
               </div>
-            </div>
-
-            {/* 3 metrics */}
-            <div style={{ flex: '1 1 280px', display: 'flex', flexWrap: 'wrap', gap: '1rem 2.5rem' }}>
-              {[
-                {
-                  big: topPct !== null ? `TOP ${topPct}%` : '–',
-                  label: 'En la sesión',
-                  sub: loaded ? `de ${sTons.length} participantes` : '–',
-                },
-                {
-                  big: `${isBelow ? '–' : '+'}${diffPct}%`,
-                  label: 'Vs. España',
-                  sub: `media: ${SPAIN_AVG} t`,
-                },
-                {
-                  big: myContrib !== null ? `${myContrib}%` : '–',
-                  label: 'Del equipo',
-                  sub: myGroup || '–',
-                },
-              ].map(({ big, label, sub }) => (
-                <div key={label}>
-                  <span style={{ fontWeight: 900, fontSize: 'clamp(1.5rem, 4.5vw, 2rem)', display: 'block', lineHeight: 1, marginBottom: '0.2rem', color: '#fff' }}>{big}</span>
-                  <span style={{ fontSize: '0.63rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#fff', opacity: 0.55, display: 'block' }}>{label}</span>
-                  <span style={{ fontSize: '0.72rem', color: '#fff', opacity: 0.8, display: 'block', marginTop: '0.1rem' }}>{sub}</span>
-                </div>
-              ))}
             </div>
           </div>
         </div>
@@ -555,7 +517,7 @@ export default function Step2Results() {
           return (
             <div style={{ background: '#fff', borderRadius: 8, border: '1px solid #e5e5e5', padding: '1.25rem 1.5rem', marginBottom: '1rem' }}>
               <CardTitle>Distribución por áreas</CardTitle>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   <PieChart width={160} height={160}>
                     <Pie data={pieData} cx={80} cy={80} innerRadius={46} outerRadius={72} dataKey="value" paddingAngle={2} startAngle={90} endAngle={-270}>
@@ -567,13 +529,13 @@ export default function Step2Results() {
                     <span style={{ fontSize: '0.58rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em' }}>t CO₂</span>
                   </div>
                 </div>
-                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem 1rem', justifyContent: 'center' }}>
                   {pieData.map(d => (
-                    <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                       <div style={{ width: 9, height: 9, background: d.color, borderRadius: 2, flexShrink: 0 }} />
-                      <span style={{ fontSize: '0.75rem', color: '#555', flex: 1 }}>{d.name}</span>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0a0a0a' }}>{d.value.toFixed(1)} t</span>
-                      <span style={{ fontSize: '0.68rem', color: '#bbb', minWidth: 30, textAlign: 'right' }}>{total > 0 ? Math.round((d.value / total) * 100) : 0}%</span>
+                      <span style={{ fontSize: '0.78rem', color: '#555' }}>{d.name}</span>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0a0a0a' }}>{d.value.toFixed(1)} t</span>
+                      <span style={{ fontSize: '0.72rem', color: '#bbb' }}>{total > 0 ? Math.round((d.value / total) * 100) : 0}%</span>
                     </div>
                   ))}
                 </div>
@@ -587,7 +549,7 @@ export default function Step2Results() {
           const maxAreaTons = Math.max(...AREAS.map(a => areas[a.id] || 0), 0.01)
           return (
             <div style={{ marginBottom: '1rem' }}>
-              <p style={{ fontSize: '0.68rem', fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+              <p style={{ fontSize: '0.78rem', fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
                 Detalle por categoría
               </p>
               {AREAS.map(area => (
@@ -604,18 +566,14 @@ export default function Step2Results() {
                   maxAreaTons={maxAreaTons}
                 />
               ))}
-              <div style={{ background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: 10, padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#555' }}>🏛️ Servicios públicos</div>
-                  <div style={{ fontSize: '0.65rem', color: '#aaa', marginTop: 2 }}>Fijo para todos en España — infraestructuras, sanidad, educación...</div>
-                </div>
-                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#888' }}>1.5t</span>
-              </div>
             </div>
           )
         })()}
 
         {/* ── public services card ── */}
+        <p style={{ fontSize: '0.88rem', color: '#888', marginBottom: '0.6rem', fontStyle: 'italic' }}>
+          ...y a esto hay que sumarle lo que pagamos entre todos 🏛️
+        </p>
         <div style={{ background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: 8, padding: '1rem 1.25rem', marginBottom: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
             <span style={{ fontSize: '0.95rem' }}>🏛️</span>
@@ -623,7 +581,7 @@ export default function Step2Results() {
               Servicios públicos — 1,5 t CO₂/año (fijo)
             </span>
           </div>
-          <p style={{ fontSize: '0.72rem', color: '#555', margin: 0, lineHeight: 1.65 }}>
+          <p style={{ fontSize: '0.88rem', color: '#555', margin: 0, lineHeight: 1.65 }}>
             Una parte de tu huella proviene de los servicios que usamos colectivamente: sanidad, educación,
             infraestructuras, administración y defensa. Este coste —estimado en{' '}
             <strong>1.500 kg CO₂/año por persona</strong> en España— se reparte de forma igualitaria entre
@@ -659,9 +617,9 @@ export default function Step2Results() {
             }}>
               <Square size={7} opacity={0} />
               <span style={{ display: 'inline-block', width: 7, height: 7, border: `1.5px solid ${isBelow ? '#16a34a' : '#b07a30'}`, flexShrink: 0 }} />
-              {diffPct}% {isBelow ? 'por debajo de la media' : 'por encima de la media'}
+              {diffPct}% {isBelow ? 'por debajo de la media de España' : 'por encima de la media de España'}
             </div>
-            <p style={{ fontSize: '0.68rem', color: '#bbb', margin: 0 }}>
+            <p style={{ fontSize: '0.78rem', color: '#bbb', margin: 0 }}>
               Fuente: Ministerio para la Transición Ecológica, 2023
             </p>
           </div>
@@ -682,11 +640,11 @@ export default function Step2Results() {
                 <div style={{ fontWeight: 900, fontSize: 'clamp(1.8rem, 5vw, 2.4rem)', lineHeight: 1, marginBottom: '0.35rem' }}>
                   TOP {topPct}%
                 </div>
-                <p style={{ fontSize: '0.73rem', opacity: 0.78, lineHeight: 1.5, margin: '0 0 0' }}>
+                <p style={{ fontSize: '0.88rem', opacity: 0.78, lineHeight: 1.5, margin: '0 0 0' }}>
                   Tu huella es menor que la del {pctHigher}% de los participantes
                 </p>
                 <DotGrid lowerCount={lowerCount} higherCount={higherCount} />
-                <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.63rem', opacity: 0.6, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.72rem', opacity: 0.6, flexWrap: 'wrap' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'rgba(255,255,255,0.82)', display: 'inline-block', flexShrink: 0 }} />
                     Menor huella ({lowerCount})
@@ -735,7 +693,7 @@ export default function Step2Results() {
                   <div>
                     <div style={{ fontWeight: 900, fontSize: '1.35rem', lineHeight: 1, color: '#0a0a0a' }}>{teamAvg.toFixed(1)} t</div>
                     <div style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>media del equipo</div>
-                    <div style={{ fontSize: '0.73rem', color: '#666', lineHeight: 1.7 }}>
+                    <div style={{ fontSize: '0.88rem', color: '#666', lineHeight: 1.7 }}>
                       Tu huella: <strong style={{ color: '#0a0a0a' }}>{carbonTons.toFixed(1)} t</strong><br />
                       Total equipo: <strong style={{ color: '#0a0a0a' }}>{teamTotal.toFixed(1)} t</strong>
                     </div>
