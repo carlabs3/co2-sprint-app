@@ -628,17 +628,22 @@ export default function Step2Rankings() {
           </div>
 
           {!step3Revealed && allConfirmed && (
-            <button
-              onClick={handleRevealStep3}
-              style={{ width: '100%', background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' }}
-            >
-              Revelar a todos →
-            </button>
+            <>
+              <p style={{ fontSize: '0.68rem', color: '#999', textAlign: 'center', lineHeight: 1.45 }}>
+                Los equipos ven sus acciones —<br />pendiente de revelar valores
+              </p>
+              <button
+                onClick={handleRevealStep3}
+                style={{ width: '100%', background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' }}
+              >
+                Revelar a todos →
+              </button>
+            </>
           )}
 
           {step3Revealed && (
-            <button disabled style={{ width: '100%', background: '#f5f5f5', color: '#999', border: '1px solid #e5e5e5', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '999px', cursor: 'default' }}>
-              ✓ Acciones reveladas
+            <button disabled style={{ width: '100%', background: '#f5f5f5', color: '#16a34a', border: '1px solid #bbf7d0', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: '999px', cursor: 'default' }}>
+              ✓ Valores revelados
             </button>
           )}
         </>
