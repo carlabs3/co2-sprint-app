@@ -21,10 +21,10 @@ const CATEGORY_CONFIG = {
 }
 
 const CATEGORY_MESSAGES = {
-  bajo:       '🌿 ¡Genial! Tu huella está muy por debajo de la media',
-  medio:      '🌱 Tu huella es moderada, hay margen de mejora',
-  alto:       '🌍 Tu huella está por encima de lo sostenible',
-  'muy alto': '🔥 Tu huella es alta — este taller es para ti',
+  bajo:       '¡Genial! Tu huella está muy por debajo de la media',
+  medio:      'Tu huella es moderada, hay margen de mejora',
+  alto:       'Tu huella está por encima de lo sostenible',
+  'muy alto': 'Tu huella es alta — este taller es para ti',
 }
 
 const AREA_LABELS = {

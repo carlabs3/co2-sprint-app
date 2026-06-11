@@ -137,7 +137,6 @@ router.post('/send-email', async (req, res) => {
     return `
       <div style="margin-bottom: 20px;">
         <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 16px;">${area.emoji}</span>
           <span style="font-size: 14px; font-weight: 700; color: ${area.color};">${area.label}</span>
           <span style="font-size: 13px; font-weight: 700; color: ${area.color}; margin-left: 8px;">${Number(areas?.[area.id] || 0).toFixed(1)}t</span>
         </div>
@@ -146,10 +145,10 @@ router.post('/send-email', async (req, res) => {
   }).join('')
 
   const CATEGORY_MESSAGES = {
-    bajo:       '🌿 ¡Genial! Tu huella está muy por debajo de la media',
-    medio:      '🌱 Tu huella es moderada, hay margen de mejora',
-    alto:       '🌍 Tu huella está por encima de lo sostenible',
-    'muy alto': '🔥 Tu huella es alta — este taller es para ti',
+    bajo:       '¡Genial! Tu huella está muy por debajo de la media',
+    medio:      'Tu huella es moderada, hay margen de mejora',
+    alto:       'Tu huella está por encima de lo sostenible',
+    'muy alto': 'Tu huella es alta — este taller es para ti',
   }
   const categoryMsg = CATEGORY_MESSAGES[category] || category
 
@@ -167,7 +166,7 @@ router.post('/send-email', async (req, res) => {
           <div style="background: #000000; border-radius: 12px; padding: 32px; text-align: center; margin-bottom: 24px;">
             <p style="color: rgba(255,255,255,0.55); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px;">Tu huella total</p>
             <h2 style="color: #fff; font-size: 52px; font-weight: 700; margin: 0;">${Number(carbonTons).toFixed(1)} t <span style="font-size: 20px; color: rgba(255,255,255,0.55);">CO₂/año</span></h2>
-            <span style="background: rgba(255,255,255,0.15); color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 13px; display: inline-block; margin-top: 12px; letter-spacing: 0.04em;">${categoryMsg}</span>
+            <p style="color: rgba(255,255,255,0.75); font-size: 14px; margin: 12px 0 0;">${categoryMsg}</p>
           </div>
 
           <h3 style="color: #1a1a1a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;">Desglose por áreas</h3>
