@@ -77,7 +77,13 @@ export default function Step2Rankings() {
   }, [code])
 
   useEffect(() => {
-    socket.emit('facilitator:join', { code }) // backend expects { code }, not { sessionCode }
+    // Ensure socket is connected and join the session room
+    const joinRoom = () => socket.emit('facilitator:join', { code })
+    if (!socket.connected) socket.connect()
+    joinRoom()
+
+    // Re-join after reconnect so the room membership survives network drops
+    socket.on('connect', joinRoom)
 
     socket.on('participant:joined', ({ total, count }) => setTotalJoined(total ?? count ?? 0))
     socket.on('ranking:update', ({ individual }) => {
@@ -95,6 +101,7 @@ export default function Step2Rankings() {
     socket.on('winners:revealed', () => setWinnersRevealed(true))
 
     return () => {
+      socket.off('connect', joinRoom)
       socket.off('participant:joined')
       socket.off('ranking:update')
       socket.off('team:confirmed')
