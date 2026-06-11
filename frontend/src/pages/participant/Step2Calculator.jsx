@@ -422,7 +422,6 @@ export default function Step2Calculator() {
   }
 
   function handlePrev() {
-    if (autoAdvanceRef.current) { clearTimeout(autoAdvanceRef.current); autoAdvanceRef.current = null }
     if (isFirst) return
     let prevQ = questionIndex - 1
     let prevA = areaIndex
@@ -589,7 +588,7 @@ export default function Step2Calculator() {
               style={{ width: 48, height: 48, borderRadius: 14, fontSize: 16, background: '#fff', border: `1px solid ${isFirst ? BORDER : BORDER}`, color: isFirst ? BORDER : '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isFirst ? 'default' : 'pointer' }}
             >←</button>
             <div style={{ flex: 1 }} />
-            <button onClick={handleNext} disabled={!canNext}
+            <button onClick={() => handleNext()} disabled={!canNext}
               style={{ width: 48, height: 48, borderRadius: 14, border: 'none', fontSize: 16, fontWeight: 500, background: canNext ? '#1a1a1a' : BORDER, color: canNext ? CREAM : '#bbb', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: canNext ? 'pointer' : 'default' }}
             >{nextIcon}</button>
           </div>
@@ -684,7 +683,7 @@ export default function Step2Calculator() {
           <button onClick={handlePrev} disabled={isFirst}
             style={{ width: 48, height: 48, borderRadius: 14, border: `1px solid ${BORDER}`, background: '#fff', color: isFirst ? BORDER : '#1a1a1a', fontSize: 16, cursor: isFirst ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
           >←</button>
-          <button onClick={handleNext} disabled={!canNext}
+          <button onClick={() => handleNext()} disabled={!canNext}
             style={{ flex: 1, height: 48, borderRadius: 14, border: 'none', background: canNext ? '#1a1a1a' : BORDER, color: canNext ? CREAM : '#bbb', fontSize: 16, fontWeight: 500, cursor: canNext ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >{nextIcon}</button>
         </div>
