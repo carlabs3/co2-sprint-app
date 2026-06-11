@@ -83,7 +83,9 @@ export default function FacilitatorDashboard() {
       api.get('/api/sessions').then(({ data }) => setSessions(data)).catch(() => {})
 
     fetchSessions().finally(() => setLoading(false))
-    const poll = setInterval(fetchSessions, 30000)
+
+    // Poll every 5 s so new footprints and status changes appear without refreshing
+    const poll = setInterval(fetchSessions, 5000)
     return () => clearInterval(poll)
   }, [])
 
