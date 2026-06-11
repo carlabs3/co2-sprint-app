@@ -693,14 +693,7 @@ export default function Step2Calculator() {
   )}
 </div>
 
-        {/* Banner individual — solo en primera pregunta */}
-        {isFirst && (
-          <div style={{ margin: '0 16px 6px', padding: '7px 12px', background: '#f5f5f5', borderRadius: 8, border: `1px solid ${BORDER}`, flexShrink: 0 }}>
-            <p style={{ fontSize: 14, color: '#0a0a0a', margin: 0, lineHeight: 1.45 }}>
-              Responde pensando en ti — no en tu familia ni compañeros de piso.
-            </p>
-          </div>
-        )}
+
 
         {/* Options — flex 1, tarjetas blancas sobre fondo claro */}
         <div style={{ padding: '0 16px 8px', flex: 1, overflowY: 'auto', background: '#f5f5f5' }}>
