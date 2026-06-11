@@ -181,6 +181,46 @@ export default function Step2Rankings() {
   )
 
   // ── Step 3 panel (inside revealed view) ──────────────────────────────────────
+  function handleToggleAction(group, actionId) {
+    setTeamSelections(prev => {
+      const current = prev[group] || []
+      return {
+        ...prev,
+        [group]: current.includes(actionId)
+          ? current.filter(id => id !== actionId)
+          : [...current, actionId]
+      }
+    })
+  }
+
+  async function handleConfirmTeam(group) {
+    const actions = teamSelections[group] || []
+    const totalReduction = actions.reduce((sum, id) => {
+      const action = ACTIONS.find(a => a.id === id)
+      return sum + (action?.co2Reduction || 0)
+    }, 0)
+    const originalAvg = groupAvgTons[group] || 0
+    const newCarbonTons = Math.max(0, originalAvg - totalReduction / 1000)
+
+    socket.emit('team:confirmActions', {
+      sessionCode: code,
+      group,
+      actions,
+      totalReduction,
+      newCarbonTons,
+    })
+    try {
+      await api.post(`/api/sessions/${code}/team-actions`, {
+        group, actions, totalReduction, newCarbonTons
+      })
+    } catch {}
+
+    setTeamConfirmations(prev => ({
+      ...prev,
+      [group]: { confirmed: true, actions, totalReduction, newCarbonTons }
+    }))
+  }
+
   const step3Panel = (() => {
     if (!step3Data && !step3Started) return (
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2.5rem' }}>
@@ -194,34 +234,6 @@ export default function Step2Rankings() {
     )
 
     if (!step3Revealed && step3Data) {
-      const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste']
-      const A_COLORS = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
-
-      const selected = teamSelections[activeTeamTab] || []
-      const conf = activeTeamTab ? teamConfirmations[activeTeamTab] : null
-
-      const allAreaActions = ACTIONS.filter(a => filter3Area === 'all' || a.area === filter3Area)
-      const selectedBudget = selected.reduce((s, id) => {
-        const a = ACTIONS.find(x => x.id === id)
-        return s + (a?.cost || 0)
-      }, 0)
-      const MAX_POINTS = 5
-
-      async function handleConfirmTeam(group) {
-        const sel = teamSelections[group] || []
-        if (!sel.length) return
-        try {
-          await api.post(`/api/sessions/${code}/team-actions`, {
-            group,
-            actions: sel,
-            pointsUsed: sel.reduce((s, id) => { const a = ACTIONS.find(x => x.id === id); return s + (a?.cost || 0) }, 0),
-          })
-          socket.emit('team:confirm', { sessionCode: code, group, actions: sel })
-          setTeamConfirmations(prev => ({ ...prev, [group]: { ...prev[group], confirmed: true } }))
-          await fetchStep3Data()
-        } catch {}
-      }
-
       return (
         <div style={{ flex: 1, padding: '2rem', overflow: 'auto', background: '#f5f5f5' }}>
           <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e5e5e5', padding: '2rem' }}>
@@ -252,25 +264,51 @@ export default function Step2Rankings() {
             </div>
 
             {activeTeamTab && (() => {
-              const teamData = step3Data?.teams?.find(t => t.group === activeTeamTab)
               const selected = teamSelections[activeTeamTab] || []
               const conf = teamConfirmations[activeTeamTab]
-              const budget = selected.reduce((s, id) => { const a = ACTIONS.find(x => x.id === id); return s + (a?.cost || 0) }, 0)
+              const originalAvg = groupAvgTons[activeTeamTab]
 
               return (
                 <div style={{ maxWidth: 680 }}>
-                  {/* Budget bar */}
-                  <div style={{ background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '0.85rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span style={{ fontSize: '0.72rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Puntos usados</span>
-                    <div style={{ flex: 1, height: 8, background: '#e5e5e5', borderRadius: 4, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${(budget / MAX_POINTS) * 100}%`, background: budget >= MAX_POINTS ? '#ef4444' : '#0a0a0a', borderRadius: 4, transition: 'width 0.3s ease' }} />
+                  {/* Team header — current footprint + selection count */}
+                  <div style={{ background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '0.85rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+                    <div>
+                      <span style={{ fontSize: '0.68rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Huella actual</span>
+                      <div style={{ fontWeight: 900, fontSize: '1.35rem', color: '#0a0a0a', lineHeight: 1.1 }}>
+                        {originalAvg != null ? `${originalAvg.toFixed(1)} t` : '–'}
+                      </div>
                     </div>
-                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: budget >= MAX_POINTS ? '#ef4444' : '#0a0a0a' }}>{budget}/{MAX_POINTS}</span>
+                    <div>
+                      <span style={{ fontSize: '0.68rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Acciones seleccionadas</span>
+                      <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#0a0a0a', lineHeight: 1.1 }}>{selected.length}</div>
+                    </div>
                   </div>
+
+                  {/* Selected actions */}
+                  {selected.length > 0 && (
+                    <div style={{ marginBottom: '1.25rem' }}>
+                      <div style={{ fontSize: '0.68rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
+                        Acciones elegidas
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                        {selected.map(id => {
+                          const a = ACTIONS.find(x => x.id === id)
+                          if (!a) return null
+                          return (
+                            <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: '10px', padding: '0.6rem 0.85rem' }}>
+                              <span style={{ fontSize: '1rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
+                              <span style={{ flex: 1, fontSize: '0.78rem', fontWeight: 600, color: '#0a0a0a' }}>{a.label}</span>
+                              <button onClick={() => handleToggleAction(activeTeamTab, id)} style={{ background: 'transparent', border: 'none', color: '#999', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: '0 0.15rem' }}>✕</button>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Area filter */}
                   <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                    {[{ id: 'all', label: 'Todas' }, ...['transport','energy','food','consumption','waste'].map(a => ({ id: a, label: AREA_LABEL[a] }))].map(f => (
+                    {[{ id: 'all', label: 'Todas' }, ...['transport','energy','food','consumption','waste'].map(a => ({ id: a, label: `${AREA_EMOJI[a]} ${AREA_LABEL[a]}` }))].map(f => (
                       <button key={f.id} onClick={() => setFilter3Area(f.id)} style={{
                         padding: '0.25rem 0.75rem', borderRadius: 999, fontSize: '0.7rem', fontWeight: 600,
                         background: filter3Area === f.id ? '#0a0a0a' : 'transparent',
@@ -281,38 +319,26 @@ export default function Step2Rankings() {
                     ))}
                   </div>
 
-                  {/* Actions list */}
+                  {/* Available actions */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
                     {ACTIONS.filter(a => filter3Area === 'all' || a.area === filter3Area).map(a => {
                       const isSel = selected.includes(a.id)
-                      const wouldExceed = !isSel && (budget + a.cost) > MAX_POINTS
                       return (
                         <div key={a.id}
-                          onClick={() => {
-                            if (wouldExceed) return
-                            setTeamSelections(prev => {
-                              const cur = prev[activeTeamTab] || []
-                              return { ...prev, [activeTeamTab]: isSel ? cur.filter(x => x !== a.id) : [...cur, a.id] }
-                            })
-                          }}
+                          onClick={() => handleToggleAction(activeTeamTab, a.id)}
                           style={{
-                            padding: '0.85rem 1rem', borderRadius: '12px', cursor: wouldExceed ? 'default' : 'pointer',
+                            padding: '0.85rem 1rem', borderRadius: '12px', cursor: 'pointer',
                             border: `1px solid ${isSel ? '#0a0a0a' : '#e5e5e5'}`,
-                            background: isSel ? '#f5f5f5' : (wouldExceed ? '#fafafa' : '#ffffff'),
-                            opacity: wouldExceed ? 0.45 : 1,
+                            background: isSel ? '#f5f5f5' : '#ffffff',
                             display: 'flex', alignItems: 'center', gap: '0.75rem',
                             transition: 'all 0.15s ease',
                           }}
                         >
+                          <div style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, border: `2px solid ${isSel ? '#0a0a0a' : '#ccc'}`, background: isSel ? '#0a0a0a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {isSel && <span style={{ color: '#fff', fontSize: 11, fontWeight: 900, lineHeight: 1 }}>✓</span>}
+                          </div>
                           <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</div>
-                            {a.description && <div style={{ fontSize: '0.68rem', color: '#666', marginTop: '0.2rem' }}>{a.description}</div>}
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, flexShrink: 0 }}>
-                            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#666' }}>{'★'.repeat(a.cost)}</span>
-                            <span style={{ fontSize: '0.65rem', color: '#666' }}>−{a.co2Reduction} kg</span>
-                          </div>
+                          <span style={{ flex: 1, fontSize: '0.8rem', fontWeight: isSel ? 600 : 400, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</span>
                         </div>
                       )
                     })}
@@ -328,7 +354,6 @@ export default function Step2Rankings() {
                       fontWeight: 600, fontSize: '0.85rem', cursor: selected.length > 0 ? 'pointer' : 'default',
                     }}
                   >
-                    {conf?.confirmed ? '✓ Confirmar de nuevo — ' : ''}
                     Confirmar acciones de {activeTeamTab} →
                   </button>
                 </div>
