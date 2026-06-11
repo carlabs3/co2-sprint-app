@@ -52,11 +52,10 @@ function buildHistogram(values, extendForSpain = false) {
   return data
 }
 
-function getBarColor(floor) {
-  if (floor < 4)  return '#eaf3de'
-  if (floor < 7)  return '#fff8e0'
-  if (floor < 10) return '#fff0e0'
-  return '#fce8e8'
+// All bars are dark/neutral — most frequent gets solid black, rest get light gray
+function getBarColor(floor, isMostFrequent) {
+  if (isMostFrequent) return '#1a1a1a'
+  return '#d4d4d4'
 }
 
 function getAnswerDistribution(ranking, areaId) {
@@ -110,12 +109,12 @@ function getMostFrequent(values) {
 // ── constants ─────────────────────────────────────────────────────────────────
 
 export const HISTOGRAM_TABS = [
-  { id: 'total',       label: 'Total',            color: '#2d5a27' },
-  { id: 'transport',   label: '🚗 Transporte',     color: '#4a90d9' },
-  { id: 'energy',      label: '🏠 Hogar',          color: '#e8a020' },
-  { id: 'food',        label: '🥗 Alimentación',   color: '#5aab5a' },
-  { id: 'consumption', label: '🛍 Consumo',         color: '#b07a30' },
-  { id: 'waste',       label: '📱 Huella Digital', color: '#7a7aaa' },
+  { id: 'total',       label: 'Todos',            color: '#000000' },
+  { id: 'transport',   label: '🚗 Transporte',     color: '#38bdf8' },
+  { id: 'energy',      label: '🏠 Hogar',          color: '#f59e0b' },
+  { id: 'food',        label: '🥗 Alimentación',   color: '#4ade80' },
+  { id: 'consumption', label: '🛍 Compras y hábitos', color: '#a855f7' },
+  { id: 'waste',       label: '📱 Vida digital',   color: '#f472b6' },
 ]
 
 export const SPAIN_AVERAGES = {
@@ -124,17 +123,20 @@ export const SPAIN_AVERAGES = {
 }
 
 export const AREA_COLORS = {
-  transport: '#4a90d9', energy: '#e8a020', food: '#5aab5a',
-  consumption: '#b07a30', waste: '#7a7aaa',
+  transport:   '#38bdf8',
+  energy:      '#f59e0b',
+  food:        '#4ade80',
+  consumption: '#a855f7',
+  waste:       '#f472b6',
 }
 
 export const AREA_LABELS = {
   transport: 'Transporte', energy: 'Hogar', food: 'Alimentación',
-  consumption: 'Consumo', waste: 'Huella Digital',
+  consumption: 'Compras y hábitos', waste: 'Vida digital',
 }
 
-export const CATEGORY_COLORS = { bajo: '#3b6d11', medio: '#2d5a27', alto: '#b07a30', 'muy alto': '#cc4444' }
-export const CATEGORY_BG     = { bajo: '#eaf3de', medio: '#eaf3de', alto: '#fff0e0', 'muy alto': '#fce8e8' }
+export const CATEGORY_COLORS = { bajo: '#16a34a', medio: '#555555', alto: '#b07a30', 'muy alto': '#cc4444' }
+export const CATEGORY_BG     = { bajo: '#f0fdf4', medio: '#f5f5f5', alto: '#fff7ed', 'muy alto': '#fef2f2' }
 export const CATEGORY_LABELS = { bajo: 'BAJO', medio: 'MEDIO', alto: 'ALTO', 'muy alto': 'MUY ALTO' }
 
 // ── Subcategory definitions ───────────────────────────────────────────────────
@@ -181,28 +183,34 @@ function getContribution(answers, key) {
     case 'heating': {
       const div = MAP.householdSize[answers.householdSize] ?? 2
       let kg = 0
-      if (answers.homeType === '25a')      kg = MAP.heatingSmall[answers.heating]  ?? 0
+      if (answers.homeType === '25a')      kg = MAP.heatingSmall[answers.heating]  ?? MAP.heatingMedium[answers.heating] ?? 0
       else if (answers.homeType === '25b') kg = MAP.heatingMedium[answers.heating] ?? 0
-      else if (answers.homeType === '25c') kg = MAP.heatingLarge[answers.heating]  ?? 0
+      else                                 kg = MAP.heatingLarge[answers.heating]  ?? MAP.heatingMedium[answers.heating] ?? 0
       return kg / div
     }
-    case 'hasAC':        return answers.hasAC === 'yes' ? (answers.homeType === '25a' ? 350 : answers.homeType === '25b' ? 420 : 438) : 0
-    case 'pool':         return (answers.pool?.includes('privatePool') ? 50 : 0) + (answers.pool?.includes('communityPool') ? 17 : 0)
-    case 'hotelNights':  return (answers.hotelNights   || 0) * 8
-    case 'hostelNights': return (answers.hostelNights  || 0) * 1
-    case 'campingNights':return (answers.campingNights || 0) * 1
-    case 'airbnbNights': return (answers.airbnbNights  || 0) * 5
-    case 'secondHome':   return answers.secondHome ? 250 : 0
-    case 'renewable':    return MAP.renewable[answers.renewable] ?? 0
-    case 'homeHabits':   return ['closeWindows', 'thermostat19', 'ledBulbs', 'ecoPrograms'].filter(h => answers.homeHabits?.includes(h)).reduce((s, h) => s + (MAP.homeHabits[h] || 0), 0)
+    case 'hasAC':        return answers.hasAC === 'yes' ? (MAP.householdSize[answers.householdSize] ? 350 / MAP.householdSize[answers.householdSize] : 175) : 0
+    case 'pool':         return answers.pool === 'yes' ? 200 : 0
+    case 'renewable':    return answers.renewable === 'yes' ? -300 : 0
+    case 'homeHabits': {
+      const h = Array.isArray(answers.homeHabits) ? answers.homeHabits : []
+      return h.length > 0 ? -(h.length * 50) : 0
+    }
+    case 'hotelNights':  return (answers.hotelNights || 0) * 30
+    case 'hostelNights': return (answers.hostelNights || 0) * 10
+    case 'campingNights':return (answers.campingNights || 0) * 5
+    case 'airbnbNights': return (answers.airbnbNights || 0) * 20
+    case 'secondHome':   return answers.secondHome === 'yes' ? 500 : 0
     case 'breakfast':    return MAP.breakfast[answers.breakfast] || 0
     case 'lunch':        return MAP.lunch[answers.lunch] || 0
     case 'dinner':       return MAP.dinner[answers.dinner] || 0
     case 'milkType':     return MAP.milkType[answers.milkType] || 0
-    case 'hotDrinks':    return (Array.isArray(answers.hotDrinks) ? answers.hotDrinks : [answers.hotDrinks]).reduce((s, v) => s + (MAP.hotDrinks[v] || 0), 0)
-    case 'alcohol':      return calcAlcohol(answers.alcohol)
+    case 'hotDrinks':    return MAP.hotDrinks[answers.hotDrinks] || 0
+    case 'alcohol':      return calcAlcohol(answers) || 0
     case 'bottledWater': return MAP.bottledWater[answers.bottledWater] || 0
-    case 'foodHabits':   return ['localFood', 'composting', 'noFoodWaste'].filter(h => answers.foodHabits?.includes(h)).reduce((s, h) => s + (MAP.foodHabits[h] || 0), 0)
+    case 'foodHabits': {
+      const h = Array.isArray(answers.foodHabits) ? answers.foodHabits : []
+      return h.length > 0 ? -(h.length * 60) : 0
+    }
     case 'clothes':      return MAP.clothes[answers.clothes] || 0
     case 'electronics':  return (Array.isArray(answers.electronics) ? answers.electronics : []).reduce((s, v) => s + (MAP.electronics[v] || 0), 0)
     case 'appliances':   return (Array.isArray(answers.appliances)  ? answers.appliances  : []).reduce((s, v) => s + (MAP.appliances[v]  || 0), 0)
@@ -267,21 +275,23 @@ export function DistributionView({ ranking }) {
   return (
     <div>
       {ranking.length < 3 && (
-        <div style={{ background: '#fff8e8', border: '1px solid #f5e0a0', borderRadius: 8, padding: '0.65rem 1rem', marginBottom: '1.5rem', fontSize: '0.78rem', color: '#b07a30' }}>
+        <div style={{ background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 8, padding: '0.65rem 1rem', marginBottom: '1.5rem', fontSize: '0.78rem', color: '#888' }}>
           Con pocos datos la distribución puede no ser representativa.
         </div>
       )}
 
       {/* Histogram card */}
-      <div style={{ background: '#fff', border: '1px solid #f0f0ee', borderRadius: 12, padding: '1.5rem', marginBottom: '1.25rem' }}>
-        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+      <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '1.5rem', marginBottom: '1.25rem' }}>
+        {/* Category tabs */}
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
           {HISTOGRAM_TABS.map(t => (
             <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-              padding: '0.3rem 0.85rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 600,
-              border: `1.5px solid ${activeTab === t.id ? t.color : '#e0e0d8'}`,
-              background: activeTab === t.id ? t.color : 'transparent',
-              color: activeTab === t.id ? '#fff' : '#666',
+              padding: '0.3rem 0.9rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 600,
+              border: `1.5px solid ${activeTab === t.id ? '#000' : '#e5e5e5'}`,
+              background: activeTab === t.id ? '#000' : '#fff',
+              color: activeTab === t.id ? '#fff' : '#555',
               cursor: 'pointer', whiteSpace: 'nowrap',
+              transition: 'all 0.15s ease',
             }}>
               {t.label}
             </button>
@@ -290,52 +300,82 @@ export function DistributionView({ ranking }) {
 
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={histData} margin={{ top: 24, right: 16, left: -20, bottom: 4 }} barCategoryGap="20%">
-            <CartesianGrid vertical={false} stroke="#f0f0ee" />
+            <CartesianGrid vertical={false} stroke="#f0f0f0" />
             <XAxis dataKey="range" tick={{ fontSize: 11, fill: '#888' }} axisLine={false} tickLine={false} />
             <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#888' }} axisLine={false} tickLine={false} />
             <Tooltip cursor={{ fill: 'rgba(0,0,0,0.04)' }} content={({ active, payload }) => {
               if (!active || !payload?.length) return null
               const d = payload[0].payload
               return (
-                <div style={{ background: '#fff', border: '1px solid #e0e0d8', borderRadius: 6, padding: '0.4rem 0.75rem', fontSize: 12 }}>
+                <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 6, padding: '0.4rem 0.75rem', fontSize: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                   <strong>{d.range} t</strong> — {d.count} participante{d.count !== 1 ? 's' : ''}
                 </div>
               )
             }} />
             <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-              {histData.map((entry, i) => (
-                <Cell key={i} fill={getBarColor(entry.floor)}
-                  stroke={entry.range === mostFrequent ? '#e8a020' : 'transparent'} strokeWidth={2} />
-              ))}
+              {histData.map((entry, i) => {
+                const isMF = entry.range === mostFrequent && entry.count > 0
+                return (
+                  <Cell
+                    key={i}
+                    fill={getBarColor(entry.floor, isMF)}
+                    stroke={entry.range === minBucket ? '#22c55e' : entry.range === maxBucket ? '#ef4444' : 'none'}
+                    strokeWidth={entry.range === minBucket || entry.range === maxBucket ? 2 : 0}
+                  />
+                )
+              })}
             </Bar>
+            {/* Spain average reference line */}
+            <ReferenceLine
+              x={spainBucket}
+              stroke="#000000"
+              strokeDasharray="4 3"
+              strokeWidth={1.5}
+              label={{ value: `España ${spainAvg}t`, position: 'top', fontSize: 10, fill: '#555' }}
+            />
+            {/* Median reference line */}
             {values.length > 0 && (
-              <ReferenceLine x={medianBucket} stroke={tab.color} strokeWidth={2} strokeDasharray="5 3"
-                label={{ value: `med. ${median.toFixed(1)}t`, fill: tab.color, fontSize: 11, fontWeight: 700, position: 'top' }} />
+              <ReferenceLine
+                x={medianBucket}
+                stroke="#666666"
+                strokeDasharray="2 2"
+                strokeWidth={1}
+                label={{ value: `med ${median.toFixed(1)}t`, position: 'top', fontSize: 10, fill: '#888' }}
+              />
             )}
-            {values.length > 0 && minBucket !== medianBucket && (
-              <ReferenceLine x={minBucket} stroke="#3b6d11" strokeWidth={1} strokeDasharray="3 3"
-                label={{ value: `mín ${minVal.toFixed(1)}t`, fill: '#3b6d11', fontSize: 10, position: 'top' }} />
+            {/* Min reference line */}
+            {values.length > 0 && (
+              <ReferenceLine
+                x={minBucket}
+                stroke="#22c55e"
+                strokeDasharray="3 3"
+                strokeWidth={1.5}
+                label={{ value: `mín ${minVal.toFixed(1)}t`, position: 'top', fontSize: 10, fill: '#22c55e' }}
+              />
             )}
-            {values.length > 0 && maxBucket !== medianBucket && maxBucket !== minBucket && (
-              <ReferenceLine x={maxBucket} stroke="#cc4444" strokeWidth={1} strokeDasharray="3 3"
-                label={{ value: `máx ${maxVal.toFixed(1)}t`, fill: '#cc4444', fontSize: 10, position: 'top' }} />
-            )}
-            {activeTab === 'total' && histData.some(d => d.range === spainBucket) && (
-              <ReferenceLine x={spainBucket} stroke="#888" strokeWidth={1.5} strokeDasharray="6 3"
-                label={{ value: `España ${spainAvg}t`, fill: '#666', fontSize: 10, position: 'top' }} />
+            {/* Max reference line */}
+            {values.length > 0 && (
+              <ReferenceLine
+                x={maxBucket}
+                stroke="#ef4444"
+                strokeDasharray="3 3"
+                strokeWidth={1.5}
+                label={{ value: `máx ${maxVal.toFixed(1)}t`, position: 'top', fontSize: 10, fill: '#ef4444' }}
+              />
             )}
           </BarChart>
         </ResponsiveContainer>
 
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #f5f5f0' }}>
+        {/* Legend */}
+        <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginTop: '0.75rem', fontSize: '0.68rem', color: '#888', alignItems: 'center' }}>
           {[
-            { line: `2px dashed ${tab.color}`, label: 'Mediana grupo' },
-            { line: '1px dashed #3b6d11', label: 'Mínimo' },
-            { line: '1px dashed #cc4444', label: 'Máximo' },
-            { line: '1.5px dashed #888', label: 'Media España' },
-            { box: '#fff', border: '2px solid #e8a020', label: 'Más frecuente' },
-          ].map(({ line, box, border, label }) => (
-            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.68rem', color: '#888' }}>
+            { label: 'Media grupo',   line: '2px dashed #aaa',     box: null,      border: null },
+            { label: 'Mínimo',        line: '2px dashed #22c55e',  box: null,      border: null },
+            { label: 'Máximo',        line: '2px dashed #ef4444',  box: null,      border: null },
+            { label: 'Media España',  line: '2px dashed #000',     box: null,      border: null },
+            { label: 'Más frecuente', line: null, box: '#1a1a1a',  border: '1px solid #000' },
+          ].map(({ label, line, box, border }) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
               {line
                 ? <div style={{ width: 20, borderTop: line }} />
                 : <div style={{ width: 12, height: 12, background: box, border, borderRadius: 2 }} />
@@ -346,30 +386,32 @@ export function DistributionView({ ranking }) {
         </div>
       </div>
 
-      {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
+      {/* Stats row — 5 cards: Media, Mínimo, Máximo, Más frecuente, Total emitido */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
         {[
-          { label: 'Mediana', value: values.length ? `${median.toFixed(1)} t` : '–', bg: '#f0f7ee', color: '#2d5a27', border: '#c8e6c0' },
-          { label: 'Mínimo',  value: values.length ? `${minVal.toFixed(1)} t` : '–',  bg: '#f5f5f0', color: '#555',    border: '#e0e0d8' },
-          { label: 'Máximo',  value: values.length ? `${maxVal.toFixed(1)} t` : '–',  bg: '#f5f5f0', color: '#555',    border: '#e0e0d8' },
-          { label: 'Más frecuente', value: mostFrequent !== '–' ? `${mostFrequent} t` : '–', bg: '#fff8e8', color: '#e8a020', border: '#f5e0a0' },
-        ].map(({ label, value, bg, color, border }) => (
-          <div key={label} style={{ background: bg, border: `1px solid ${border}`, borderRadius: 10, padding: '1rem', textAlign: 'center' }}>
-            <div style={{ fontWeight: 900, fontSize: '1.4rem', color, lineHeight: 1, marginBottom: '0.3rem' }}>{value}</div>
+          { label: 'Media',         value: values.length ? `${median.toFixed(1)} t` : '–' },
+          { label: 'Mínimo',        value: values.length ? `${minVal.toFixed(1)} t` : '–' },
+          { label: 'Máximo',        value: values.length ? `${maxVal.toFixed(1)} t` : '–' },
+          { label: 'Más frecuente', value: mostFrequent !== '–' ? `${mostFrequent} t` : '–' },
+          { label: 'Total emitido', value: values.length ? `${values.reduce((s, v) => s + v, 0).toFixed(0)} t` : '–' },
+        ].map(({ label, value }) => (
+          <div key={label} style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '1rem', textAlign: 'center' }}>
+            <div style={{ fontWeight: 900, fontSize: '1.4rem', color: '#000', lineHeight: 1, marginBottom: '0.3rem' }}>{value}</div>
             <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#aaa' }}>{label}</div>
           </div>
         ))}
       </div>
 
-      {/* Area breakdown — Total tab: legend with percentages; Area tabs: subcategory distribution */}
+      {/* Area breakdown */}
       {areaTotal > 0 && (
-        <div style={{ background: '#fff', border: '1px solid #f0f0ee', borderRadius: 12, padding: '1.5rem', marginBottom: '1.25rem' }}>
+        <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '1.5rem', marginBottom: '1.25rem' }}>
           {activeTab === 'total' ? (
             <>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '1rem' }}>
-                Media del grupo por áreas
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#000', marginBottom: '1rem' }}>
+                Media por categorías
               </div>
-              <div style={{ display: 'flex', height: 28, borderRadius: 6, overflow: 'hidden', marginBottom: '0.75rem' }}>
+              {/* Stacked bar */}
+              <div style={{ display: 'flex', height: 32, borderRadius: 8, overflow: 'hidden', marginBottom: '0.85rem' }}>
                 {Object.entries(AREA_COLORS).map(([key, color]) => {
                   const w = areaAvg[key] / areaTotal * 100
                   return w > 0 ? (
@@ -378,13 +420,13 @@ export function DistributionView({ ranking }) {
                   ) : null
                 })}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              {/* Legend row */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1.25rem' }}>
                 {Object.entries(AREA_COLORS).map(([key, color]) => (
-                  <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.72rem' }}>
+                  <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem' }}>
                     <div style={{ width: 10, height: 10, borderRadius: 2, background: color, flexShrink: 0 }} />
-                    <span style={{ flex: 1, color: '#555' }}>{AREA_LABELS[key]}</span>
-                    <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{areaAvg[key].toFixed(2)} t</span>
-                    <span style={{ color: '#aaa', minWidth: 36, textAlign: 'right' }}>
+                    <span style={{ color: '#555' }}>{AREA_LABELS[key]}</span>
+                    <span style={{ fontWeight: 700, color: '#000' }}>
                       {areaTotal > 0 ? Math.round((areaAvg[key] / areaTotal) * 100) : 0}%
                     </span>
                   </div>
@@ -397,16 +439,16 @@ export function DistributionView({ ranking }) {
                 Distribución de subcategorías
               </div>
               {(AREA_SUBCATEGORIES[activeTab] || []).map((sub, i) => {
-                const avgKg     = getSubcatAvg(ranking, sub.keys)
+                const avgKg      = getSubcatAvg(ranking, sub.keys)
                 const areaTotalKg = areaAvg[activeTab] * 1000
-                const pct       = areaTotalKg > 0 ? Math.round((Math.abs(avgKg) / areaTotalKg) * 100) : 0
+                const pct        = areaTotalKg > 0 ? Math.round((Math.abs(avgKg) / areaTotalKg) * 100) : 0
                 return (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '0.5px solid #f0f0f0' }}>
-                    <span style={{ flex: 1, fontSize: '0.75rem', color: sub.negative ? '#3b6d11' : '#1a1a1a' }}>{sub.label}</span>
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '0.5px solid #f5f5f5' }}>
+                    <span style={{ flex: 1, fontSize: '0.75rem', color: sub.negative ? '#16a34a' : '#1a1a1a' }}>{sub.label}</span>
                     <div style={{ width: 80, height: 5, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: sub.negative ? '#3b6d11' : AREA_COLORS[activeTab], borderRadius: 3 }} />
+                      <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: sub.negative ? '#16a34a' : AREA_COLORS[activeTab], borderRadius: 3 }} />
                     </div>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 600, width: 36, textAlign: 'right', color: sub.negative ? '#3b6d11' : AREA_COLORS[activeTab] }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 600, width: 36, textAlign: 'right', color: sub.negative ? '#16a34a' : AREA_COLORS[activeTab] }}>
                       {pct}%
                     </span>
                   </div>
@@ -427,7 +469,7 @@ export function DistributionView({ ranking }) {
               Distribución de respuestas
             </div>
             {dist.map(({ question, distribution, total: qTotal, maxCount }) => (
-              <div key={question.id} style={{ background: '#fff', border: '1px solid #f0f0ee', borderRadius: 12, padding: '1.5rem', marginBottom: '1rem' }}>
+              <div key={question.id} style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '1.5rem', marginBottom: '1rem' }}>
                 <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#333', marginBottom: '0.25rem', lineHeight: 1.4 }}>
                   {question.text}
                 </div>
@@ -440,15 +482,15 @@ export function DistributionView({ ranking }) {
                   return (
                     <div key={opt.value} style={{ marginBottom: '0.7rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                        <span style={{ fontSize: '0.72rem', fontWeight: isMost ? 700 : 400, color: isMost ? '#1a1a1a' : '#777' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: isMost ? 700 : 400, color: isMost ? '#000' : '#777' }}>
                           {opt.label}
                         </span>
-                        <span style={{ fontSize: '0.72rem', fontWeight: isMost ? 700 : 400, color: isMost ? tab.color : '#aaa' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: isMost ? 700 : 400, color: isMost ? '#000' : '#aaa' }}>
                           {opt.pct}%
                         </span>
                       </div>
-                      <div style={{ height: 6, background: '#f0f0ee', borderRadius: 3, overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${opt.pct}%`, background: isMost ? tab.color : '#d8d8d4', borderRadius: 3, transition: 'width 0.5s ease' }} />
+                      <div style={{ height: 6, background: '#f5f5f5', borderRadius: 3, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${opt.pct}%`, background: isMost ? '#000' : '#d4d4d4', borderRadius: 3, transition: 'width 0.5s ease' }} />
                       </div>
                     </div>
                   )
@@ -481,14 +523,14 @@ export function GroupsView({ groups }) {
   return (
     <div>
       {groups.map((g, i) => (
-        <div key={g.name} style={{ background: '#f5f5f0', padding: '1rem 1.25rem', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '1.5rem', borderRadius: '8px' }}>
-          <span style={{ fontWeight: 900, fontSize: '1.2rem', width: '2rem', color: '#1a1a1a' }}>#{i + 1}</span>
-          <span style={{ fontWeight: 700, fontSize: '1rem', flex: 1 }}>{g.name}</span>
-          <div style={{ flex: 2, height: '6px', background: '#e0e0d8', position: 'relative', overflow: 'hidden', borderRadius: '3px' }}>
-            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${(g.avg / maxGroupAvg) * 100}%`, background: '#2d5a27', borderRadius: '3px', transition: 'width 0.5s ease' }} />
+        <div key={g.name} style={{ background: '#fafafa', border: '1px solid #e5e5e5', padding: '1rem 1.25rem', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '1.5rem', borderRadius: '12px' }}>
+          <span style={{ fontWeight: 900, fontSize: '1.2rem', width: '2rem', color: '#000' }}>#{i + 1}</span>
+          <span style={{ fontWeight: 700, fontSize: '1rem', flex: 1, color: '#000' }}>{g.name}</span>
+          <div style={{ flex: 2, height: '6px', background: '#e5e5e5', position: 'relative', overflow: 'hidden', borderRadius: '3px' }}>
+            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${(g.avg / maxGroupAvg) * 100}%`, background: '#000', borderRadius: '3px', transition: 'width 0.5s ease' }} />
           </div>
-          <span style={{ fontWeight: 900, fontSize: '1.05rem', width: '60px', textAlign: 'right' }}>{Number(g.avg).toFixed(1)} t</span>
-          <span style={{ background: CATEGORY_BG[g.category] || '#f5f5f0', color: CATEGORY_COLORS[g.category] || '#888', padding: '0.2rem 0.65rem', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '999px' }}>
+          <span style={{ fontWeight: 900, fontSize: '1.05rem', width: '60px', textAlign: 'right', color: '#000' }}>{Number(g.avg).toFixed(1)} t</span>
+          <span style={{ background: CATEGORY_BG[g.category] || '#f5f5f5', color: CATEGORY_COLORS[g.category] || '#888', padding: '0.2rem 0.65rem', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '999px', border: '1px solid #e5e5e5' }}>
             {CATEGORY_LABELS[g.category]}
           </span>
           <span style={{ fontSize: '0.72rem', color: '#bbb' }}>{g.count} pers.</span>

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 const styles = {
   nav: {
     height: '52px',
-    background: '#2d5a27',
+    background: '#000000',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -14,47 +14,42 @@ const styles = {
     zIndex: 100,
   },
   logo: {
-    fontWeight: 900,
-    fontWeight: 900,
-    fontSize: '1.05rem',
+    fontWeight: 700,
+    fontSize: '1.15rem',
     letterSpacing: '-0.02em',
-    textTransform: 'uppercase',
     color: '#ffffff',
-  },
-  asterisk: {
-    color: 'rgba(255,255,255,0.45)',
   },
   links: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem',
+    gap: '0.75rem',
   },
   link: {
     fontFamily: "'Inter', sans-serif",
     fontWeight: 500,
-    fontSize: '0.8rem',
-    letterSpacing: '0.06em',
-    textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.8)',
+    fontSize: '0.85rem',
+    color: 'rgba(255,255,255,0.85)',
+    textDecoration: 'none',
   },
   btnPill: {
-    background: 'rgba(255,255,255,0.15)',
-    color: '#ffffff',
-    padding: '0.4rem 1rem',
-    fontSize: '0.78rem',
-    letterSpacing: '0.06em',
-    borderRadius: '20px',
-    fontWeight: 500,
+    background: '#ffffff',
+    color: '#000000',
+    padding: '0.4rem 1.1rem',
+    fontSize: '0.82rem',
+    borderRadius: '999px',
+    fontWeight: 600,
+    border: 'none',
+    cursor: 'pointer',
   },
   btnSalir: {
     background: 'transparent',
-    color: 'rgba(255,255,255,0.7)',
-    padding: '0.4rem 0',
-    fontSize: '0.78rem',
-    letterSpacing: '0.06em',
-    borderBottom: '1px solid rgba(255,255,255,0.3)',
-    borderRadius: 0,
+    color: 'rgba(255,255,255,0.55)',
+    padding: '0.4rem 0.75rem',
+    fontSize: '0.82rem',
+    borderRadius: '6px',
     fontWeight: 500,
+    border: '1px solid rgba(255,255,255,0.15)',
+    cursor: 'pointer',
   },
 }
 
@@ -70,14 +65,14 @@ export default function Navbar() {
   return (
     <nav style={styles.nav}>
       <Link to="/" style={styles.logo}>
-        CO2 SPRINT <span style={styles.asterisk}>*</span>
+        Drop.
       </Link>
       <div style={styles.links}>
         {user ? (
           <>
             <Link to="/dashboard" style={styles.link}>Sesiones</Link>
             <Link to="/session/create">
-              <button style={styles.btnPill}>Nueva Sesión</button>
+              <button style={styles.btnPill}>Nueva sesión</button>
             </Link>
             <button style={styles.btnSalir} onClick={handleLogout}>Salir</button>
           </>
