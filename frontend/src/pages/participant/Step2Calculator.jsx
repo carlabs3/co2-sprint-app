@@ -631,8 +631,8 @@ export default function Step2Calculator() {
         </div>
 
         {/* Progress — "Pregunta X de Y" + bar */}
-        <div style={{ padding: '12px 18px 0', flexShrink: 0, background: '#f5f5f5', marginBottom: 20 }}>
-          <p style={{ fontSize: 13, color: '#999', marginBottom: 6, fontWeight: 400 }}>
+        <div style={{ padding: '18px 18px 0', flexShrink: 0, background: '#f5f5f5', marginBottom: 20 }}>
+          <p style={{ fontSize: 16, color: '#999', marginBottom: 6, fontWeight: 400 }}>
             Pregunta {questionIndex + 1} de {area.questions.filter(q => !isSkipped(q)).length}
           </p>
           <div style={{ display: 'flex', gap: 4 }}>
@@ -643,12 +643,12 @@ export default function Step2Calculator() {
         </div>
 
         {/* Question */}
-        <div style={{ padding: '20px 18px 18px', flexShrink: 0, background: '#f5f5f5' }}>
-          <p style={{ fontSize: 22, fontWeight: 800, color: '#0a0a0a', lineHeight: 1.25, margin: 0 }}>
+        <div style={{ padding: '18px 18px 18px', flexShrink: 0, background: '#f5f5f5' }}>
+          <p style={{ fontSize: 22, fontWeight: 600, color: '#0a0a0a', lineHeight: 1.25, margin: 0 }}>
             {question.text}
           </p>
           {question.info && (
-            <p style={{ fontSize: 11, color: '#999', marginTop: 6, fontWeight: 400 }}>
+            <p style={{ fontSize: 16, color: '#999', marginTop: 6, fontWeight: 400 }}>
               {question.info}
             </p>
           )}
@@ -662,7 +662,7 @@ export default function Step2Calculator() {
         {/* Banner individual — solo en primera pregunta */}
         {isFirst && (
           <div style={{ margin: '0 16px 6px', padding: '7px 12px', background: '#f5f5f5', borderRadius: 8, border: `1px solid ${BORDER}`, flexShrink: 0 }}>
-            <p style={{ fontSize: 11, color: '#0a0a0a', margin: 0, lineHeight: 1.45 }}>
+            <p style={{ fontSize: 14, color: '#0a0a0a', margin: 0, lineHeight: 1.45 }}>
               Responde pensando en ti — no en tu familia ni compañeros de piso.
             </p>
           </div>
