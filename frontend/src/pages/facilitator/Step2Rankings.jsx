@@ -92,6 +92,7 @@ export default function Step2Rankings() {
         setRanking(sorted)
         setGroups(computeGroups(sorted))
         setShowRanking(true)
+        setRevealed(true)
       }
     })
     socket.on('team:confirmed', ({ group, confirmed, confirmedFinal }) => {
@@ -575,21 +576,6 @@ export default function Step2Rankings() {
             style={{ width: '100%', background: '#f5f5f5', color: '#999', border: '1px solid #e5e5e5', padding: '0.8rem', fontSize: '0.78rem', fontWeight: 600, borderRadius: '999px', cursor: 'default' }}
           >
             Calculadora activa
-          </button>
-
-          <button
-            onClick={revealed ? undefined : handleReveal}
-            disabled={revealed}
-            style={{
-              width: '100%',
-              background: revealed ? '#f5f5f5' : '#0a0a0a',
-              color: revealed ? '#999' : '#fff',
-              border: revealed ? '1px solid #e5e5e5' : 'none',
-              padding: '0.8rem', fontSize: '0.78rem', fontWeight: 600,
-              borderRadius: '999px', cursor: revealed ? 'default' : 'pointer',
-            }}
-          >
-            {revealed ? 'Resultados revelados' : `Revelar resultados (${completed})`}
           </button>
 
           {revealed && !step3Started && (

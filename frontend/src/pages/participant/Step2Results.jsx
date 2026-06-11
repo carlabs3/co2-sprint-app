@@ -365,14 +365,25 @@ export default function Step2Results() {
     }
     function onStepChange({ step }) { if (step >= 3) setStep3Started(true) }
     function onSessionClosed() { navigate(`/session/${code}/end`, { replace: true }) }
+    function onRankingUpdate({ individual }) {
+      if (individual && individual.length > 0) {
+        setSessionResults(individual.map(r => ({
+          carbonTons: r.tons,
+          group: r.group,
+          category: r.category,
+        })))
+      }
+    }
 
     socket.on('results:revealed', onResultsRevealed)
     socket.on('step:change', onStepChange)
     socket.on('session:closed', onSessionClosed)
+    socket.on('ranking:update', onRankingUpdate)
     return () => {
       socket.off('results:revealed', onResultsRevealed)
       socket.off('step:change', onStepChange)
       socket.off('session:closed', onSessionClosed)
+      socket.off('ranking:update', onRankingUpdate)
     }
   }, [code, navigate])
 

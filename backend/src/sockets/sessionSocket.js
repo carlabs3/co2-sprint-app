@@ -186,11 +186,9 @@ export function registerSocketHandlers(io) {
 
         io.to(sessionCode).emit('ranking:update', { individual })
 
-        // Late participant: if results already revealed, send event directly to their socket
-        const session = await Session.findOne({ code: sessionCode }, 'resultsRevealed')
-        if (session?.resultsRevealed) {
-          socket.emit('results:revealed')
-        }
+        // Auto-reveal: mark session as revealed and emit to all
+        await Session.findOneAndUpdate({ code: sessionCode }, { resultsRevealed: true })
+        io.to(sessionCode).emit('results:revealed')
       } catch {
         socket.emit('error', { message: 'Error al guardar huella' })
       }

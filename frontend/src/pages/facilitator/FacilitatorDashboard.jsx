@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../../utils/api.js'
 import { useAuth } from '../../context/AuthContext.jsx'
+import { socket } from '../../utils/socket.js'
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })
@@ -93,6 +94,25 @@ export default function FacilitatorDashboard() {
     const active = sessions.find(s => s.status === 'active' || s.status === 'waiting' || s.status === 'actions')
     setActiveBanner(active || null)
   }, [sessions])
+
+  useEffect(() => {
+    // Join all active session rooms to receive real-time events
+    sessions
+      .filter(s => s.status === 'active' || s.status === 'waiting')
+      .forEach(s => socket.emit('facilitator:join', { code: s.code }))
+
+    function onFootprintSubmitted() {
+      api.get('/api/sessions').then(({ data }) => setSessions(data)).catch(() => {})
+    }
+
+    socket.on('footprint:submitted', onFootprintSubmitted)
+    socket.on('ranking:update', onFootprintSubmitted)
+
+    return () => {
+      socket.off('footprint:submitted', onFootprintSubmitted)
+      socket.off('ranking:update', onFootprintSubmitted)
+    }
+  }, [sessions.length])
 
   async function handleDelete(code) {
     if (!confirm('¿Eliminar esta sesión? Se borrarán todos los datos permanentemente. Esta acción no se puede deshacer.')) return
