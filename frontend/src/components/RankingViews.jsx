@@ -373,7 +373,7 @@ export function DistributionView({ ranking }) {
         {/* Legend */}
         <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginTop: '0.75rem', fontSize: '0.82rem', color: '#666', alignItems: 'center' }}>
           {[
-            { label: 'Mediana grupo',  line: `2px dashed ${tab.color}`, box: null,   border: null },
+            { label: 'Valor medio',     line: `2px dashed ${tab.color}`, box: null,   border: null },
             { label: 'Mínimo',        line: '2px dashed #22c55e',  box: null,      border: null },
             { label: 'Máximo',        line: '2px dashed #ef4444',  box: null,      border: null },
             { label: 'Media España',  line: '2px dashed #000',     box: null,      border: null },
@@ -399,7 +399,9 @@ export function DistributionView({ ranking }) {
               {
                 label: 'Huella media',
                 value: values.length ? `${meanVal.toFixed(1)} t` : '–',
-                bg: '#1a1a1a', color: '#ffffff', border: '#1a1a1a',
+                bg: activeTab === 'total' ? '#1a1a1a' : tab.color,
+                color: '#ffffff',
+                border: activeTab === 'total' ? '#1a1a1a' : tab.color,
                 labelColor: 'rgba(255,255,255,0.6)',
               },
               {
@@ -417,8 +419,10 @@ export function DistributionView({ ranking }) {
               {
                 label: 'Huella más frecuente',
                 value: mostFrequent !== '–' ? `${mostFrequent} t` : '–',
-                bg: '#fff8e8', color: '#e8a020', border: '#f5e0a0',
-                labelColor: '#b07a30',
+                bg: activeTab === 'total' ? '#fff8e8' : tab.color,
+                color: activeTab === 'total' ? '#e8a020' : '#ffffff',
+                border: activeTab === 'total' ? '#f5e0a0' : tab.color,
+                labelColor: activeTab === 'total' ? '#b07a30' : 'rgba(255,255,255,0.7)',
               },
               {
                 label: 'Total CO₂ emitido',
@@ -473,36 +477,57 @@ export function DistributionView({ ranking }) {
                 ))}
               </div>
             </>
-          ) : (
-            <>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '0.85rem' }}>
-                Distribución de subcategorías
-              </div>
-              {(AREA_SUBCATEGORIES[activeTab] || []).map((sub, i) => {
-                const avgKg = getSubcatAvg(ranking, sub.keys)
-                const areaTotalKg = areaAvg[activeTab] * 1000
-                const pct = areaTotalKg > 0 ? Math.round((Math.abs(avgKg) / areaTotalKg) * 100) : 0
-                const barColor = sub.negative ? '#3b6d11' : AREA_COLORS[activeTab]
-                return (
-                  <div key={i} style={{ marginBottom: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.35rem' }}>
-                      <span style={{ fontSize: '0.95rem', fontWeight: 600, color: sub.negative ? '#3b6d11' : '#1a1a1a' }}>{sub.label}</span>
-                      <span style={{ fontSize: '0.95rem', fontWeight: 700, color: barColor }}>{pct}%</span>
-                    </div>
-                    <div style={{ height: 14, background: '#f0f0f0', borderRadius: 6, overflow: 'hidden' }}>
-                      <div style={{
-                        height: '100%',
-                        width: `${Math.min(pct, 100)}%`,
-                        background: barColor,
-                        borderRadius: 6,
-                        transition: 'width 0.5s ease',
-                      }} />
-                    </div>
+          ) : (() => {
+              const subcats = AREA_SUBCATEGORIES[activeTab] || []
+              const subcatData = subcats.map(sub => ({
+                label: sub.label,
+                kg: Math.max(0, getSubcatAvg(ranking, sub.keys)),
+                negative: sub.negative,
+              }))
+              const totalKg = subcatData.reduce((s, d) => s + d.kg, 0)
+              const baseColor = AREA_COLORS[activeTab]
+
+              return (
+                <>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '0.85rem' }}>
+                    Distribución de subcategorías
                   </div>
-                )
-              })}
-            </>
-          )}
+
+                  {/* Stacked bar */}
+                  <div style={{ display: 'flex', height: 44, borderRadius: 8, overflow: 'hidden', marginBottom: '1rem' }}>
+                    {subcatData.map((sub, i) => {
+                      const pct = totalKg > 0 ? (sub.kg / totalKg) * 100 : 0
+                      if (pct < 0.5) return null
+                      return (
+                        <div key={i}
+                          title={`${sub.label}: ${pct.toFixed(0)}%`}
+                          style={{
+                            width: `${pct}%`,
+                            background: sub.negative ? '#3b6d11' : `${baseColor}${['', 'dd', 'aa', '88', '66'][Math.min(i, 4)]}`,
+                            transition: 'width 0.5s ease',
+                          }}
+                        />
+                      )
+                    })}
+                  </div>
+
+                  {/* Legend */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {subcatData.map((sub, i) => {
+                      const pct = totalKg > 0 ? Math.round((sub.kg / totalKg) * 100) : 0
+                      const color = sub.negative ? '#3b6d11' : `${baseColor}${['', 'dd', 'aa', '88', '66'][Math.min(i, 4)]}`
+                      return (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.95rem' }}>
+                          <div style={{ width: 14, height: 14, borderRadius: 3, background: color, flexShrink: 0 }} />
+                          <span style={{ flex: 1, color: '#555' }}>{sub.label}</span>
+                          <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{pct}%</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              )
+            })()}
         </div>
       )}
 
