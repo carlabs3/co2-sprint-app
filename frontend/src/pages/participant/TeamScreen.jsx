@@ -65,10 +65,7 @@ function DotsLoader({ color = '#0a0a0a' }) {
 
 function Navbar({ group }) {
   return (
-    <div style={{ background: '#0a0a0a', padding: '0.85rem 1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-      <span style={{ fontWeight: 900, fontSize: '0.9rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#fff' }}>
-        CO2 SPRINT *
-      </span>
+    <div style={{ background: '#0a0a0a', padding: '0.85rem 1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
       {group && (
         <span style={{ background: 'rgba(255,255,255,0.2)', padding: '0.3rem 0.9rem', borderRadius: 999, fontSize: '0.8rem', fontWeight: 700, color: '#fff', letterSpacing: '0.04em' }}>
           {group}
@@ -353,13 +350,12 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
 
 // ── Step 3: Display (receiver only) ──────────────────────────────────────────
 function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showValues }) {
-  const { actions = [], newCarbonTons = 0 } = confirmedData || {}
+  const { actions = [], newCarbonTons = 0, totalReduction = 0 } = confirmedData || {}
 
   const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste']
   const COLORS = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
   const SHORT   = { transport: 'Trans.', energy: 'Viv.', food: 'Alim.', consumption: 'Cons.', waste: 'Dig.' }
 
-  // Area averages BEFORE from teamResults
   const areaAvgBefore = {}
   AREA_ORDER.forEach(area => {
     areaAvgBefore[area] = teamResults.length
@@ -367,62 +363,21 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
       : 0
   })
 
-  // Per-area reductions from confirmed actions
   const areaRed = { transport: 0, energy: 0, food: 0, consumption: 0, waste: 0 }
   actions.forEach(id => {
     const a = ACTIONS.find(x => x.id === id)
     if (a) areaRed[a.area] = (areaRed[a.area] || 0) + a.co2Reduction / 1000
   })
 
-  // Area averages AFTER
   const areaAvgAfter = {}
   AREA_ORDER.forEach(area => {
     areaAvgAfter[area] = Math.max(0, areaAvgBefore[area] - (areaRed[area] || 0))
   })
 
-  // Sorted actions
   const sortedActions = [...actions]
     .map(id => ACTIONS.find(a => a.id === id))
     .filter(Boolean)
     .sort((a, b) => b.co2Reduction - a.co2Reduction)
-
-  // ── INTERMEDIATE VIEW: actions confirmed, values not yet revealed ─────────────
-  if (!showValues) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', flexDirection: 'column' }}>
-        <Navbar group={group} />
-        {/* Mini hero — just "Antes" */}
-        <div style={{ background: '#0a0a0a', padding: '18px 22px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>Huella actual del equipo</div>
-            <div style={{ fontSize: 32, fontWeight: 900, color: '#fff', lineHeight: 1 }}>
-              {teamAvg.toFixed(1)}<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontWeight: 400 }}> t CO₂/año</span>
-            </div>
-          </div>
-        </div>
-        {/* Actions list (no values) */}
-        <div style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', maxWidth: 640, margin: '0 auto', width: '100%' }}>
-          <p style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#aaa', marginBottom: '0.75rem' }}>
-            Acciones confirmadas para vuestro equipo
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {sortedActions.map(action => (
-              <div key={action.id} style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '10px 14px' }}>
-                <span style={{ fontSize: 16, flexShrink: 0 }}>{AREA_EMOJI[action.area]}</span>
-                <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: '#0a0a0a', lineHeight: 1.35 }}>{action.label}</span>
-                <span style={{ fontSize: 11, color: '#ccc', flexShrink: 0 }}>···</span>
-              </div>
-            ))}
-          </div>
-          <p style={{ fontSize: 12, color: '#aaa', textAlign: 'center', marginTop: 20, fontStyle: 'italic' }}>
-            El facilitador revelará los resultados en breve
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  // ── FULL RESULTS VIEW: values revealed ───────────────────────────────────────
 
   const StackedBar = ({ areaAvg, total, maxVal, label, color = '#0a0a0a' }) => (
     <div style={{ marginBottom: 6 }}>
@@ -437,19 +392,6 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
           return <div key={area} style={{ width: `${pct}%`, background: COLORS[area] }} />
         })}
       </div>
-      {/* Area chips legend */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px' }}>
-        {AREA_ORDER.filter(area => areaAvg[area] > 0.001).map(area => {
-          const val = areaAvg[area]
-          const pct = total > 0 ? Math.round((val / total) * 100) : 0
-          return (
-            <span key={area} style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, color: '#666' }}>
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: COLORS[area], flexShrink: 0 }} />
-              {SHORT[area]} {val.toFixed(1)}t <span style={{ color: '#aaa' }}>{pct}%</span>
-            </span>
-          )
-        })}
-      </div>
     </div>
   )
 
@@ -457,65 +399,97 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
     <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', flexDirection: 'column' }}>
       <Navbar group={group} />
 
-      {/* Compact hero */}
-      <div style={{ background: '#0a0a0a', padding: '18px 22px', display: 'flex', gap: 14, alignItems: 'center', flexShrink: 0 }}>
-        <div style={{ flex: 1, textAlign: 'center' }}>
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>Antes</div>
-          <div style={{ fontSize: 32, fontWeight: 900, color: '#fff', lineHeight: 1 }}>
-            {teamAvg.toFixed(1)}<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontWeight: 400 }}> t</span>
+      {/* Header oscuro — huella actual */}
+      <div style={{ background: '#1a1a1a', padding: '2rem 3rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <p style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.45)', margin: '0 0 0.3rem' }}>
+            Huella actual del equipo
+          </p>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', color: '#fff', lineHeight: 1 }}>
+              {teamAvg.toFixed(1)}
+            </span>
+            <span style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>t CO₂/año · media</span>
           </div>
         </div>
-        <div style={{ fontSize: 22, color: 'rgba(255,255,255,0.4)', fontWeight: 300 }}>→</div>
-        <div style={{ flex: 1, textAlign: 'center' }}>
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>Después</div>
-          <div style={{ fontSize: 32, fontWeight: 900, color: '#fff', lineHeight: 1 }}>
-            {newCarbonTons.toFixed(1)}<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontWeight: 400 }}> t</span>
-          </div>
-        </div>
-        <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 8, padding: '10px 12px', textAlign: 'center', flexShrink: 0 }}>
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#16a34a' }}>
-            −{(teamAvg - newCarbonTons).toFixed(1)}t
-          </div>
-          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ahorro</div>
-        </div>
+
+        {(() => {
+          const areaTotal = Object.values(areaAvgBefore).reduce((s, v) => s + v, 0)
+          const COLORS_LOCAL = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
+          return areaTotal > 0 ? (
+            <div style={{ flex: '1 1 300px', maxWidth: 500 }}>
+              <div style={{ display: 'flex', height: 12, borderRadius: 999, overflow: 'hidden', marginBottom: '0.5rem' }}>
+                {AREA_ORDER.map(area => {
+                  const pct = (areaAvgBefore[area] / areaTotal) * 100
+                  if (pct < 0.5) return null
+                  return <div key={area} style={{ width: `${pct}%`, background: COLORS_LOCAL[area] }} />
+                })}
+              </div>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                {AREA_ORDER.map(area => {
+                  const pct = Math.round((areaAvgBefore[area] / areaTotal) * 100)
+                  if (!pct) return null
+                  return (
+                    <div key={area} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: 'rgba(255,255,255,0.6)' }}>
+                      <div style={{ width: 8, height: 8, borderRadius: 2, background: COLORS_LOCAL[area] }} />
+                      {SHORT[area]} {pct}%
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ) : null
+        })()}
       </div>
 
-      {/* Responsive body */}
-      <style>{`
-        .ts3-body { display: grid; grid-template-columns: 1fr; gap: 0; flex: 1; overflow: auto; }
-        @media (min-width: 600px) {
-          .ts3-body { grid-template-columns: 1fr 1fr; }
-        }
-        @media (min-width: 1025px) {
-          .ts3-body { max-width: 960px; margin: 0 auto; width: 100%; }
-        }
-        @keyframes fadeInVal { from { opacity:0; transform:translateX(8px); } to { opacity:1; transform:translateX(0); } }
-      `}</style>
+      {/* Body — acciones confirmadas */}
+      <div style={{ flex: 1, padding: '2.5rem 3rem' }}>
+        <p style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#aaa', marginBottom: '1.25rem' }}>
+          Acciones confirmadas para vuestro equipo
+        </p>
 
-      <div className="ts3-body">
-        {/* Comparison bars */}
-        <div style={{ padding: '20px 18px', background: '#fff', borderRight: '1px solid #e5e5e5' }}>
-          <p style={{ fontSize: 9, color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Comparativa</p>
-          <StackedBar areaAvg={areaAvgBefore} total={teamAvg}       maxVal={teamAvg} label="Antes"    color="#0a0a0a" />
-          <div style={{ height: 14 }} />
-          <StackedBar areaAvg={areaAvgAfter}  total={newCarbonTons} maxVal={teamAvg} label="Después"  color="#16a34a" />
-        </div>
-
-        {/* Actions list */}
-        <div style={{ padding: '20px 18px', overflowY: 'auto', background: '#fff' }}>
-          <p style={{ fontSize: 9, color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
-            Acciones del equipo
-          </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.75rem', maxWidth: 900 }}>
           {sortedActions.map(action => (
-            <div key={action.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0', borderBottom: '0.5px solid #e5e5e5' }}>
-              <span style={{ fontSize: 14, flexShrink: 0 }}>{AREA_EMOJI[action.area]}</span>
-              <span style={{ flex: 1, fontSize: 11, fontWeight: 500, lineHeight: 1.35, color: '#0a0a0a' }}>{action.label}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#16a34a', flexShrink: 0, animation: 'fadeInVal 0.4s ease both' }}>
-                −{(action.co2Reduction / 1000).toFixed(1)}t
-              </span>
+            <div key={action.id} style={{
+              display: 'flex', alignItems: 'center', gap: 12,
+              background: '#fff', border: '1px solid #e5e5e5',
+              borderRadius: 14, padding: '1rem 1.25rem',
+            }}>
+              <span style={{ fontSize: '1.4rem', flexShrink: 0 }}>{AREA_EMOJI[action.area]}</span>
+              <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{action.label}</span>
+              {showValues ? (
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>
+                  −{(action.co2Reduction / 1000).toFixed(1)} t
+                </span>
+              ) : (
+                <span style={{ fontSize: '0.85rem', color: '#ccc', flexShrink: 0 }}>···</span>
+              )}
             </div>
           ))}
         </div>
+
+        {showValues && (
+          <div style={{ marginTop: '2rem', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 16, padding: '1.25rem 1.5rem', maxWidth: 900 }}>
+            <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <div>
+                <p style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 0.25rem' }}>Reducción total</p>
+                <span style={{ fontWeight: 900, fontSize: '1.75rem', color: '#16a34a' }}>−{(totalReduction / 1000).toFixed(1)} t</span>
+              </div>
+              <div>
+                <p style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 0.25rem' }}>Nueva huella estimada</p>
+                <span style={{ fontWeight: 900, fontSize: '1.75rem', color: '#1a1a1a' }}>{newCarbonTons.toFixed(1)} t</span>
+              </div>
+            </div>
+            <StackedBar areaAvg={areaAvgBefore} total={teamAvg}       maxVal={teamAvg} label="Antes"   color="#1a1a1a" />
+            <StackedBar areaAvg={areaAvgAfter}  total={newCarbonTons} maxVal={teamAvg} label="Después" color="#16a34a" />
+          </div>
+        )}
+
+        {!showValues && sortedActions.length > 0 && (
+          <p style={{ fontSize: '0.82rem', color: '#aaa', marginTop: '1.5rem', fontStyle: 'italic' }}>
+            El facilitador revelará los valores en breve
+          </p>
+        )}
       </div>
     </div>
   )
