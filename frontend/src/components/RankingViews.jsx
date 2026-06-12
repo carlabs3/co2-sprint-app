@@ -109,12 +109,12 @@ function getMostFrequent(values) {
 // ── constants ─────────────────────────────────────────────────────────────────
 
 export const HISTOGRAM_TABS = [
-  { id: 'total',       label: 'Todos',            color: '#000000' },
+  { id: 'total',       label: 'Total',            color: '#2d5a27' },
   { id: 'transport',   label: '🚗 Transporte',     color: '#38bdf8' },
   { id: 'energy',      label: '🏠 Hogar',          color: '#f59e0b' },
   { id: 'food',        label: '🥗 Alimentación',   color: '#4ade80' },
-  { id: 'consumption', label: '🛍 Compras y hábitos', color: '#a855f7' },
-  { id: 'waste',       label: '📱 Vida digital',   color: '#f472b6' },
+  { id: 'consumption', label: '🛍 Consumo',         color: '#a855f7' },
+  { id: 'waste',       label: '📱 Huella Digital', color: '#f472b6' },
 ]
 
 export const SPAIN_AVERAGES = {
@@ -123,9 +123,9 @@ export const SPAIN_AVERAGES = {
 }
 
 export const AREA_COLORS = {
-  transport:   '#4a90d9',
-  energy:      '#e8a020',
-  food:        '#5aab5a',
+  transport:   '#38bdf8',
+  energy:      '#f59e0b',
+  food:        '#4ade80',
   consumption: '#a855f7',
   waste:       '#f472b6',
 }
@@ -237,9 +237,9 @@ function getSubcatAvg(ranking, keys) {
 }
 
 const SUBCAT_PALETTES = {
-  transport:   ['#1a6fa8', '#4ab3e8', '#a8d8f0'],
-  energy:      ['#c47a00', '#f0a830', '#f5d080'],
-  food:        ['#1e7a3a', '#4ab86a', '#a0dbb0'],
+  transport:   ['#0369a1', '#38bdf8', '#bae6fd'],
+  energy:      ['#b45309', '#f59e0b', '#fde68a'],
+  food:        ['#16a34a', '#4ade80', '#bbf7d0'],
   consumption: ['#7e22ce', '#a855f7', '#d8b4fe'],
   waste:       ['#be185d', '#f472b6', '#fbcfe8'],
 }
@@ -465,7 +465,7 @@ export function DistributionView({ ranking }) {
             { label: 'Mínimo',        line: '2px dashed #22c55e',  box: null,      border: null },
             { label: 'Máximo',        line: '2px dashed #ef4444',  box: null,      border: null },
             { label: 'Media España',  line: '2px dashed #000',     box: null,      border: null },
-            { label: 'Más frecuente', line: null, box: '#1a1a1a',  border: '1px solid #000' },
+            { label: 'Más frecuente', line: null, box: '#fff',     border: `2px solid ${tab.color}` },
           ].map(({ label, line, box, border }) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
               {line
