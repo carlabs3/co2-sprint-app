@@ -447,11 +447,11 @@ export function DistributionView({ ranking }) {
         <div style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.25rem' }}>
           {activeTab === 'total' ? (
             <>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#000', marginBottom: '1rem' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#000', marginBottom: '1rem' }}>
                 Media por categorías
               </div>
               {/* Stacked bar */}
-              <div style={{ display: 'flex', height: 32, borderRadius: '12px', overflow: 'hidden', marginBottom: '0.85rem' }}>
+              <div style={{ display: 'flex', height: 44, borderRadius: '12px', overflow: 'hidden', marginBottom: '0.85rem' }}>
                 {Object.entries(AREA_COLORS).map(([key, color]) => {
                   const w = areaAvg[key] / areaTotal * 100
                   return w > 0 ? (
@@ -461,10 +461,10 @@ export function DistributionView({ ranking }) {
                 })}
               </div>
               {/* Legend row */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1.25rem' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem 1.25rem' }}>
                 {Object.entries(AREA_COLORS).map(([key, color]) => (
-                  <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem' }}>
-                    <div style={{ width: 10, height: 10, borderRadius: 2, background: color, flexShrink: 0 }} />
+                  <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '1.35rem' }}>
+                    <div style={{ width: 20, height: 20, borderRadius: 2, background: color, flexShrink: 0 }} />
                     <span style={{ color: '#555' }}>{AREA_LABELS[key]}</span>
                     <span style={{ fontWeight: 700, color: '#000' }}>
                       {areaTotal > 0 ? Math.round((areaAvg[key] / areaTotal) * 100) : 0}%
