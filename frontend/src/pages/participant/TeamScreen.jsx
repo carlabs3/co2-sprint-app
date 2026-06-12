@@ -400,12 +400,12 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
       <Navbar group={group} />
 
       {/* Header oscuro — huella actual */}
-      <div style={{ background: '#1a1a1a', padding: '2rem 3rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ background: '#000000', padding: '2rem 3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', textAlign: 'center' }}>
         <div>
           <p style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.45)', margin: '0 0 0.3rem' }}>
             Huella actual del equipo
           </p>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, justifyContent: 'center' }}>
             <span style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', color: '#fff', lineHeight: 1 }}>
               {teamAvg.toFixed(1)}
             </span>
@@ -417,7 +417,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
           const areaTotal = Object.values(areaAvgBefore).reduce((s, v) => s + v, 0)
           const COLORS_LOCAL = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
           return areaTotal > 0 ? (
-            <div style={{ flex: '1 1 300px', maxWidth: 500 }}>
+            <div style={{ width: '100%', maxWidth: 500 }}>
               <div style={{ display: 'flex', height: 12, borderRadius: 999, overflow: 'hidden', marginBottom: '0.5rem' }}>
                 {AREA_ORDER.map(area => {
                   const pct = (areaAvgBefore[area] / areaTotal) * 100
@@ -425,7 +425,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
                   return <div key={area} style={{ width: `${pct}%`, background: COLORS_LOCAL[area] }} />
                 })}
               </div>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {AREA_ORDER.map(area => {
                   const pct = Math.round((areaAvgBefore[area] / areaTotal) * 100)
                   if (!pct) return null
@@ -443,12 +443,12 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
       </div>
 
       {/* Body — acciones confirmadas */}
-      <div style={{ flex: 1, padding: '2.5rem 3rem' }}>
+      <div style={{ flex: 1, padding: '2.5rem 3rem', textAlign: 'center' }}>
         <p style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#aaa', marginBottom: '1.25rem' }}>
           Acciones confirmadas para vuestro equipo
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.75rem', maxWidth: 900 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: 560, margin: '0 auto' }}>
           {sortedActions.map(action => (
             <div key={action.id} style={{
               display: 'flex', alignItems: 'center', gap: 12,
@@ -456,7 +456,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
               borderRadius: 14, padding: '1rem 1.25rem',
             }}>
               <span style={{ fontSize: '1.4rem', flexShrink: 0 }}>{AREA_EMOJI[action.area]}</span>
-              <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{action.label}</span>
+              <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, textAlign: 'left' }}>{action.label}</span>
               {showValues ? (
                 <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>
                   −{(action.co2Reduction / 1000).toFixed(1)} t
