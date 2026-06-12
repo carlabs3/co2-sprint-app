@@ -123,9 +123,9 @@ export const SPAIN_AVERAGES = {
 }
 
 export const AREA_COLORS = {
-  transport:   '#38bdf8',
-  energy:      '#f59e0b',
-  food:        '#4ade80',
+  transport:   '#4a90d9',
+  energy:      '#e8a020',
+  food:        '#5aab5a',
   consumption: '#a855f7',
   waste:       '#f472b6',
 }
@@ -240,13 +240,13 @@ const SUBCAT_PALETTES = {
   transport:   ['#1a6fa8', '#4ab3e8', '#a8d8f0'],
   energy:      ['#c47a00', '#f0a830', '#f5d080'],
   food:        ['#1e7a3a', '#4ab86a', '#a0dbb0'],
-  consumption: ['#7a4010', '#b07a30', '#d4a870'],
-  waste:       ['#3a3a6a', '#7a7aaa', '#b0b0cc'],
+  consumption: ['#7e22ce', '#a855f7', '#d8b4fe'],
+  waste:       ['#be185d', '#f472b6', '#fbcfe8'],
 }
 
 function AnswerDistribution({ ranking, activeTab, tab }) {
   const [openSections, setOpenSections] = useState(() =>
-    Object.fromEntries((AREA_SUBCATEGORIES[activeTab] || []).map((s, i) => [i, true]))
+    Object.fromEntries((AREA_SUBCATEGORIES[activeTab] || []).map((s, i) => [i, false]))
   )
   const allDist = getAnswerDistribution(ranking, activeTab)
   const subcats = AREA_SUBCATEGORIES[activeTab] || []
@@ -273,7 +273,7 @@ function AnswerDistribution({ ranking, activeTab, tab }) {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <div style={{ width: 10, height: 10, borderRadius: 2, background: sub.negative ? '#3b6d11' : (SUBCAT_PALETTES[activeTab]?.[si] ?? tab.color), flexShrink: 0 }} />
-                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1a1a1a' }}>{sub.label}</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.01rem' }}>{sub.label}</span>
                 <span style={{ fontSize: '0.72rem', color: '#bbb' }}>({subDist.length} pregunta{subDist.length !== 1 ? 's' : ''})</span>
               </div>
               <span style={{ fontSize: '0.8rem', color: '#bbb', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▼</span>
