@@ -19,18 +19,20 @@ export function avg(arr) {
   return arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : 0
 }
 
-export function computeGroups(individual) {
+export function computeGroups(ranking) {
   const map = {}
-  for (const p of individual) {
-    if (!map[p.group]) map[p.group] = []
-    map[p.group].push(p.tons)
-  }
-  return Object.entries(map)
-    .map(([name, tons]) => {
-      const a = avg(tons)
-      return { name, avg: a, count: tons.length, category: getCategory(a) }
+  ranking.forEach(r => {
+    if (!map[r.group]) map[r.group] = { name: r.group, items: [] }
+    map[r.group].items.push(r)
+  })
+  return Object.values(map).map(g => {
+    const avgVal = g.items.reduce((s, r) => s + r.tons, 0) / g.items.length
+    const areas = {}
+    ;['transport', 'energy', 'food', 'consumption', 'waste'].forEach(area => {
+      areas[area] = g.items.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / g.items.length
     })
-    .sort((a, b) => a.avg - b.avg)
+    return { name: g.name, avg: avgVal, count: g.items.length, category: getCategory(avgVal), areas }
+  }).sort((a, b) => a.avg - b.avg)
 }
 
 function buildHistogram(values, extendForSpain = false) {
@@ -410,8 +412,8 @@ export function DistributionView({ ranking }) {
                 return (
                   <Cell
                     key={i}
-                    fill={entry.range === mostFrequent ? tab.color : getBarColor(entry.floor)}
-                    stroke={entry.range === mostFrequent ? tab.color : 'transparent'}
+                    fill={entry.range === mostFrequent ? (activeTab === 'total' ? '#1a1a1a' : tab.color) : getBarColor(entry.floor)}
+                    stroke={entry.range === mostFrequent ? (activeTab === 'total' ? '#1a1a1a' : tab.color) : 'transparent'}
                     strokeWidth={2}
                   />
                 )
@@ -508,9 +510,9 @@ export function DistributionView({ ranking }) {
                 label: 'Huella más frecuente',
                 value: mostFrequent !== '–' ? `${mostFrequent} t` : '–',
                 bg: activeTab === 'total' ? '#fff8e8' : `${tab.color}18`,
-                color: activeTab === 'total' ? '#e8a020' : tab.color,
-                border: activeTab === 'total' ? '#f5e0a0' : tab.color,
-                labelColor: activeTab === 'total' ? '#b07a30' : tab.color,
+                color: activeTab === 'total' ? '#1a1a1a' : tab.color,
+                border: activeTab === 'total' ? '#1a1a1a' : tab.color,
+                labelColor: activeTab === 'total' ? '#555' : tab.color,
               },
               {
                 label: 'Total CO₂ emitido',
@@ -625,9 +627,16 @@ export function DistributionView({ ranking }) {
 
 // ── GroupsView ────────────────────────────────────────────────────────────────
 
-export function GroupsView({ groups }) {
-  const maxGroupAvg = groups.length > 0 ? Math.max(...groups.map(g => g.avg)) : 1
+const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste']
+const AREA_LABEL_SHORT = {
+  transport:   'Transporte',
+  energy:      'Hogar',
+  food:        'Alimentación',
+  consumption: 'Compras y hábitos',
+  waste:       'Vida digital',
+}
 
+export function GroupsView({ groups }) {
   if (groups.length === 0) return (
     <div style={{ textAlign: 'center', color: '#bbb', padding: '4rem 2rem', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
       Sin datos de equipos aún...
@@ -635,21 +644,73 @@ export function GroupsView({ groups }) {
   )
 
   return (
-    <div>
-      {groups.map((g, i) => (
-        <div key={g.name} style={{ background: '#ffffff', border: '1px solid #e5e5e5', padding: '1rem 1.25rem', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '1.5rem', borderRadius: '16px' }}>
-          <span style={{ fontWeight: 900, fontSize: '1.2rem', width: '2rem', color: '#0a0a0a' }}>#{i + 1}</span>
-          <span style={{ fontWeight: 700, fontSize: '1rem', flex: 1, color: '#0a0a0a' }}>{g.name}</span>
-          <div style={{ flex: 2, height: '6px', background: '#e5e5e5', position: 'relative', overflow: 'hidden', borderRadius: '3px' }}>
-            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${(g.avg / maxGroupAvg) * 100}%`, background: '#0a0a0a', borderRadius: '3px', transition: 'width 0.5s ease' }} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {groups.map((g, i) => {
+        const areaTotal = AREA_ORDER.reduce((s, a) => s + (g.areas?.[a] || 0), 0)
+        const hasAreas  = areaTotal > 0
+
+        return (
+          <div key={g.name} style={{
+            background: '#fff',
+            border: '1px solid #e8e8e4',
+            borderRadius: 16,
+            padding: '1.25rem 1.5rem',
+          }}>
+            {/* Top row: rank + name + badge + tons + count */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: hasAreas ? '1.1rem' : 0 }}>
+              <span style={{ fontWeight: 900, fontSize: '1.5rem', color: '#1a1a1a', minWidth: 36 }}>#{i + 1}</span>
+              <span style={{ fontWeight: 800, fontSize: '1.35rem', flex: 1, color: '#1a1a1a' }}>{g.name}</span>
+              <span style={{
+                background: CATEGORY_BG[g.category]    || '#f5f5f0',
+                color:      CATEGORY_COLORS[g.category] || '#888',
+                border:     `1px solid ${CATEGORY_COLORS[g.category] || '#ccc'}`,
+                padding: '0.3rem 0.85rem',
+                fontSize: '0.78rem', fontWeight: 700,
+                letterSpacing: '0.04em',
+                borderRadius: 999,
+              }}>
+                {g.category === 'bajo' ? '🌿' : g.category === 'medio' ? '🌱' : '🔥'} Huella {CATEGORY_LABELS[g.category]?.toLowerCase()}
+              </span>
+              <span style={{ fontWeight: 900, fontSize: '1.5rem', color: '#1a1a1a' }}>{Number(g.avg).toFixed(1)}t</span>
+              <span style={{ fontSize: '0.85rem', color: '#bbb', minWidth: 48 }}>{g.count} pers.</span>
+            </div>
+
+            {/* Stacked bar */}
+            {hasAreas && (
+              <>
+                <div style={{ display: 'flex', height: 36, borderRadius: 999, overflow: 'hidden', marginBottom: '0.75rem' }}>
+                  {AREA_ORDER.map(area => {
+                    const pct = areaTotal > 0 ? (g.areas[area] / areaTotal) * 100 : 0
+                    if (pct < 0.5) return null
+                    return (
+                      <div key={area} style={{
+                        width: `${pct}%`,
+                        background: AREA_COLORS[area],
+                        transition: 'width 0.5s ease',
+                      }} />
+                    )
+                  })}
+                </div>
+
+                {/* Legend */}
+                <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+                  {AREA_ORDER.map(area => {
+                    const pct = areaTotal > 0 ? Math.round((g.areas[area] / areaTotal) * 100) : 0
+                    if (!pct) return null
+                    return (
+                      <div key={area} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', color: '#555' }}>
+                        <div style={{ width: 11, height: 11, borderRadius: 3, background: AREA_COLORS[area], flexShrink: 0 }} />
+                        <span>{AREA_LABEL_SHORT[area]}</span>
+                        <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{pct}%</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </>
+            )}
           </div>
-          <span style={{ fontWeight: 900, fontSize: '1.05rem', width: '60px', textAlign: 'right', color: '#0a0a0a' }}>{Number(g.avg).toFixed(1)} t</span>
-          <span style={{ background: CATEGORY_BG[g.category] || '#f5f5f5', color: CATEGORY_COLORS[g.category] || '#666', padding: '0.2rem 0.65rem', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: '999px', border: '1px solid #e5e5e5' }}>
-            {CATEGORY_LABELS[g.category]}
-          </span>
-          <span style={{ fontSize: '0.72rem', color: '#666' }}>{g.count} pers.</span>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
