@@ -322,9 +322,9 @@ export function DistributionView({ ranking }) {
                 return (
                   <Cell
                     key={i}
-                    fill={getBarColor(entry.floor, isMF)}
-                    stroke={isMF ? tab.color : entry.range === minBucket ? '#22c55e' : entry.range === maxBucket ? '#ef4444' : 'none'}
-                    strokeWidth={isMF || entry.range === minBucket || entry.range === maxBucket ? 2 : 0}
+                    fill={entry.range === mostFrequent ? tab.color : getBarColor(entry.floor)}
+                    stroke={entry.range === mostFrequent ? tab.color : 'transparent'}
+                    strokeWidth={2}
                   />
                 )
               })}
@@ -419,10 +419,10 @@ export function DistributionView({ ranking }) {
               {
                 label: 'Huella más frecuente',
                 value: mostFrequent !== '–' ? `${mostFrequent} t` : '–',
-                bg: activeTab === 'total' ? '#fff8e8' : tab.color,
-                color: activeTab === 'total' ? '#e8a020' : '#ffffff',
+                bg: activeTab === 'total' ? '#fff8e8' : `${tab.color}18`,
+                color: activeTab === 'total' ? '#e8a020' : tab.color,
                 border: activeTab === 'total' ? '#f5e0a0' : tab.color,
-                labelColor: activeTab === 'total' ? '#b07a30' : 'rgba(255,255,255,0.7)',
+                labelColor: activeTab === 'total' ? '#b07a30' : tab.color,
               },
               {
                 label: 'Total CO₂ emitido',
@@ -478,6 +478,13 @@ export function DistributionView({ ranking }) {
               </div>
             </>
           ) : (() => {
+              const SUBCAT_PALETTES = {
+                transport:   ['#1a6fa8', '#4ab3e8', '#a8d8f0'],
+                energy:      ['#c47a00', '#f0a830', '#f5d080'],
+                food:        ['#1e7a3a', '#4ab86a', '#a0dbb0'],
+                consumption: ['#7a3a00', '#c07030', '#e8b080'],
+                waste:       ['#4a4a8a', '#8080cc', '#c0c0ee'],
+              }
               const subcats = AREA_SUBCATEGORIES[activeTab] || []
               const subcatData = subcats.map(sub => ({
                 label: sub.label,
@@ -485,7 +492,6 @@ export function DistributionView({ ranking }) {
                 negative: sub.negative,
               }))
               const totalKg = subcatData.reduce((s, d) => s + d.kg, 0)
-              const baseColor = AREA_COLORS[activeTab]
 
               return (
                 <>
@@ -498,14 +504,11 @@ export function DistributionView({ ranking }) {
                     {subcatData.map((sub, i) => {
                       const pct = totalKg > 0 ? (sub.kg / totalKg) * 100 : 0
                       if (pct < 0.5) return null
+                      const color = sub.negative ? '#3b6d11' : (SUBCAT_PALETTES[activeTab]?.[i] ?? tab.color)
                       return (
                         <div key={i}
                           title={`${sub.label}: ${pct.toFixed(0)}%`}
-                          style={{
-                            width: `${pct}%`,
-                            background: sub.negative ? '#3b6d11' : `${baseColor}${['', 'dd', 'aa', '88', '66'][Math.min(i, 4)]}`,
-                            transition: 'width 0.5s ease',
-                          }}
+                          style={{ width: `${pct}%`, background: color, transition: 'width 0.5s ease' }}
                         />
                       )
                     })}
@@ -515,7 +518,7 @@ export function DistributionView({ ranking }) {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     {subcatData.map((sub, i) => {
                       const pct = totalKg > 0 ? Math.round((sub.kg / totalKg) * 100) : 0
-                      const color = sub.negative ? '#3b6d11' : `${baseColor}${['', 'dd', 'aa', '88', '66'][Math.min(i, 4)]}`
+                      const color = sub.negative ? '#3b6d11' : (SUBCAT_PALETTES[activeTab]?.[i] ?? tab.color)
                       return (
                         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.95rem' }}>
                           <div style={{ width: 14, height: 14, borderRadius: 3, background: color, flexShrink: 0 }} />
