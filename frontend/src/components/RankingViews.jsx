@@ -35,20 +35,20 @@ export function computeGroups(ranking) {
   }).sort((a, b) => a.avg - b.avg)
 }
 
-function buildHistogram(values, extendForSpain = false) {
+function buildHistogram(values, extendForSpain = false, step = 1) {
   if (!values.length) return []
   const counts = {}
   values.forEach(v => {
-    const f = Math.floor(v)
-    const key = `${f}–${f + 1}`
+    const f = Math.floor(v / step) * step
+    const key = `${f}–${(f + step)}`
     counts[key] = (counts[key] || 0) + 1
   })
-  const minFloor = Math.floor(Math.min(...values))
-  let maxFloor = Math.floor(Math.max(...values))
+  const minFloor = Math.floor(Math.min(...values) / step) * step
+  let maxFloor = Math.floor(Math.max(...values) / step) * step
   if (extendForSpain) maxFloor = Math.max(maxFloor, 7)
   const data = []
-  for (let f = minFloor; f <= maxFloor; f++) {
-    const key = `${f}–${f + 1}`
+  for (let f = minFloor; f <= maxFloor; f = Math.round((f + step) * 100) / 100) {
+    const key = `${f}–${Math.round((f + step) * 100) / 100}`
     data.push({ range: key, count: counts[key] || 0, floor: f })
   }
   return data
@@ -369,7 +369,8 @@ export function DistributionView({ ranking }) {
     .filter(v => v > 0)
     .sort((a, b) => a - b)
 
-  const histData = buildHistogram(values, activeTab === 'total')
+  const histStep = activeTab === 'total' ? 1 : 0.5
+  const histData = buildHistogram(values, activeTab === 'total', histStep)
   const spainAvg = SPAIN_AVERAGES[activeTab]
   const spainBucket = `${Math.floor(spainAvg)}–${Math.floor(spainAvg) + 1}`
 
@@ -378,9 +379,9 @@ export function DistributionView({ ranking }) {
   const maxVal       = values[values.length - 1] ?? 0
   const mostFrequent = values.length ? getMostFrequent(values) : '–'
 
-  const meanBucket   = `${Math.floor(meanVal)}–${Math.floor(meanVal) + 1}`
-  const minBucket    = `${Math.floor(minVal)}–${Math.floor(minVal) + 1}`
-  const maxBucket    = `${Math.floor(maxVal)}–${Math.floor(maxVal) + 1}`
+  const meanBucket = `${Math.floor(meanVal / histStep) * histStep}–${Math.round((Math.floor(meanVal / histStep) * histStep + histStep) * 100) / 100}`
+  const minBucket  = `${Math.floor(minVal  / histStep) * histStep}–${Math.round((Math.floor(minVal  / histStep) * histStep + histStep) * 100) / 100}`
+  const maxBucket  = `${Math.floor(maxVal  / histStep) * histStep}–${Math.round((Math.floor(maxVal  / histStep) * histStep + histStep) * 100) / 100}`
 
   const areaAvg = {
     transport:   avg(ranking.map(r => r.areas?.transport   ?? 0)),
