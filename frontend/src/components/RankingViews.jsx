@@ -373,12 +373,12 @@ export function DistributionView({ ranking }) {
   const spainAvg = SPAIN_AVERAGES[activeTab]
   const spainBucket = `${Math.floor(spainAvg)}–${Math.floor(spainAvg) + 1}`
 
-  const median       = values.length ? values[Math.floor(values.length / 2)] : 0
+  const meanVal      = values.length ? values.reduce((s, v) => s + v, 0) / values.length : 0
   const minVal       = values[0] ?? 0
   const maxVal       = values[values.length - 1] ?? 0
   const mostFrequent = values.length ? getMostFrequent(values) : '–'
 
-  const medianBucket = `${Math.floor(median)}–${Math.floor(median) + 1}`
+  const meanBucket   = `${Math.floor(meanVal)}–${Math.floor(meanVal) + 1}`
   const minBucket    = `${Math.floor(minVal)}–${Math.floor(minVal) + 1}`
   const maxBucket    = `${Math.floor(maxVal)}–${Math.floor(maxVal) + 1}`
 
@@ -458,35 +458,17 @@ export function DistributionView({ ranking }) {
               strokeWidth={1.5}
               label={{ value: `España ${spainAvg}t`, position: 'top', fontSize: 13, fill: '#555' }}
             />
-            {/* Median reference line */}
             {values.length > 0 && (
-              <ReferenceLine
-                x={medianBucket}
-                stroke={tab.color}
-                strokeDasharray="2 2"
-                strokeWidth={2.5}
-                label={{ value: `med ${median.toFixed(1)}t`, position: 'top', fontSize: 14, fill: tab.color }}
-              />
+              <ReferenceLine x={meanBucket} stroke={tab.color} strokeWidth={2.5} strokeDasharray="5 3"
+                label={{ value: `${meanVal.toFixed(1)}t`, fill: tab.color, fontSize: 14, fontWeight: 700, position: 'top' }} />
             )}
-            {/* Min reference line */}
-            {values.length > 0 && (
-              <ReferenceLine
-                x={minBucket}
-                stroke="#22c55e"
-                strokeDasharray="3 3"
-                strokeWidth={1.5}
-                label={{ value: `mín ${minVal.toFixed(1)}t`, position: 'top', fontSize: 13, fill: '#22c55e' }}
-              />
+            {values.length > 0 && minBucket !== meanBucket && (
+              <ReferenceLine x={minBucket} stroke="#3b6d11" strokeWidth={1} strokeDasharray="3 3"
+                label={{ value: `mín ${minVal.toFixed(1)}t`, fill: '#3b6d11', fontSize: 13, position: 'top' }} />
             )}
-            {/* Max reference line */}
-            {values.length > 0 && (
-              <ReferenceLine
-                x={maxBucket}
-                stroke="#ef4444"
-                strokeDasharray="3 3"
-                strokeWidth={1.5}
-                label={{ value: `máx ${maxVal.toFixed(1)}t`, position: 'top', fontSize: 13, fill: '#ef4444' }}
-              />
+            {values.length > 0 && maxBucket !== meanBucket && maxBucket !== minBucket && (
+              <ReferenceLine x={maxBucket} stroke="#cc4444" strokeWidth={1} strokeDasharray="3 3"
+                label={{ value: `máx ${maxVal.toFixed(1)}t`, fill: '#cc4444', fontSize: 13, position: 'top' }} />
             )}
           </BarChart>
         </ResponsiveContainer>
@@ -495,8 +477,8 @@ export function DistributionView({ ranking }) {
         <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginTop: '0.75rem', fontSize: '0.82rem', color: '#666', alignItems: 'center' }}>
           {[
             { label: 'Valor medio',     line: `2px dashed ${tab.color}`, box: null,   border: null },
-            { label: 'Mínimo',        line: '2px dashed #22c55e',  box: null,      border: null },
-            { label: 'Máximo',        line: '2px dashed #ef4444',  box: null,      border: null },
+            { label: 'Mínimo',        line: '2px dashed #3b6d11',  box: null,      border: null },
+            { label: 'Máximo',        line: '2px dashed #cc4444',  box: null,      border: null },
             { label: 'Media España',  line: '2px dashed #000',     box: null,      border: null },
             { label: 'Más frecuente', line: null, box: '#fff',     border: `2px solid ${activeTab === 'total' ? '#1a1a1a' : tab.color}` },
           ].map(({ label, line, box, border }) => (
@@ -513,7 +495,6 @@ export function DistributionView({ ranking }) {
 
       {/* Stats row */}
       {(() => {
-        const meanVal = values.length ? values.reduce((s, v) => s + v, 0) / values.length : 0
         return (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.85rem', marginBottom: '1.5rem' }}>
             {[
