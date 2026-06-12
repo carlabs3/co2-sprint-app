@@ -302,11 +302,11 @@ export function DistributionView({ ranking }) {
           ))}
         </div>
 
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={histData} margin={{ top: 24, right: 16, left: -20, bottom: 4 }} barCategoryGap="20%">
+        <ResponsiveContainer width="100%" height={340}>
+          <BarChart data={histData} margin={{ top: 32, right: 24, left: -8, bottom: 8 }} barCategoryGap="20%">
             <CartesianGrid vertical={false} stroke="#f0f0f0" />
-            <XAxis dataKey="range" tick={{ fontSize: 11, fill: '#888' }} axisLine={false} tickLine={false} />
-            <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#888' }} axisLine={false} tickLine={false} />
+            <XAxis dataKey="range" tick={{ fontSize: 14, fill: '#888' }} axisLine={false} tickLine={false} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 14, fill: '#888' }} axisLine={false} tickLine={false} domain={[0, 'auto']} minTickGap={6} />
             <Tooltip cursor={{ fill: 'rgba(0,0,0,0.04)' }} content={({ active, payload }) => {
               if (!active || !payload?.length) return null
               const d = payload[0].payload
@@ -335,7 +335,7 @@ export function DistributionView({ ranking }) {
               stroke="#000000"
               strokeDasharray="4 3"
               strokeWidth={1.5}
-              label={{ value: `España ${spainAvg}t`, position: 'top', fontSize: 10, fill: '#555' }}
+              label={{ value: `España ${spainAvg}t`, position: 'top', fontSize: 13, fill: '#555' }}
             />
             {/* Median reference line */}
             {values.length > 0 && (
@@ -343,8 +343,8 @@ export function DistributionView({ ranking }) {
                 x={medianBucket}
                 stroke="#666666"
                 strokeDasharray="2 2"
-                strokeWidth={1}
-                label={{ value: `med ${median.toFixed(1)}t`, position: 'top', fontSize: 10, fill: '#888' }}
+                strokeWidth={2.5}
+                label={{ value: `med ${median.toFixed(1)}t`, position: 'top', fontSize: 14, fill: '#888' }}
               />
             )}
             {/* Min reference line */}
@@ -354,7 +354,7 @@ export function DistributionView({ ranking }) {
                 stroke="#22c55e"
                 strokeDasharray="3 3"
                 strokeWidth={1.5}
-                label={{ value: `mín ${minVal.toFixed(1)}t`, position: 'top', fontSize: 10, fill: '#22c55e' }}
+                label={{ value: `mín ${minVal.toFixed(1)}t`, position: 'top', fontSize: 13, fill: '#22c55e' }}
               />
             )}
             {/* Max reference line */}
@@ -364,14 +364,14 @@ export function DistributionView({ ranking }) {
                 stroke="#ef4444"
                 strokeDasharray="3 3"
                 strokeWidth={1.5}
-                label={{ value: `máx ${maxVal.toFixed(1)}t`, position: 'top', fontSize: 10, fill: '#ef4444' }}
+                label={{ value: `máx ${maxVal.toFixed(1)}t`, position: 'top', fontSize: 13, fill: '#ef4444' }}
               />
             )}
           </BarChart>
         </ResponsiveContainer>
 
         {/* Legend */}
-        <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginTop: '0.75rem', fontSize: '0.68rem', color: '#666', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginTop: '0.75rem', fontSize: '0.82rem', color: '#666', alignItems: 'center' }}>
           {[
             { label: 'Media grupo',   line: '2px dashed #aaa',     box: null,      border: null },
             { label: 'Mínimo',        line: '2px dashed #22c55e',  box: null,      border: null },
@@ -381,7 +381,7 @@ export function DistributionView({ ranking }) {
           ].map(({ label, line, box, border }) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
               {line
-                ? <div style={{ width: 20, borderTop: line }} />
+                ? <div style={{ width: 28, borderTop: line }} />
                 : <div style={{ width: 12, height: 12, background: box, border, borderRadius: 2 }} />
               }
               {label}
@@ -390,21 +390,57 @@ export function DistributionView({ ranking }) {
         </div>
       </div>
 
-      {/* Stats row — 5 cards: Media, Mínimo, Máximo, Más frecuente, Total emitido */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
-        {[
-          { label: 'Media',         value: values.length ? `${median.toFixed(1)} t` : '–' },
-          { label: 'Mínimo',        value: values.length ? `${minVal.toFixed(1)} t` : '–' },
-          { label: 'Máximo',        value: values.length ? `${maxVal.toFixed(1)} t` : '–' },
-          { label: 'Más frecuente', value: mostFrequent !== '–' ? `${mostFrequent} t` : '–' },
-          { label: 'Total emitido', value: values.length ? `${values.reduce((s, v) => s + v, 0).toFixed(0)} t` : '–' },
-        ].map(({ label, value }) => (
-          <div key={label} style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
-            <div style={{ fontWeight: 900, fontSize: '1.4rem', color: '#0a0a0a', lineHeight: 1, marginBottom: '0.3rem' }}>{value}</div>
-            <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#aaa' }}>{label}</div>
+      {/* Stats row */}
+      {(() => {
+        const meanVal = values.length ? values.reduce((s, v) => s + v, 0) / values.length : 0
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.85rem', marginBottom: '1.5rem' }}>
+            {[
+              {
+                label: 'Huella media',
+                value: values.length ? `${meanVal.toFixed(1)} t` : '–',
+                bg: '#1a1a1a', color: '#ffffff', border: '#1a1a1a',
+                labelColor: 'rgba(255,255,255,0.6)',
+              },
+              {
+                label: 'Huella mínima',
+                value: values.length ? `${minVal.toFixed(1)} t` : '–',
+                bg: '#ffffff', color: '#2d5a27', border: '#3b6d11',
+                labelColor: '#3b6d11',
+              },
+              {
+                label: 'Huella máxima',
+                value: values.length ? `${maxVal.toFixed(1)} t` : '–',
+                bg: '#ffffff', color: '#cc4444', border: '#cc4444',
+                labelColor: '#cc4444',
+              },
+              {
+                label: 'Huella más frecuente',
+                value: mostFrequent !== '–' ? `${mostFrequent} t` : '–',
+                bg: '#fff8e8', color: '#e8a020', border: '#f5e0a0',
+                labelColor: '#b07a30',
+              },
+              {
+                label: 'Total CO₂ emitido',
+                value: values.length ? `${values.reduce((s, v) => s + v, 0).toFixed(1)} t` : '–',
+                bg: '#ffffff', color: '#444', border: '#e0e0d8',
+                labelColor: '#aaa',
+              },
+            ].map(({ label, value, bg, color, border, labelColor }) => (
+              <div key={label} style={{
+                background: bg,
+                border: `2px solid ${border}`,
+                borderRadius: 14,
+                padding: '1.25rem 1rem',
+                textAlign: 'center',
+              }}>
+                <div style={{ fontWeight: 900, fontSize: '1.8rem', color, lineHeight: 1, marginBottom: '0.45rem' }}>{value}</div>
+                <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: labelColor, fontWeight: 600 }}>{label}</div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        )
+      })()}
 
       {/* Area breakdown */}
       {areaTotal > 0 && (
