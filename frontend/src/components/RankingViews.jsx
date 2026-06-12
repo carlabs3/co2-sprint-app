@@ -628,6 +628,7 @@ export function DistributionView({ ranking }) {
 // ── GroupsView ────────────────────────────────────────────────────────────────
 
 const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste']
+const CATEGORY_LABEL_F = { bajo: 'baja', medio: 'media', alto: 'alta', 'muy alto': 'muy alta' }
 const AREA_LABEL_SHORT = {
   transport:   'Transporte',
   energy:      'Hogar',
@@ -669,7 +670,7 @@ export function GroupsView({ groups }) {
                 letterSpacing: '0.04em',
                 borderRadius: 999,
               }}>
-                {g.category === 'bajo' ? '🌿' : g.category === 'medio' ? '🌱' : '🔥'} Huella {CATEGORY_LABELS[g.category]?.toLowerCase()}
+                {g.category === 'bajo' ? '🌿' : g.category === 'medio' ? '🌱' : '🔥'} Huella {CATEGORY_LABEL_F[g.category]}
               </span>
               <span style={{ fontWeight: 900, fontSize: '1.5rem', color: '#1a1a1a' }}>{Number(g.avg).toFixed(1)}t</span>
               <span style={{ fontSize: '0.85rem', color: '#bbb', minWidth: 48 }}>{g.count} pers.</span>

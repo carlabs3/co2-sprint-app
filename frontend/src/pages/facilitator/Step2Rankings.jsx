@@ -550,7 +550,7 @@ export default function Step2Rankings() {
               transition: 'all 0.15s ease',
             }}
           >
-            STEP 2
+            Huellas
           </button>
           <button
             onClick={() => { setActiveStep(3); if (!step3Started) handleStartStep3() }}
@@ -563,7 +563,7 @@ export default function Step2Rankings() {
               transition: 'all 0.15s ease',
             }}
           >
-            STEP 3
+            Acciones
           </button>
         </div>
       )}
