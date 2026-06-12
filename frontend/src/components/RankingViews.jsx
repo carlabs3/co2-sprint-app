@@ -323,8 +323,8 @@ export function DistributionView({ ranking }) {
                   <Cell
                     key={i}
                     fill={getBarColor(entry.floor, isMF)}
-                    stroke={entry.range === minBucket ? '#22c55e' : entry.range === maxBucket ? '#ef4444' : 'none'}
-                    strokeWidth={entry.range === minBucket || entry.range === maxBucket ? 2 : 0}
+                    stroke={isMF ? tab.color : entry.range === minBucket ? '#22c55e' : entry.range === maxBucket ? '#ef4444' : 'none'}
+                    strokeWidth={isMF || entry.range === minBucket || entry.range === maxBucket ? 2 : 0}
                   />
                 )
               })}
@@ -341,10 +341,10 @@ export function DistributionView({ ranking }) {
             {values.length > 0 && (
               <ReferenceLine
                 x={medianBucket}
-                stroke="#666666"
+                stroke={tab.color}
                 strokeDasharray="2 2"
                 strokeWidth={2.5}
-                label={{ value: `med ${median.toFixed(1)}t`, position: 'top', fontSize: 14, fill: '#888' }}
+                label={{ value: `med ${median.toFixed(1)}t`, position: 'top', fontSize: 14, fill: tab.color }}
               />
             )}
             {/* Min reference line */}
@@ -373,7 +373,7 @@ export function DistributionView({ ranking }) {
         {/* Legend */}
         <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginTop: '0.75rem', fontSize: '0.82rem', color: '#666', alignItems: 'center' }}>
           {[
-            { label: 'Media grupo',   line: '2px dashed #aaa',     box: null,      border: null },
+            { label: 'Mediana grupo',  line: `2px dashed ${tab.color}`, box: null,   border: null },
             { label: 'Mínimo',        line: '2px dashed #22c55e',  box: null,      border: null },
             { label: 'Máximo',        line: '2px dashed #ef4444',  box: null,      border: null },
             { label: 'Media España',  line: '2px dashed #000',     box: null,      border: null },
@@ -479,18 +479,25 @@ export function DistributionView({ ranking }) {
                 Distribución de subcategorías
               </div>
               {(AREA_SUBCATEGORIES[activeTab] || []).map((sub, i) => {
-                const avgKg      = getSubcatAvg(ranking, sub.keys)
+                const avgKg = getSubcatAvg(ranking, sub.keys)
                 const areaTotalKg = areaAvg[activeTab] * 1000
-                const pct        = areaTotalKg > 0 ? Math.round((Math.abs(avgKg) / areaTotalKg) * 100) : 0
+                const pct = areaTotalKg > 0 ? Math.round((Math.abs(avgKg) / areaTotalKg) * 100) : 0
+                const barColor = sub.negative ? '#3b6d11' : AREA_COLORS[activeTab]
                 return (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '0.5px solid #f5f5f5' }}>
-                    <span style={{ flex: 1, fontSize: '0.75rem', color: sub.negative ? '#16a34a' : '#1a1a1a' }}>{sub.label}</span>
-                    <div style={{ width: 80, height: 5, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: sub.negative ? '#16a34a' : AREA_COLORS[activeTab], borderRadius: 3 }} />
+                  <div key={i} style={{ marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.35rem' }}>
+                      <span style={{ fontSize: '0.95rem', fontWeight: 600, color: sub.negative ? '#3b6d11' : '#1a1a1a' }}>{sub.label}</span>
+                      <span style={{ fontSize: '0.95rem', fontWeight: 700, color: barColor }}>{pct}%</span>
                     </div>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 600, width: 36, textAlign: 'right', color: sub.negative ? '#16a34a' : AREA_COLORS[activeTab] }}>
-                      {pct}%
-                    </span>
+                    <div style={{ height: 14, background: '#f0f0f0', borderRadius: 6, overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${Math.min(pct, 100)}%`,
+                        background: barColor,
+                        borderRadius: 6,
+                        transition: 'width 0.5s ease',
+                      }} />
+                    </div>
                   </div>
                 )
               })}
