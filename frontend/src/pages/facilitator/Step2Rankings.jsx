@@ -683,7 +683,7 @@ export default function Step2Rankings() {
         <div style={{ flex: 1, padding: '2.5rem', overflow: 'auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
             <h1 style={{ fontWeight: 900, fontSize: '1.6rem', color: '#0a0a0a' }}>
-              {view === 'individual' ? '¿Cómo contamina el grupo?' : 'Ranking por equipos'}
+              {view === 'individual' ? 'Distribución de huellas individuales' : 'Ranking por equipos'}
             </h1>
             {/* Global / Equipos toggle pill */}
             <div style={{ display: 'flex', gap: '0.4rem' }}>

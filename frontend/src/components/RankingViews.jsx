@@ -111,7 +111,7 @@ function getMostFrequent(values) {
 // ── constants ─────────────────────────────────────────────────────────────────
 
 export const HISTOGRAM_TABS = [
-  { id: 'total',       label: 'Total',            color: '#2d5a27' },
+  { id: 'total',       label: 'Total',            color: '#1a1a1a' },
   { id: 'transport',   label: '🚗 Transporte',     color: '#38bdf8' },
   { id: 'energy',      label: '🏠 Hogar',          color: '#f59e0b' },
   { id: 'food',        label: '🥗 Alimentación',   color: '#4ade80' },
@@ -509,7 +509,7 @@ export function DistributionView({ ranking }) {
               {
                 label: 'Huella más frecuente',
                 value: mostFrequent !== '–' ? `${mostFrequent} t` : '–',
-                bg: activeTab === 'total' ? '#fff8e8' : `${tab.color}18`,
+                bg: activeTab === 'total' ? '#f0f0ee' : `${tab.color}18`,
                 color: activeTab === 'total' ? '#1a1a1a' : tab.color,
                 border: activeTab === 'total' ? '#1a1a1a' : tab.color,
                 labelColor: activeTab === 'total' ? '#555' : tab.color,
