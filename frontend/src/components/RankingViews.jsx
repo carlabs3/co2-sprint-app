@@ -463,7 +463,7 @@ export function DistributionView({ ranking }) {
               {/* Legend row */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem 1.25rem' }}>
                 {Object.entries(AREA_COLORS).map(([key, color]) => (
-                  <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '1.35rem' }}>
+                  <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.95rem' }}>
                     <div style={{ width: 20, height: 20, borderRadius: 2, background: color, flexShrink: 0 }} />
                     <span style={{ color: '#555' }}>{AREA_LABELS[key]}</span>
                     <span style={{ fontWeight: 700, color: '#000' }}>
