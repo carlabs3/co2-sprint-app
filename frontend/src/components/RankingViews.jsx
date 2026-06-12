@@ -201,6 +201,12 @@ function getContribution(answers, key) {
       const h = Array.isArray(answers.homeHabits) ? answers.homeHabits : []
       return h.length > 0 ? -(h.length * 50) : 0
     }
+    case 'vacationNights':
+      return (answers.hotelNights   || 0) * 8
+           + (answers.hostelNights  || 0) * 1
+           + (answers.campingNights || 0) * 1
+           + (answers.airbnbNights  || 0) * 5
+           + (answers.secondHome    ? 250 : 0)
     case 'hotelNights':  return (answers.hotelNights || 0) * 30
     case 'hostelNights': return (answers.hostelNights || 0) * 10
     case 'campingNights':return (answers.campingNights || 0) * 5
@@ -229,6 +235,13 @@ function getContribution(answers, key) {
     case 'aiUsage':      return MAP.aiUsage[answers.aiUsage] || 0
     default:             return 0
   }
+}
+
+function getQuestionAvgKg(ranking, questionId) {
+  const vals = ranking
+    .filter(r => r.answers && Object.keys(r.answers).length > 0)
+    .map(r => getContribution(r.answers, questionId))
+  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0
 }
 
 function getSubcatAvg(ranking, keys) {
@@ -287,6 +300,26 @@ function AnswerDistribution({ ranking, activeTab, tab }) {
                     <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#333', marginBottom: '0.2rem', lineHeight: 1.4 }}>
                       {question.text}
                     </div>
+                    {(() => {
+                      const avgKg = getQuestionAvgKg(ranking, question.id)
+                      if (avgKg === 0) return null
+                      const isNegative = avgKg < 0
+                      return (
+                        <div style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                          marginBottom: '0.65rem',
+                          background: isNegative ? '#f0fdf4' : '#f5f5f5',
+                          border: `1px solid ${isNegative ? '#bbf7d0' : '#e0e0d8'}`,
+                          borderRadius: 999,
+                          padding: '0.2rem 0.65rem',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          color: isNegative ? '#16a34a' : '#555',
+                        }}>
+                          {isNegative ? '↓' : '+'}{Math.abs(Math.round(avgKg))} kg CO₂ de media
+                        </div>
+                      )
+                    })()}
                     {question.type === 'multi' && (
                       <div style={{ fontSize: '0.68rem', color: '#bbb', marginBottom: '0.65rem' }}>
                         Selección múltiple · % sobre {ranking.length} participantes
