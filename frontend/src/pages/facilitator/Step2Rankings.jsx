@@ -29,9 +29,9 @@ export default function Step2Rankings() {
   const [winnersRevealed, setWinnersRevealed]       = useState(false)
   const [step3Data, setStep3Data]                   = useState(null)
   const [sessionGroups, setSessionGroups]           = useState([])
-  const [activeTeamTab,  setActiveTeamTab]          = useState(null)
+  const [activeTeamTab,  setActiveTeamTab]          = useState('Equipo A')
   const [teamSelections, setTeamSelections]         = useState({})
-  const [filter3Area,    setFilter3Area]            = useState('all')
+  const [filter3Area,    setFilter3Area]            = useState('transport')
   const [sessionStatus,  setSessionStatus]           = useState(null)
 
   const joinUrl = `${window.location.origin}/?code=${code}`
@@ -285,7 +285,7 @@ export default function Step2Rankings() {
             const AREA_LABELS_LOCAL = { transport: 'Transp.', energy: 'Hogar', food: 'Alim.', consumption: 'Cons.', waste: 'Digital' }
 
             return (
-              <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '1rem', alignItems: 'start' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'start' }}>
 
                 {/* LEFT COLUMN — huella + acciones seleccionadas */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
