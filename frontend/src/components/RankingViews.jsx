@@ -236,6 +236,94 @@ function getSubcatAvg(ranking, keys) {
   return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0
 }
 
+const SUBCAT_PALETTES = {
+  transport:   ['#1a6fa8', '#4ab3e8', '#a8d8f0'],
+  energy:      ['#c47a00', '#f0a830', '#f5d080'],
+  food:        ['#1e7a3a', '#4ab86a', '#a0dbb0'],
+  consumption: ['#7a4010', '#b07a30', '#d4a870'],
+  waste:       ['#3a3a6a', '#7a7aaa', '#b0b0cc'],
+}
+
+function AnswerDistribution({ ranking, activeTab, tab }) {
+  const [openSections, setOpenSections] = useState(() =>
+    Object.fromEntries((AREA_SUBCATEGORIES[activeTab] || []).map((s, i) => [i, true]))
+  )
+  const allDist = getAnswerDistribution(ranking, activeTab)
+  const subcats = AREA_SUBCATEGORIES[activeTab] || []
+
+  return (
+    <div>
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '1rem' }}>
+        Distribución de respuestas
+      </div>
+      {subcats.map((sub, si) => {
+        const subDist = allDist.filter(d => sub.keys.includes(d.question.id))
+        if (!subDist.length) return null
+        const isOpen = openSections[si] !== false
+        return (
+          <div key={si} style={{ marginBottom: '0.75rem', border: '1px solid #f0f0ee', borderRadius: 12, overflow: 'hidden' }}>
+            <button
+              onClick={() => setOpenSections(prev => ({ ...prev, [si]: !isOpen }))}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '0.85rem 1.25rem', background: isOpen ? '#fafafa' : '#fff',
+                border: 'none', cursor: 'pointer', textAlign: 'left',
+                borderBottom: isOpen ? '1px solid #f0f0ee' : 'none',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{ width: 10, height: 10, borderRadius: 2, background: sub.negative ? '#3b6d11' : (SUBCAT_PALETTES[activeTab]?.[si] ?? tab.color), flexShrink: 0 }} />
+                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1a1a1a' }}>{sub.label}</span>
+                <span style={{ fontSize: '0.72rem', color: '#bbb' }}>({subDist.length} pregunta{subDist.length !== 1 ? 's' : ''})</span>
+              </div>
+              <span style={{ fontSize: '0.8rem', color: '#bbb', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▼</span>
+            </button>
+            {isOpen && (
+              <div style={{ padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {subDist.map(({ question, distribution, total: qTotal, maxCount }) => (
+                  <div key={question.id}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#333', marginBottom: '0.2rem', lineHeight: 1.4 }}>
+                      {question.text}
+                    </div>
+                    {question.type === 'multi' && (
+                      <div style={{ fontSize: '0.68rem', color: '#bbb', marginBottom: '0.65rem' }}>
+                        Selección múltiple · % sobre {ranking.length} participantes
+                      </div>
+                    )}
+                    {question.type !== 'multi' && <div style={{ marginBottom: '0.65rem' }} />}
+                    {distribution.map(opt => {
+                      const isMost = opt.count > 0 && opt.count === maxCount
+                      const barColor = sub.negative ? '#3b6d11' : (SUBCAT_PALETTES[activeTab]?.[si] ?? tab.color)
+                      return (
+                        <div key={opt.value} style={{ marginBottom: '0.6rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: isMost ? 700 : 400, color: isMost ? '#1a1a1a' : '#777' }}>
+                              {opt.label}
+                            </span>
+                            <span style={{ fontSize: '0.75rem', fontWeight: isMost ? 700 : 400, color: isMost ? barColor : '#aaa' }}>
+                              {opt.pct}%
+                            </span>
+                          </div>
+                          <div style={{ height: 6, background: '#f0f0ee', borderRadius: 3, overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${opt.pct}%`, background: isMost ? barColor : `${barColor}66`, borderRadius: 3, transition: 'width 0.4s ease' }} />
+                          </div>
+                        </div>
+                      )
+                    })}
+                    <div style={{ fontSize: '0.68rem', color: '#bbb', marginTop: '0.4rem' }}>
+                      {qTotal} de {ranking.length} respondieron
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 // ── DistributionView ──────────────────────────────────────────────────────────
 
 export function DistributionView({ ranking }) {
@@ -478,13 +566,6 @@ export function DistributionView({ ranking }) {
               </div>
             </>
           ) : (() => {
-              const SUBCAT_PALETTES = {
-                transport:   ['#1a6fa8', '#4ab3e8', '#a8d8f0'],
-                energy:      ['#c47a00', '#f0a830', '#f5d080'],
-                food:        ['#1e7a3a', '#4ab86a', '#a0dbb0'],
-                consumption: ['#7a3a00', '#c07030', '#e8b080'],
-                waste:       ['#4a4a8a', '#8080cc', '#c0c0ee'],
-              }
               const subcats = AREA_SUBCATEGORIES[activeTab] || []
               const subcatData = subcats.map(sub => ({
                 label: sub.label,
@@ -515,14 +596,14 @@ export function DistributionView({ ranking }) {
                   </div>
 
                   {/* Legend */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
                     {subcatData.map((sub, i) => {
                       const pct = totalKg > 0 ? Math.round((sub.kg / totalKg) * 100) : 0
                       const color = sub.negative ? '#3b6d11' : (SUBCAT_PALETTES[activeTab]?.[i] ?? tab.color)
                       return (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.95rem' }}>
-                          <div style={{ width: 14, height: 14, borderRadius: 3, background: color, flexShrink: 0 }} />
-                          <span style={{ flex: 1, color: '#555' }}>{sub.label}</span>
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', color: '#666' }}>
+                          <div style={{ width: 12, height: 12, borderRadius: 2, background: color, flexShrink: 0 }} />
+                          <span>{sub.label}</span>
                           <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{pct}%</span>
                         </div>
                       )
@@ -535,51 +616,9 @@ export function DistributionView({ ranking }) {
       )}
 
       {/* Answer distribution */}
-      {activeTab !== 'total' && (() => {
-        const dist = getAnswerDistribution(ranking, activeTab)
-        if (!dist.length) return null
-        return (
-          <div>
-            <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '1rem' }}>
-              Distribución de respuestas
-            </div>
-            {dist.map(({ question, distribution, total: qTotal, maxCount }) => (
-              <div key={question.id} style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
-                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#333', marginBottom: '0.25rem', lineHeight: 1.4 }}>
-                  {question.text}
-                </div>
-                {question.type === 'multi' && (
-                  <div style={{ fontSize: '0.65rem', color: '#bbb', marginBottom: '0.85rem' }}>Selección múltiple · % sobre {ranking.length} participantes</div>
-                )}
-                {question.type === 'single' && <div style={{ marginBottom: '0.85rem' }} />}
-                {distribution.map(opt => {
-                  const isMost = opt.count > 0 && opt.count === maxCount
-                  return (
-                    <div key={opt.value} style={{ marginBottom: '0.7rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                        <span style={{ fontSize: '0.72rem', fontWeight: isMost ? 700 : 400, color: isMost ? '#000' : '#777' }}>
-                          {opt.label}
-                        </span>
-                        <span style={{ fontSize: '0.72rem', fontWeight: isMost ? 700 : 400, color: isMost ? '#000' : '#aaa' }}>
-                          {opt.pct}%
-                        </span>
-                      </div>
-                      <div style={{ height: 6, background: '#f5f5f5', borderRadius: 3, overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${opt.pct}%`, background: isMost ? '#0a0a0a' : '#d4d4d4', borderRadius: 3, transition: 'width 0.5s ease' }} />
-                      </div>
-                    </div>
-                  )
-                })}
-                {question.type === 'single' && qTotal < ranking.length && (
-                  <div style={{ fontSize: '0.65rem', color: '#ccc', marginTop: '0.5rem' }}>
-                    {qTotal} de {ranking.length} respondieron
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )
-      })()}
+      {activeTab !== 'total' && (
+        <AnswerDistribution ranking={ranking} activeTab={activeTab} tab={tab} />
+      )}
     </div>
   )
 }
