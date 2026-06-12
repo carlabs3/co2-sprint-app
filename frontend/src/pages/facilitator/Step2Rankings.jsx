@@ -237,142 +237,197 @@ export default function Step2Rankings() {
 
     if (!step3Revealed && step3Data) {
       return (
-        <div style={{ flex: 1, padding: '2rem', overflow: 'auto', background: '#f5f5f5' }}>
-          <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e5e5e5', padding: '2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-              <h1 style={{ fontWeight: 900, fontSize: '1.4rem', color: '#0a0a0a' }}>Fase de acciones</h1>
-              <span style={{ fontSize: '0.75rem', color: '#666', background: '#f5f5f5', padding: '0.3rem 0.85rem', borderRadius: 999, border: '1px solid #e5e5e5' }}>
-                {confirmedCount}/{sessionGroups.length} equipos confirmados
-              </span>
-            </div>
+        <div style={{ flex: 1, padding: '1.5rem', overflow: 'auto', background: '#f5f5f5' }}>
 
-            {/* Team tabs */}
-            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-              {sessionGroups.map(g => {
-                const isActive = activeTeamTab === g
-                const isConf = teamConfirmations[g]?.confirmed
-                return (
-                  <button key={g} onClick={() => setActiveTeamTab(g)} style={{
-                    padding: '0.4rem 1rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600,
-                    background: isActive ? '#0a0a0a' : '#ffffff',
-                    color: isActive ? '#fff' : (isConf ? '#16a34a' : '#666'),
-                    border: `1px solid ${isActive ? '#0a0a0a' : (isConf ? '#bbf7d0' : '#e5e5e5')}`,
-                    cursor: 'pointer',
-                  }}>
-                    {isConf ? '✓ ' : ''}{g}
-                  </button>
-                )
-              })}
-            </div>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+            <h1 style={{ fontWeight: 900, fontSize: '1.4rem', color: '#0a0a0a' }}>Fase de acciones</h1>
+            <span style={{ fontSize: '0.75rem', color: '#666', background: '#fff', padding: '0.3rem 0.85rem', borderRadius: 999, border: '1px solid #e5e5e5' }}>
+              {confirmedCount}/{sessionGroups.length} equipos confirmados
+            </span>
+          </div>
 
-            {activeTeamTab && (() => {
-              const selected = teamSelections[activeTeamTab] || []
-              const conf = teamConfirmations[activeTeamTab]
-              const originalAvg = groupAvgTons[activeTeamTab]
-
+          {/* Team tabs */}
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+            {sessionGroups.map(g => {
+              const isActive = activeTeamTab === g
+              const isConf = teamConfirmations[g]?.confirmed
               return (
-                <div style={{ maxWidth: 680 }}>
-                  {/* Team header — current footprint + selection count */}
-                  <div style={{ background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '0.85rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-                    <div>
-                      <span style={{ fontSize: '0.68rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Huella actual</span>
-                      <div style={{ fontWeight: 900, fontSize: '1.35rem', color: '#0a0a0a', lineHeight: 1.1 }}>
+                <button key={g} onClick={() => setActiveTeamTab(g)} style={{
+                  padding: '0.4rem 1rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600,
+                  background: isActive ? '#0a0a0a' : '#ffffff',
+                  color: isActive ? '#fff' : (isConf ? '#16a34a' : '#666'),
+                  border: `1px solid ${isActive ? '#0a0a0a' : (isConf ? '#bbf7d0' : '#e5e5e5')}`,
+                  cursor: 'pointer',
+                }}>
+                  {isConf ? '✓ ' : ''}{g}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Two-column layout */}
+          {activeTeamTab && (() => {
+            const group = activeTeamTab
+            const conf = teamConfirmations[group]
+            const selected = teamSelections[group] || []
+            const originalAvg = groupAvgTons[group]
+
+            const groupMembers = ranking.filter(r => r.group === group)
+            const areaAvg = {}
+            ;['transport','energy','food','consumption','waste'].forEach(area => {
+              areaAvg[area] = groupMembers.length
+                ? groupMembers.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / groupMembers.length
+                : 0
+            })
+            const areaTotal = Object.values(areaAvg).reduce((s, v) => s + v, 0)
+            const AREA_COLORS_LOCAL = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
+            const AREA_LABELS_LOCAL = { transport: 'Transp.', energy: 'Hogar', food: 'Alim.', consumption: 'Cons.', waste: 'Digital' }
+
+            return (
+              <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '1rem', alignItems: 'start' }}>
+
+                {/* LEFT COLUMN — huella + acciones seleccionadas */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+
+                  {/* Huella actual card */}
+                  <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 16, padding: '1rem 1.25rem' }}>
+                    <p style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 0.5rem' }}>Huella actual del equipo</p>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: '0.75rem' }}>
+                      <span style={{ fontWeight: 900, fontSize: '2rem', color: '#0a0a0a', lineHeight: 1 }}>
                         {originalAvg != null ? `${originalAvg.toFixed(1)} t` : '–'}
-                      </div>
+                      </span>
+                      <span style={{ fontSize: '0.78rem', color: '#aaa' }}>CO₂/año · media</span>
                     </div>
-                    <div>
-                      <span style={{ fontSize: '0.68rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Acciones seleccionadas</span>
-                      <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#0a0a0a', lineHeight: 1.1 }}>{selected.length}</div>
-                    </div>
+                    {areaTotal > 0 && (
+                      <>
+                        <div style={{ display: 'flex', height: 12, borderRadius: 999, overflow: 'hidden', marginBottom: '0.6rem' }}>
+                          {['transport','energy','food','consumption','waste'].map(area => {
+                            const pct = areaTotal > 0 ? (areaAvg[area] / areaTotal) * 100 : 0
+                            if (pct < 0.5) return null
+                            return <div key={area} style={{ width: `${pct}%`, background: AREA_COLORS_LOCAL[area] }} />
+                          })}
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 12px' }}>
+                          {['transport','energy','food','consumption','waste'].map(area => {
+                            const pct = areaTotal > 0 ? Math.round((areaAvg[area] / areaTotal) * 100) : 0
+                            if (!pct) return null
+                            return (
+                              <div key={area} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#666' }}>
+                                <div style={{ width: 8, height: 8, borderRadius: 2, background: AREA_COLORS_LOCAL[area], flexShrink: 0 }} />
+                                {AREA_LABELS_LOCAL[area]} {pct}%
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </>
+                    )}
                   </div>
 
-                  {/* Selected actions */}
-                  {selected.length > 0 && (
-                    <div style={{ marginBottom: '1.25rem' }}>
-                      <div style={{ fontSize: '0.68rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
-                        Acciones elegidas
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  {/* Acciones seleccionadas card */}
+                  <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 16, padding: '1rem 1.25rem' }}>
+                    <p style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 0.75rem' }}>
+                      Acciones seleccionadas · {selected.length}
+                    </p>
+
+                    {selected.length === 0 ? (
+                      <p style={{ fontSize: '0.78rem', color: '#ccc', fontStyle: 'italic' }}>Sin acciones seleccionadas aún</p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '0.75rem' }}>
                         {selected.map(id => {
                           const a = ACTIONS.find(x => x.id === id)
                           if (!a) return null
                           return (
-                            <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: '10px', padding: '0.6rem 0.85rem' }}>
+                            <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f5f5f5', borderRadius: 10, padding: '0.5rem 0.75rem' }}>
                               <span style={{ fontSize: '1rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
-                              <span style={{ flex: 1, fontSize: '0.78rem', fontWeight: 600, color: '#0a0a0a' }}>{a.label}</span>
-                              <button onClick={() => handleToggleAction(activeTeamTab, id)} style={{ background: 'transparent', border: 'none', color: '#999', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: '0 0.15rem' }}>✕</button>
+                              <span style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</span>
+                              <button onClick={() => handleToggleAction(group, id)} style={{ background: 'transparent', border: 'none', color: '#bbb', cursor: 'pointer', fontSize: '0.9rem', padding: '0 2px' }}>✕</button>
                             </div>
                           )
                         })}
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Area filter */}
-                  <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                    {[{ id: 'all', label: 'Todas' }, ...['transport','energy','food','consumption','waste'].map(a => ({ id: a, label: `${AREA_EMOJI[a]} ${AREA_LABEL[a]}` }))].map(f => (
-                      <button key={f.id} onClick={() => setFilter3Area(f.id)} style={{
-                        padding: '0.25rem 0.75rem', borderRadius: 999, fontSize: '0.7rem', fontWeight: 600,
-                        background: filter3Area === f.id ? '#0a0a0a' : 'transparent',
-                        color: filter3Area === f.id ? '#fff' : '#666',
-                        border: `1px solid ${filter3Area === f.id ? '#0a0a0a' : '#e5e5e5'}`,
-                        cursor: 'pointer',
-                      }}>{f.label}</button>
-                    ))}
+                    <button
+                      onClick={() => handleConfirmTeam(group)}
+                      disabled={selected.length === 0}
+                      style={{
+                        width: '100%', padding: '0.85rem', borderRadius: 999, border: 'none',
+                        background: selected.length > 0 ? '#0a0a0a' : '#f0f0f0',
+                        color: selected.length > 0 ? '#fff' : '#aaa',
+                        fontWeight: 600, fontSize: '0.82rem',
+                        cursor: selected.length > 0 ? 'pointer' : 'default',
+                      }}
+                    >
+                      {conf?.confirmed ? '✓ Confirmar de nuevo' : `Confirmar acciones de ${group} →`}
+                    </button>
                   </div>
+                </div>
 
-                  {/* Available actions */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                    {ACTIONS.filter(a => filter3Area === 'all' || a.area === filter3Area).map(a => {
-                      const isSel = selected.includes(a.id)
+                {/* RIGHT COLUMN — filtros + listado de acciones */}
+                <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 16, padding: '1rem 1.25rem' }}>
+
+                  {/* Filtros por categoría */}
+                  <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                    {['transport','energy','food','consumption','waste'].map(area => {
+                      const labels = { transport: '🚗 Transporte', energy: '🏠 Hogar', food: '🥗 Alimentación', consumption: '🛍 Consumo', waste: '📱 Digital' }
+                      const colors = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
+                      const isActive = filter3Area === area
                       return (
-                        <div key={a.id}
-                          onClick={() => handleToggleAction(activeTeamTab, a.id)}
-                          style={{
-                            padding: '0.85rem 1rem', borderRadius: '12px', cursor: 'pointer',
-                            border: `1px solid ${isSel ? '#0a0a0a' : '#e5e5e5'}`,
-                            background: isSel ? '#f5f5f5' : '#ffffff',
-                            display: 'flex', alignItems: 'center', gap: '0.75rem',
-                            transition: 'all 0.15s ease',
-                          }}
-                        >
-                          <div style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, border: `2px solid ${isSel ? '#0a0a0a' : '#ccc'}`, background: isSel ? '#0a0a0a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {isSel && <span style={{ color: '#fff', fontSize: 11, fontWeight: 900, lineHeight: 1 }}>✓</span>}
-                          </div>
-                          <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
-                          <span style={{ flex: 1, fontSize: '0.8rem', fontWeight: isSel ? 600 : 400, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</span>
-                        </div>
+                        <button key={area} onClick={() => setFilter3Area(area === filter3Area ? 'all' : area)} style={{
+                          padding: '0.3rem 0.85rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 600,
+                          background: isActive ? colors[area] : 'transparent',
+                          color: isActive ? '#0a0a0a' : '#666',
+                          border: `1px solid ${isActive ? colors[area] : '#e5e5e5'}`,
+                          cursor: 'pointer',
+                        }}>
+                          {labels[area]}
+                        </button>
                       )
                     })}
                   </div>
 
-                  <button
-                    onClick={() => handleConfirmTeam(activeTeamTab)}
-                    disabled={selected.length === 0}
-                    style={{
-                      width: '100%', padding: '0.9rem', borderRadius: '999px', border: 'none',
-                      background: selected.length > 0 ? '#0a0a0a' : '#f5f5f5',
-                      color: selected.length > 0 ? '#fff' : '#999',
-                      fontWeight: 600, fontSize: '0.85rem', cursor: selected.length > 0 ? 'pointer' : 'default',
-                    }}
-                  >
-                    Confirmar acciones de {activeTeamTab} →
-                  </button>
+                  {/* Listado de acciones */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    {ACTIONS.filter(a => filter3Area === 'all' || a.area === filter3Area).map(a => {
+                      const isSel = selected.includes(a.id)
+                      return (
+                        <div key={a.id}
+                          onClick={() => handleToggleAction(group, a.id)}
+                          style={{
+                            padding: '0.75rem 1rem', borderRadius: 12, cursor: 'pointer',
+                            border: `1px solid ${isSel ? '#0a0a0a' : '#e5e5e5'}`,
+                            background: isSel ? '#f5f5f5' : '#fff',
+                            display: 'flex', alignItems: 'center', gap: '0.75rem',
+                          }}
+                        >
+                          <div style={{ width: 16, height: 16, borderRadius: 4, flexShrink: 0, border: `2px solid ${isSel ? '#0a0a0a' : '#ccc'}`, background: isSel ? '#0a0a0a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {isSel && <span style={{ color: '#fff', fontSize: 10, fontWeight: 900, lineHeight: 1 }}>✓</span>}
+                          </div>
+                          <span style={{ fontSize: '1rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
+                          <span style={{ flex: 1, fontSize: '0.82rem', fontWeight: isSel ? 600 : 400, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
-              )
-            })()}
 
-            {allConfirmed && (
-              <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e5e5' }}>
-                <button
-                  onClick={handleRevealStep3}
-                  style={{ width: '100%', maxWidth: 680, padding: '1rem', background: '#0a0a0a', color: '#fff', border: 'none', borderRadius: '999px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
-                >
-                  Revelar huella a todos los equipos →
-                </button>
               </div>
-            )}
-          </div>
+            )
+          })()}
+
+          {/* Reveal button — solo cuando todos confirmados */}
+          {allConfirmed && (
+            <div style={{ marginTop: '1.5rem' }}>
+              <button
+                onClick={handleRevealStep3}
+                style={{ width: '100%', padding: '1rem', background: '#0a0a0a', color: '#fff', border: 'none', borderRadius: 999, fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
+              >
+                Revelar huella a todos los equipos →
+              </button>
+            </div>
+          )}
+
         </div>
       )
     }
