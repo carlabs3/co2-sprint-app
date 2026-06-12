@@ -63,7 +63,12 @@ const SUBCATEGORIES = {
   transport: [
     {
       label: 'Vehículo privado',
-      calc: (answers) => ((MAP.car[answers.car] || 0) + (MAP.electricCar[answers.electricCar] || 0)) / 1000,
+      calc: (answers) => {
+        if (!answers.carKm || answers.carKm === 'km_e') return 0
+        return (answers.carType === 'electric'
+          ? (MAP.electricCar[answers.carKm] || 0)
+          : (MAP.carKm[answers.carKm] || 0)) / 1000
+      },
     },
     {
       label: 'Vuelos',
@@ -104,7 +109,7 @@ const SUBCATEGORIES = {
     {
       label: 'Extras (piscina y vacaciones)',
       calc: (answers) => {
-        const poolKg = (answers.pool?.includes('privatePool') ? 50 : 0) + (answers.pool?.includes('communityPool') ? 17 : 0)
+        const poolKg = MAP.pool?.[answers.pool] || 0
         const vacKg  = (answers.hotelNights   || 0) * 8 + (answers.hostelNights  || 0) + (answers.campingNights || 0) + (answers.airbnbNights || 0) * 5 + (answers.secondHome ? 250 : 0)
         return (poolKg + vacKg) / 1000
       },

@@ -338,7 +338,8 @@ export default function Step2Calculator() {
   }, [code, navigate]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function isSkipped(q) {
-    return q.id === 'electricCar' && answers.car === '1e'
+    if (q.showIf) return !q.showIf(answers)
+    return false
   }
 
   const area     = AREAS[areaIndex]

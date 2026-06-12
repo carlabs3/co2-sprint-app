@@ -8,8 +8,9 @@ const router = Router()
 // ── Calculator MAP (mirror of frontend/src/utils/calculator.js) ──────────────
 
 const MAP = {
-  car:           { '1a': 184, '1b': 797, '1c': 1839, '1d': 3677, '1e': 0 },
-  electricCar:   { 'a': 146, 'b': 775, 'c': 1550, 'd': 3600, 'e': 0 },
+  carKm:         { km_a: 184, km_b: 797, km_c: 1839, km_d: 3677, km_e: 0 },
+  electricCar:   { km_a: 146, km_b: 775, km_c: 1550, km_d: 3600, km_e: 0 },
+  pool:          { privatePool: 50, communityPool: 17, noPool: 0 },
   train:         { '3a': 21, '3b': 126, '3c': 630, '3d': 0 },
   moto:          { '4a': 11, '4b': 57, '4c': 228, '4d': 0 },
   urbanMobility: { '5a': 0, '5b': 2, '5c': 4, '5d': 5, '5e': 44 },
@@ -59,14 +60,14 @@ function calcAlcohol(alcohol = {}) {
 
 const SUBCATS = {
   transport: [
-    { label: 'Vehículo privado',            calc: (a) => (MAP.car[a.car] || 0) + (MAP.electricCar[a.electricCar] || 0) },
+    { label: 'Vehículo privado',            calc: (a) => !a.carKm || a.carKm === 'km_e' ? 0 : a.carType === 'electric' ? (MAP.electricCar[a.carKm] || 0) : (MAP.carKm[a.carKm] || 0) },
     { label: 'Vuelos',                       calc: (a) => (a.flights?.includes('flightShort') ? 824 : 0) + (a.flights?.includes('flightMedium') ? 1879 : 0) + (a.flights?.includes('flightLong') ? 2627 : 0) },
     { label: 'Transporte público y activo',  calc: (a) => (MAP.train[a.train] || 0) + (MAP.moto[a.moto] || 0) + (MAP.urbanMobility[a.urbanMobility] || 0) },
   ],
   energy: [
     { label: 'Calefacción y agua caliente',  calc: (a) => { const div = MAP.householdSize[a.householdSize] ?? 2; let h = 0; if (a.homeType === '25a') h = MAP.heatingSmall[a.heating] ?? 0; else if (a.homeType === '25b') h = MAP.heatingMedium[a.heating] ?? 0; else if (a.homeType === '25c') h = MAP.heatingLarge[a.heating] ?? 0; return h / div } },
     { label: 'Refrigeración',                calc: (a) => a.hasAC === 'yes' ? (a.homeType === '25a' ? 350 : a.homeType === '25b' ? 420 : 438) : 0 },
-    { label: 'Extras (piscina y vacaciones)', calc: (a) => (a.pool?.includes('privatePool') ? 50 : 0) + (a.pool?.includes('communityPool') ? 17 : 0) + (a.hotelNights || 0) * 8 + (a.hostelNights || 0) + (a.campingNights || 0) + (a.airbnbNights || 0) * 5 + (a.secondHome ? 250 : 0) },
+    { label: 'Extras (piscina y vacaciones)', calc: (a) => (MAP.pool?.[a.pool] || 0) + (a.hotelNights || 0) * 8 + (a.hostelNights || 0) + (a.campingNights || 0) + (a.airbnbNights || 0) * 5 + (a.secondHome ? 250 : 0) },
     { label: 'Energía renovable',            calc: (a) => MAP.renewable[a.renewable] ?? 0, negative: true },
     { label: 'Hábitos de eficiencia',        calc: (a) => ['closeWindows', 'thermostat19', 'ledBulbs', 'ecoPrograms'].filter(h => a.homeHabits?.includes(h)).reduce((s, h) => s + (MAP.homeHabits[h] || 0), 0), negative: true },
   ],

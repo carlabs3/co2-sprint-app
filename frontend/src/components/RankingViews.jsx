@@ -143,7 +143,7 @@ export const CATEGORY_LABELS = { bajo: 'BAJO', medio: 'MEDIO', alto: 'ALTO', 'mu
 
 const AREA_SUBCATEGORIES = {
   transport: [
-    { label: 'Vehículo privado',           keys: ['car', 'electricCar'] },
+    { label: 'Vehículo privado',           keys: ['carKm'] },
     { label: 'Vuelos',                      keys: ['flights'] },
     { label: 'Transporte público y activo', keys: ['train', 'moto', 'urbanMobility'] },
   ],
@@ -174,8 +174,12 @@ const AREA_SUBCATEGORIES = {
 function getContribution(answers, key) {
   if (!answers) return 0
   switch (key) {
-    case 'car':          return MAP.car[answers.car] || 0
-    case 'electricCar':  return MAP.electricCar[answers.electricCar] || 0
+    case 'carKm': {
+      if (!answers.carKm || answers.carKm === 'km_e') return 0
+      return answers.carType === 'electric'
+        ? (MAP.electricCar[answers.carKm] || 0)
+        : (MAP.carKm[answers.carKm] || 0)
+    }
     case 'flights':      return ((answers.flights?.includes('flightShort') ? 824 : 0) + (answers.flights?.includes('flightMedium') ? 1879 : 0) + (answers.flights?.includes('flightLong') ? 2627 : 0))
     case 'train':        return MAP.train[answers.train] || 0
     case 'moto':         return MAP.moto[answers.moto] || 0
@@ -189,7 +193,7 @@ function getContribution(answers, key) {
       return kg / div
     }
     case 'hasAC':        return answers.hasAC === 'yes' ? (MAP.householdSize[answers.householdSize] ? 350 / MAP.householdSize[answers.householdSize] : 175) : 0
-    case 'pool':         return answers.pool === 'yes' ? 200 : 0
+    case 'pool':         return MAP.pool?.[answers.pool] || 0
     case 'renewable':    return answers.renewable === 'yes' ? -300 : 0
     case 'homeHabits': {
       const h = Array.isArray(answers.homeHabits) ? answers.homeHabits : []

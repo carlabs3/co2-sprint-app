@@ -2,8 +2,8 @@ export const PUBLIC_SERVICES_KG = 1500
 
 export const MAP = {
   // ── TRANSPORTE ──
-  car:           { '1a': 184, '1b': 797, '1c': 1839, '1d': 3677, '1e': 0 },
-  electricCar:   { 'a': 146, 'b': 775, 'c': 1550, 'd': 3600, 'e': 0 },
+  carKm:         { km_a: 184, km_b: 797, km_c: 1839, km_d: 3677, km_e: 0 },
+  electricCar:   { km_a: 146, km_b: 775, km_c: 1550, km_d: 3600, km_e: 0 },
   train:         { '3a': 21, '3b': 126, '3c': 630, '3d': 0 },
   moto:          { '4a': 11, '4b': 57, '4c': 228, '4d': 0 },
   urbanMobility: { '5a': 0, '5b': 2, '5c': 4, '5d': 5, '5e': 44 },
@@ -14,7 +14,7 @@ export const MAP = {
   heatingLarge:  { '26a': 0, '26b': 781, '26c': 1219, '26d': 1787, '26e': 288, '26f': 469, '26g': 835 },
   renewable:     { 'a': -720, 'b': -200, 'c': 0 },
   householdSize: { '1': 1, '2': 2, '3': 3, '4': 4, '4+': 4 },
-  pool:          { privatePool: 50, communityPool: 17, noPool: 0 },
+  pool:          { privatePool: 50, communityPool: 17, noPool: 0 }, // single now
   homeHabits:    { closeWindows: -47, thermostat19: -47, ledBulbs: -4, ecoPrograms: -36, none: 0 },
 
   // ── ALIMENTACIÓN ──
@@ -70,12 +70,14 @@ function sum(key, vals) {
 
 export function calculator(answers) {
   // ── Transporte ──────────────────────────────────────────────────────────────
-  const carKg     = get('car', answers.car)
-  const evKg      = get('electricCar', answers.electricCar)
+  const carKg = answers.carKm === 'km_e' ? 0
+    : answers.carType === 'electric'
+      ? (MAP.electricCar[answers.carKm] ?? 0)
+      : (MAP.carKm[answers.carKm] ?? 0)
   const flightsKg = (answers.flights?.includes('flightShort')  ? 824  : 0)
                   + (answers.flights?.includes('flightMedium') ? 1879 : 0)
                   + (answers.flights?.includes('flightLong')   ? 2627 : 0)
-  const transportKg = carKg + evKg + flightsKg
+  const transportKg = carKg + flightsKg
     + get('train', answers.train)
     + get('moto', answers.moto)
     + get('urbanMobility', answers.urbanMobility)
@@ -96,7 +98,7 @@ export function calculator(answers) {
   }
 
   const renewableKg = MAP.renewable[answers.renewable] ?? 0
-  const poolKg      = sum('pool', answers.pool)
+  const poolKg      = get('pool', answers.pool)
 
   const housingKg = Math.max(0,
     (heatingKg / div) +

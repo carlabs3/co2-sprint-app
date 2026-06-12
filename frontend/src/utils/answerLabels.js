@@ -6,29 +6,26 @@ export const AREA_QUESTIONS = [
     areaColor: '#4a90d9',
     questions: [
       {
-        id: 'car',
-        text: '¿Qué distancia recorres en coche al año?',
+        id: 'carKm',
+        text: '¿Cuántos km haces en coche al año?',
         info: 'Cuenta los km que haces al trabajo, escapadas y vacaciones. Si compartes coche habitualmente, cuenta los km totales.',
         type: 'single',
         options: [
-          { value: '1a', label: 'Solo para vacaciones (menos de 3.000 km)' },
-          { value: '1b', label: 'Vacaciones y fines de semana (3.000–10.000 km)' },
-          { value: '1c', label: 'Vacaciones, trabajo y escapadas (10.000–20.000 km)' },
-          { value: '1d', label: 'Lo uso para todo, más de 20.000 km' },
-          { value: '1e', label: 'No tengo coche / no lo uso' },
+          { value: 'km_a', label: 'Solo para vacaciones (menos de 3.000 km)' },
+          { value: 'km_b', label: 'Vacaciones y fines de semana (3.000–10.000 km)' },
+          { value: 'km_c', label: 'Vacaciones, trabajo y escapadas (10.000–20.000 km)' },
+          { value: 'km_d', label: 'Lo uso para todo, más de 20.000 km' },
+          { value: 'km_e', label: 'No tengo coche / no lo uso' },
         ],
       },
       {
-        id: 'electricCar',
-        text: '¿Tienes coche eléctrico? ¿Cuántos km haces al año?',
-        info: 'El coche eléctrico emite menos CO₂ en uso, pero su fabricación (sobre todo la batería) tiene una huella importante. Aquí usamos el análisis de ciclo de vida completo.',
+        id: 'carType',
+        text: '¿Es eléctrico o de gasolina/diésel?',
         type: 'single',
+        showIf: (answers) => answers.carKm !== 'km_e',
         options: [
-          { value: 'a', label: 'Solo para vacaciones (menos de 3.000 km)' },
-          { value: 'b', label: 'Vacaciones y fines de semana (3.000–10.000 km)' },
-          { value: 'c', label: '10.000–20.000 km/año' },
-          { value: 'd', label: 'Más de 20.000 km' },
-          { value: 'e', label: 'No tengo coche eléctrico' },
+          { value: 'gasoline', label: 'Gasolina o diésel' },
+          { value: 'electric', label: 'Eléctrico' },
         ],
       },
       {
@@ -87,7 +84,7 @@ export const AREA_QUESTIONS = [
         type: 'single',
         isSensibilization: true,
         options: [
-          { value: 'never',   label: 'Nunca teletrabajo' },
+          { value: 'always',   label: 'Siempre teletrabajo' },
           { value: 'partial', label: '1–2 días/semana' },
           { value: 'mostly',  label: '3–5 días/semana (principalmente remoto)' },
           { value: 'na',      label: 'No aplica a mi trabajo' },
@@ -163,12 +160,11 @@ export const AREA_QUESTIONS = [
       {
         id: 'pool',
         text: '¿Tienes en casa...?',
-        type: 'multi',
-        noneValue: 'noPool',
+        type: 'single',
         options: [
           { value: 'privatePool',   label: 'Piscina privada' },
           { value: 'communityPool', label: 'Piscina comunitaria' },
-          { value: 'noPool',        label: 'Nada de esto' },
+          { value: 'noPool',        label: 'No tengo piscina' },
         ],
       },
       {
