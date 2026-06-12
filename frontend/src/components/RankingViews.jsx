@@ -465,7 +465,7 @@ export function DistributionView({ ranking }) {
             { label: 'Mínimo',        line: '2px dashed #22c55e',  box: null,      border: null },
             { label: 'Máximo',        line: '2px dashed #ef4444',  box: null,      border: null },
             { label: 'Media España',  line: '2px dashed #000',     box: null,      border: null },
-            { label: 'Más frecuente', line: null, box: '#fff',     border: `2px solid ${tab.color}` },
+            { label: 'Más frecuente', line: null, box: '#fff',     border: `2px solid ${activeTab === 'total' ? '#1a1a1a' : tab.color}` },
           ].map(({ label, line, box, border }) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
               {line
