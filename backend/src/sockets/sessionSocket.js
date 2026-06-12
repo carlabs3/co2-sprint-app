@@ -33,6 +33,20 @@ export function registerSocketHandlers(io) {
         const mapSize = sessionParticipants.get(code)?.size ?? 0
         const total = mapSize > 0 ? mapSize : await Participant.countDocuments({ sessionCode: code })
         socket.emit('participant:joined', { total })
+
+        // Send existing ranking so the facilitator recovers after refresh/reconnect
+        const existing = await FootprintResult.find({ sessionCode: code }).sort({ carbonTons: 1 })
+        if (existing.length > 0) {
+          const individual = existing.map(r => ({
+            name:     participantNames.get(r.participantId?.toString()) || 'Anónimo',
+            group:    r.group,
+            tons:     r.carbonTons,
+            category: r.category,
+            areas:    r.areas || {},
+            answers:  r.answers || {},
+          }))
+          socket.emit('ranking:update', { individual })
+        }
       } catch {}
     })
 
@@ -155,8 +169,18 @@ export function registerSocketHandlers(io) {
         if (participant?._id) {
           const existing = await FootprintResult.findOne({ sessionCode, participantId: participant._id })
           if (existing) {
-            // Already saved — confirm to client without updating (prevents duplicates)
+            // Already saved — confirm to client and broadcast current ranking (don't create duplicate)
             socket.emit('footprint:saved')
+            const allResults = await FootprintResult.find({ sessionCode }).sort({ carbonTons: 1 })
+            const individual = allResults.map(r => ({
+              name:     participantNames.get(r.participantId?.toString()) || 'Anónimo',
+              group:    r.group,
+              tons:     r.carbonTons,
+              category: r.category,
+              areas:    r.areas || {},
+              answers:  r.answers || {},
+            }))
+            io.to(sessionCode).emit('ranking:update', { individual })
             return
           }
           await FootprintResult.create({

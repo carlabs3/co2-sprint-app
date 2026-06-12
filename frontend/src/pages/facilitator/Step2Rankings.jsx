@@ -58,6 +58,7 @@ export default function Step2Rankings() {
         setRanking(items)
         setGroups(computeGroups(items))
         setTotalJoined(prev => Math.max(prev, items.length))
+        if (items.length > 0) { setShowRanking(true); setRevealed(true) }
       })
       .catch(() => {})
 
