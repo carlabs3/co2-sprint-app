@@ -86,7 +86,7 @@ export default function Step2Rankings() {
         const s = res.data
         setSessionStatus(s.status)
         setSessionGroups(s.groups || [])
-        if (s.resultsRevealed) { setRevealed(true); setShowRanking(true) }
+        if (s.resultsRevealed || s.status === 'closed') { setRevealed(true); setShowRanking(true) }
         if (s.step3Revealed)   setStep3Revealed(true)
         if (s.winnersRevealed) setWinnersRevealed(true)
         if (s.currentStep >= 3) { setStep3Started(true); setActiveStep(3) }
@@ -173,6 +173,7 @@ export default function Step2Rankings() {
   const completed   = ranking.length
   const total       = Math.max(totalJoined, completed)
   const progressPct = total > 0 ? Math.round((completed / total) * 100) : 0
+  const isClosed    = sessionStatus === 'closed'
 
   const confirmedCount      = sessionGroups.filter(g => teamConfirmations[g]?.confirmed).length
   const confirmedFinalCount = sessionGroups.filter(g => teamConfirmations[g]?.confirmedFinal).length
@@ -376,19 +377,21 @@ export default function Step2Rankings() {
                       </div>
                     )}
 
-                    <button
-                      onClick={() => handleConfirmTeam(group)}
-                      disabled={selected.length === 0}
-                      style={{
-                        width: '100%', padding: '0.85rem', borderRadius: 999, border: 'none',
-                        background: selected.length > 0 ? '#0a0a0a' : '#f0f0f0',
-                        color: selected.length > 0 ? '#fff' : '#aaa',
-                        fontWeight: 600, fontSize: '0.82rem',
-                        cursor: selected.length > 0 ? 'pointer' : 'default',
-                      }}
-                    >
-                      {conf?.confirmed ? '✓ Confirmar de nuevo' : `Confirmar acciones de ${group} →`}
-                    </button>
+                    {!isClosed && (
+                      <button
+                        onClick={() => handleConfirmTeam(group)}
+                        disabled={selected.length === 0}
+                        style={{
+                          width: '100%', padding: '0.85rem', borderRadius: 999, border: 'none',
+                          background: selected.length > 0 ? '#0a0a0a' : '#f0f0f0',
+                          color: selected.length > 0 ? '#fff' : '#aaa',
+                          fontWeight: 600, fontSize: '0.82rem',
+                          cursor: selected.length > 0 ? 'pointer' : 'default',
+                        }}
+                      >
+                        {conf?.confirmed ? '✓ Confirmar de nuevo' : `Confirmar acciones de ${group} →`}
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -451,7 +454,7 @@ export default function Step2Rankings() {
             )
           })()}
 
-          {allConfirmed && !step3Revealed && (
+          {allConfirmed && !step3Revealed && !isClosed && (
             <div style={{ marginTop: '1.5rem' }}>
               <button
                 onClick={handleRevealStep3}
@@ -651,7 +654,7 @@ export default function Step2Rankings() {
               </div>
             )}
 
-            {!winnersRevealed && step3Data.allConfirmedFinal && (
+            {!winnersRevealed && step3Data.allConfirmedFinal && !isClosed && (
               <button
                 onClick={handleRevealWinners}
                 style={{ width: '100%', marginTop: '1.5rem', padding: '0.9rem', background: '#0a0a0a', color: '#fff', border: 'none', borderRadius: '999px', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer' }}
@@ -729,7 +732,7 @@ export default function Step2Rankings() {
             Calculadora activa
           </button>
 
-          {revealed && !step3Started && (
+          {revealed && !step3Started && !isClosed && (
             <button
               onClick={() => { setActiveStep(3); handleStartStep3() }}
               style={{ width: '100%', background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.85rem', fontSize: '0.78rem', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' }}
@@ -764,7 +767,7 @@ export default function Step2Rankings() {
             </div>
           </div>
 
-          {!step3Revealed && allConfirmed && (
+          {!step3Revealed && allConfirmed && !isClosed && (
             <button
               onClick={handleRevealStep3}
               style={{ width: '100%', background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: 999, cursor: 'pointer' }}
@@ -780,9 +783,15 @@ export default function Step2Rankings() {
         </>
       )}
 
-      <button onClick={handleClose} style={{ width: '100%', background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.7rem', fontSize: '0.72rem', fontWeight: 600, borderRadius: '999px', marginTop: 'auto', cursor: 'pointer' }}>
-        Cerrar sesión
-      </button>
+      {isClosed ? (
+        <div style={{ width: '100%', textAlign: 'center', fontSize: '0.72rem', color: '#aaa', marginTop: 'auto', padding: '0.5rem 0' }}>
+          Sesión cerrada
+        </div>
+      ) : (
+        <button onClick={handleClose} style={{ width: '100%', background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.7rem', fontSize: '0.72rem', fontWeight: 600, borderRadius: '999px', marginTop: 'auto', cursor: 'pointer' }}>
+          Cerrar sesión
+        </button>
+      )}
     </div>
   )
 
