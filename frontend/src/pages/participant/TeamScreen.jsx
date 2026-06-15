@@ -325,24 +325,36 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
     .filter(Boolean)
     .sort((a, b) => b.co2Reduction - a.co2Reduction)
 
-  const StackedBar = ({ areaAvg, total, maxVal, label, color = '#0a0a0a' }) => (
-    <div style={{ marginBottom: 6 }}>
+  const StackedBar = ({ areaAvg, total, maxVal, label, color = '#0a0a0a', showLegend = false }) => (
+    <div style={{ marginBottom: showLegend ? 12 : 6 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
         <span style={{ fontSize: 11, color: '#888' }}>{label}</span>
         <span style={{ fontSize: 11, fontWeight: 700, color }}>{total.toFixed(1)} t</span>
       </div>
-      <div style={{ height: 18, background: '#f5f5f5', borderRadius: 4, overflow: 'hidden', display: 'flex', marginBottom: 6 }}>
+      <div style={{ height: 18, background: '#f5f5f5', borderRadius: 4, overflow: 'hidden', display: 'flex', marginBottom: showLegend ? 6 : 6 }}>
         {AREA_ORDER.map(area => {
           const pct = maxVal > 0 ? (areaAvg[area] / maxVal) * 100 : 0
           if (pct < 0.1) return null
           return <div key={area} style={{ width: `${pct}%`, background: COLORS[area] }} />
         })}
       </div>
+      {showLegend && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {AREA_META.filter(a => (areaAvg[a.key] || 0) > 0.001).map(a => {
+            const areaPct = total > 0 ? Math.round((areaAvg[a.key] / total) * 100) : 0
+            return (
+              <div key={a.key} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.68rem' }}>
+                <div style={{ width: 7, height: 7, borderRadius: 2, background: a.color, flexShrink: 0 }} />
+                <span style={{ color: '#555', flex: 1 }}>{a.label}</span>
+                <span style={{ fontWeight: 700, color: '#333' }}>{(areaAvg[a.key] || 0).toFixed(1)} t</span>
+                <span style={{ color: '#bbb', minWidth: 28, textAlign: 'right' }}>{areaPct}%</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
-
-  const catNew    = getCategory(newCarbonTons)
-  const catCfgNew = CATEGORY_CONFIG[catNew]
 
   return (
     <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', flexDirection: 'column' }}>
@@ -350,29 +362,40 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
 
       {/* Header oscuro */}
       {showValues ? (
-        <div style={{ background: '#0a0a0a', color: '#fff', padding: '2.5rem 2rem 3rem', textAlign: 'center' }}>
-          <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.45, margin: '0 0 0.9rem' }}>
+        <div style={{ background: '#0a0a0a', color: '#fff', padding: 'clamp(1.25rem, 4vw, 2.5rem) clamp(1rem, 4vw, 3rem)', textAlign: 'center' }}>
+          <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.45, margin: '0 0 1.25rem' }}>
             Huella media · {group}
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 7vw, 4rem)', lineHeight: 1 }}>
-              {teamAvg.toFixed(1)}
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(1.5rem, 5vw, 4rem)', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {/* Antes */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+              <div style={{ background: 'rgba(255,255,255,0.18)', padding: '0.25rem 0.75rem', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
+                {CATEGORY_CONFIG[getCategory(teamAvg)].label}
+              </div>
+              <span style={{ fontWeight: 900, fontSize: 'clamp(2.8rem, 8vw, 5rem)', lineHeight: 1 }}>
+                {teamAvg.toFixed(1)}
+              </span>
+              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>t CO₂/año</span>
+            </div>
+            {/* Centro — reducción + flecha */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#4ade80' }}>
+              <span style={{ fontSize: 'clamp(0.85rem, 2vw, 1rem)', fontWeight: 700, color: '#4ade80' }}>
                 −{(totalReduction / 1000).toFixed(3)} t
               </span>
-              <span style={{ fontSize: 'clamp(1.2rem, 3vw, 1.8rem)', color: '#555', lineHeight: 1 }}>→</span>
+              <span style={{ fontSize: '1.5rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1 }}>→</span>
             </div>
-            <span style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 7vw, 4rem)', lineHeight: 1, color: '#4ade80' }}>
-              {newCarbonTons.toFixed(1)}
-            </span>
+            {/* Después */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+              <div style={{ background: 'rgba(255,255,255,0.18)', padding: '0.25rem 0.75rem', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
+                {CATEGORY_CONFIG[getCategory(newCarbonTons)].label}
+              </div>
+              <span style={{ fontWeight: 900, fontSize: 'clamp(2.8rem, 8vw, 5rem)', lineHeight: 1, color: '#4ade80' }}>
+                {newCarbonTons.toFixed(1)}
+              </span>
+              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>t CO₂/año</span>
+            </div>
           </div>
-          <p style={{ fontSize: '0.75rem', opacity: 0.5, margin: '0.4rem 0 0', textTransform: 'uppercase', letterSpacing: '0.08em' }}>t CO₂/año</p>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: '0.9rem', background: 'rgba(255,255,255,0.18)', padding: '0.35rem 0.9rem', borderRadius: 4, fontSize: '0.8rem', fontWeight: 700 }}>
-            {catCfgNew.label}
-          </div>
-          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.5rem' }}>
+          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginTop: '1rem' }}>
             {teamResults.length} miembro{teamResults.length !== 1 ? 's' : ''} han completado
           </div>
         </div>
@@ -392,27 +415,19 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
 
       {/* Body */}
       {showValues ? (
-        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', maxWidth: 960, margin: '0 auto', padding: '1.5rem', alignItems: 'start', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(0.5rem, 2vw, 1.25rem)', maxWidth: 960, margin: '0 auto', padding: 'clamp(0.75rem, 3vw, 1.5rem)', alignItems: 'start', width: '100%', boxSizing: 'border-box' }}>
 
           {/* Columna izquierda — desglose antes/después */}
           <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 14, padding: '1.25rem' }}>
             <p style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#aaa', margin: '0 0 1rem' }}>
               Desglose por áreas
             </p>
-            <StackedBar areaAvg={areaAvgBefore} total={teamAvg}       maxVal={teamAvg} label="Antes"   color="#1a1a1a" />
-            <StackedBar areaAvg={areaAvgAfter}  total={newCarbonTons} maxVal={teamAvg} label="Después" color="#4ade80" />
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 12px', marginTop: '0.75rem' }}>
-              {AREA_META.map(a => (
-                <div key={a.key} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#666' }}>
-                  <div style={{ width: 8, height: 8, borderRadius: 2, background: a.color, flexShrink: 0 }} />
-                  {a.label}
-                </div>
-              ))}
-            </div>
+            <StackedBar areaAvg={areaAvgBefore} total={teamAvg}       maxVal={teamAvg} label="Antes"   color="#1a1a1a" showLegend />
+            <StackedBar areaAvg={areaAvgAfter}  total={newCarbonTons} maxVal={teamAvg} label="Después" color="#4ade80" showLegend />
           </div>
 
           {/* Columna derecha — acciones con reducción */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.75rem', alignContent: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.75rem', alignContent: 'start' }}>
             {sortedActions.map(action => (
               <div key={action.id} style={{ display: 'flex', flexDirection: 'column', borderRadius: 10, border: '1px solid #e5e5e5', background: '#fff', overflow: 'hidden' }}>
                 <img
@@ -422,10 +437,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
                   onError={e => { e.currentTarget.style.display = 'none' }}
                 />
                 <div style={{ padding: '0.6rem 0.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginBottom: '0.3rem' }}>
-                    <span style={{ fontSize: '1rem', flexShrink: 0 }}>{AREA_EMOJI[action.area]}</span>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{action.label}</span>
-                  </div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, marginBottom: '0.3rem' }}>{action.label}</div>
                   <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#16a34a' }}>
                     −{(action.co2Reduction / 1000).toFixed(3)} t
                   </div>
