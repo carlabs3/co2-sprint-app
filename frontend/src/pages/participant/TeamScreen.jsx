@@ -462,7 +462,6 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
                 onError={e => { e.currentTarget.style.display = 'none' }}
               />
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0.85rem 1rem' }}>
-                <span style={{ fontSize: '1.4rem', flexShrink: 0 }}>{AREA_EMOJI[action.area]}</span>
                 <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, textAlign: 'left' }}>{action.label}</span>
                 {showValues ? (
                   <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>

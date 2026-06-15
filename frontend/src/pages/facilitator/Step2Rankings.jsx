@@ -341,7 +341,6 @@ export default function Step2Rankings() {
                           if (!a) return null
                           return (
                             <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f5f5f5', borderRadius: 10, padding: '0.5rem 0.75rem' }}>
-                              <span style={{ fontSize: '1rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
                               <span style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</span>
                               <button onClick={() => handleToggleAction(group, id)} style={{ background: 'transparent', border: 'none', color: '#bbb', cursor: 'pointer', fontSize: '0.9rem', padding: '0 2px' }}>✕</button>
                             </div>
@@ -413,7 +412,6 @@ export default function Step2Rankings() {
                             onError={e => { e.currentTarget.style.display = 'none' }}
                           />
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.6rem 0.75rem' }}>
-                            <span style={{ fontSize: '1rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
                             <span style={{ flex: 1, fontSize: '0.82rem', fontWeight: isSel ? 600 : 400, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</span>
                           </div>
                         </div>
@@ -583,7 +581,6 @@ export default function Step2Rankings() {
                     />
                     <div style={{ padding: '0.6rem 0.75rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: '1rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
                         <span style={{ flex: 1, fontSize: '0.78rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{a.label}</span>
                         <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>−{(a.co2Reduction / 1000).toFixed(1)} t</span>
                       </div>
