@@ -341,79 +341,127 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
     </div>
   )
 
+  const catNew    = getCategory(newCarbonTons)
+  const catCfgNew = CATEGORY_CONFIG[catNew]
+
   return (
     <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', flexDirection: 'column' }}>
       <Navbar group={group} />
 
-      {/* Header oscuro — huella actual */}
-      <div style={{ background: '#000000', padding: '2.5rem 2rem 3rem', textAlign: 'center', color: '#fff' }}>
-        <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.5, margin: '0 0 0.6rem' }}>
-          Huella actual del equipo
-        </p>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <span style={{ fontWeight: 900, fontSize: 'clamp(3.5rem, 10vw, 5.5rem)', lineHeight: 1 }}>
-            {teamAvg.toFixed(1)}
-          </span>
-          <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>t CO₂/año</span>
-        </div>
-      </div>
-
-      {/* Body — acciones confirmadas */}
-      <div style={{ flex: 1, padding: '2.5rem 3rem', textAlign: 'center' }}>
-        <p style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#aaa', marginBottom: '1.25rem' }}>
-          Acciones confirmadas para vuestro equipo
-        </p>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', maxWidth: 900, margin: '0 auto' }}>
-          {sortedActions.map(action => (
-            <div key={action.id} style={{
-              display: 'flex', flexDirection: 'column',
-              borderRadius: 14, border: '1px solid #e5e5e5', background: '#fff',
-              overflow: 'hidden',
-            }}>
-              <img
-                src={action.image}
-                alt=""
-                style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: '14px 14px 0 0', display: 'block' }}
-                onError={e => { e.currentTarget.style.display = 'none' }}
-              />
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0.85rem 1rem' }}>
-                <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, textAlign: 'left' }}>{action.label}</span>
-                {showValues ? (
-                  <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>
-                    −{(action.co2Reduction / 1000).toFixed(1)} t
-                  </span>
-                ) : (
-                  <span style={{ fontSize: '0.85rem', color: '#ccc', flexShrink: 0 }}>···</span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {showValues && (
-          <div style={{ marginTop: '2rem', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 16, padding: '1.25rem 1.5rem', maxWidth: 900 }}>
-            <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              <div>
-                <p style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 0.25rem' }}>Reducción total</p>
-                <span style={{ fontWeight: 900, fontSize: '1.75rem', color: '#16a34a' }}>−{(totalReduction / 1000).toFixed(1)} t</span>
-              </div>
-              <div>
-                <p style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 0.25rem' }}>Nueva huella estimada</p>
-                <span style={{ fontWeight: 900, fontSize: '1.75rem', color: '#1a1a1a' }}>{newCarbonTons.toFixed(1)} t</span>
-              </div>
-            </div>
-            <StackedBar areaAvg={areaAvgBefore} total={teamAvg}       maxVal={teamAvg} label="Antes"   color="#1a1a1a" />
-            <StackedBar areaAvg={areaAvgAfter}  total={newCarbonTons} maxVal={teamAvg} label="Después" color="#16a34a" />
-          </div>
-        )}
-
-        {!showValues && sortedActions.length > 0 && (
-          <p style={{ fontSize: '0.82rem', color: '#aaa', marginTop: '1.5rem', fontStyle: 'italic' }}>
-            El facilitador revelará los valores en breve
+      {/* Header oscuro */}
+      {showValues ? (
+        <div style={{ background: '#0a0a0a', color: '#fff', padding: '2.5rem 2rem 3rem', textAlign: 'center' }}>
+          <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.45, margin: '0 0 0.9rem' }}>
+            Huella media · {group}
           </p>
-        )}
-      </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 7vw, 4rem)', lineHeight: 1 }}>
+              {teamAvg.toFixed(1)}
+            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#4ade80' }}>
+                −{(totalReduction / 1000).toFixed(3)} t
+              </span>
+              <span style={{ fontSize: 'clamp(1.2rem, 3vw, 1.8rem)', color: '#555', lineHeight: 1 }}>→</span>
+            </div>
+            <span style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 7vw, 4rem)', lineHeight: 1, color: '#4ade80' }}>
+              {newCarbonTons.toFixed(1)}
+            </span>
+          </div>
+          <p style={{ fontSize: '0.75rem', opacity: 0.5, margin: '0.4rem 0 0', textTransform: 'uppercase', letterSpacing: '0.08em' }}>t CO₂/año</p>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: '0.9rem', background: 'rgba(255,255,255,0.18)', padding: '0.35rem 0.9rem', borderRadius: 4, fontSize: '0.8rem', fontWeight: 700 }}>
+            {catCfgNew.label}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.5rem' }}>
+            {teamResults.length} miembro{teamResults.length !== 1 ? 's' : ''} han completado
+          </div>
+        </div>
+      ) : (
+        <div style={{ background: '#000000', padding: '2.5rem 2rem 3rem', textAlign: 'center', color: '#fff' }}>
+          <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.5, margin: '0 0 0.6rem' }}>
+            Huella actual del equipo
+          </p>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <span style={{ fontWeight: 900, fontSize: 'clamp(3.5rem, 10vw, 5.5rem)', lineHeight: 1 }}>
+              {teamAvg.toFixed(1)}
+            </span>
+            <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>t CO₂/año</span>
+          </div>
+        </div>
+      )}
+
+      {/* Body */}
+      {showValues ? (
+        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', maxWidth: 960, margin: '0 auto', padding: '1.5rem', alignItems: 'start', width: '100%', boxSizing: 'border-box' }}>
+
+          {/* Columna izquierda — desglose antes/después */}
+          <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 14, padding: '1.25rem' }}>
+            <p style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#aaa', margin: '0 0 1rem' }}>
+              Desglose por áreas
+            </p>
+            <StackedBar areaAvg={areaAvgBefore} total={teamAvg}       maxVal={teamAvg} label="Antes"   color="#1a1a1a" />
+            <StackedBar areaAvg={areaAvgAfter}  total={newCarbonTons} maxVal={teamAvg} label="Después" color="#4ade80" />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 12px', marginTop: '0.75rem' }}>
+              {AREA_META.map(a => (
+                <div key={a.key} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#666' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: 2, background: a.color, flexShrink: 0 }} />
+                  {a.label}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Columna derecha — acciones con reducción */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.75rem', alignContent: 'start' }}>
+            {sortedActions.map(action => (
+              <div key={action.id} style={{ display: 'flex', flexDirection: 'column', borderRadius: 10, border: '1px solid #e5e5e5', background: '#fff', overflow: 'hidden' }}>
+                <img
+                  src={action.image}
+                  alt=""
+                  style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: '10px 10px 0 0', display: 'block' }}
+                  onError={e => { e.currentTarget.style.display = 'none' }}
+                />
+                <div style={{ padding: '0.6rem 0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginBottom: '0.3rem' }}>
+                    <span style={{ fontSize: '1rem', flexShrink: 0 }}>{AREA_EMOJI[action.area]}</span>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{action.label}</span>
+                  </div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#16a34a' }}>
+                    −{(action.co2Reduction / 1000).toFixed(3)} t
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div style={{ flex: 1, padding: '2.5rem 3rem', textAlign: 'center' }}>
+          <p style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#aaa', marginBottom: '1.25rem' }}>
+            Acciones confirmadas para vuestro equipo
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', maxWidth: 900, margin: '0 auto' }}>
+            {sortedActions.map(action => (
+              <div key={action.id} style={{ display: 'flex', flexDirection: 'column', borderRadius: 14, border: '1px solid #e5e5e5', background: '#fff', overflow: 'hidden' }}>
+                <img
+                  src={action.image}
+                  alt=""
+                  style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: '14px 14px 0 0', display: 'block' }}
+                  onError={e => { e.currentTarget.style.display = 'none' }}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0.85rem 1rem' }}>
+                  <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, textAlign: 'left' }}>{action.label}</span>
+                  <span style={{ fontSize: '0.85rem', color: '#ccc', flexShrink: 0 }}>···</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          {sortedActions.length > 0 && (
+            <p style={{ fontSize: '0.82rem', color: '#aaa', marginTop: '1.5rem', fontStyle: 'italic' }}>
+              El facilitador revelará los valores en breve
+            </p>
+          )}
+        </div>
+      )}
     </div>
   )
 }
