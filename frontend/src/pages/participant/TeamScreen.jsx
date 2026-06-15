@@ -100,53 +100,31 @@ function WaitingPhase({ group }) {
 }
 
 // ── Phase 2: Calculating ──────────────────────────────────────────────────────
-function CalculatingPhase({ group, teamResults, teamJoined }) {
-  const completed = teamResults.length
-  const total     = Math.max(completed, teamJoined)
+function CalculatingPhase({ group, teamResults }) {
+  const teamAvg = teamResults.length ? mean(teamResults.map(r => r.tons)) : null
 
   return (
     <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', flexDirection: 'column' }}>
       <Navbar group={group} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem 2rem', textAlign: 'center' }}>
-        <p style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: '#bbb', marginBottom: '1.25rem' }}>
-          Calculando la huella del equipo
-        </p>
-
-        <div style={{ fontWeight: 900, fontSize: 'clamp(5rem, 16vw, 10rem)', lineHeight: 1, color: '#0a0a0a', letterSpacing: '-0.03em', marginBottom: '0.5rem' }}>
-          {total > 0 ? `${completed}/${total}` : completed || '–'}
-        </div>
-        <p style={{ fontSize: '1rem', color: '#888', marginBottom: '2.5rem' }}>
-          miembros han completado la calculadora
-        </p>
-
-        {total > 0 && (
-          <div style={{ width: '100%', maxWidth: 420, height: 8, background: '#e5e5e5', borderRadius: 4, overflow: 'hidden', marginBottom: '3rem' }}>
-            <div style={{
-              height: '100%',
-              width: `${Math.min((completed / total) * 100, 100)}%`,
-              background: completed >= total ? '#0a0a0a' : '#0a0a0a',
-              borderRadius: 4, transition: 'width 0.6s ease',
-            }} />
-          </div>
-        )}
-
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.6rem', maxWidth: 560 }}>
-          {teamResults.map((r, i) => (
-            <div key={i} style={{ padding: '0.5rem 1.2rem', borderRadius: 999, background: '#f5f5f5', border: '1px solid #e5e5e5', color: '#0a0a0a', fontSize: '0.85rem', fontWeight: 700 }}>
-              ✓ {r.name && r.name !== 'Anónimo' ? r.name : `Miembro ${i + 1}`}
+        {teamAvg === null ? (
+          <>
+            <p style={{ fontSize: '1rem', color: '#888', marginBottom: '2rem', maxWidth: 360, lineHeight: 1.6 }}>
+              Esperando a que los miembros del equipo calculen su huella
+            </p>
+            <DotsLoader />
+          </>
+        ) : (
+          <>
+            <p style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: '#bbb', marginBottom: '1.25rem' }}>
+              Huella media del equipo · en curso
+            </p>
+            <div style={{ fontWeight: 900, fontSize: 'clamp(5rem, 16vw, 10rem)', lineHeight: 1, color: '#0a0a0a', letterSpacing: '-0.03em', marginBottom: '0.5rem' }}>
+              {teamAvg.toFixed(1)}
             </div>
-          ))}
-          {Array.from({ length: Math.max(0, total - completed) }).map((_, i) => (
-            <div key={`p${i}`} style={{ padding: '0.5rem 1.2rem', borderRadius: 999, background: '#fff', border: '1px solid #e5e5e5', color: '#ccc', fontSize: '0.85rem', fontWeight: 600 }}>
-              Esperando...
-            </div>
-          ))}
-        </div>
-
-        {completed > 0 && (
-          <p style={{ fontSize: '0.75rem', color: '#ccc', marginTop: '2rem', fontStyle: 'italic' }}>
-            Los resultados se revelarán cuando el facilitador lo indique
-          </p>
+            <p style={{ fontSize: '1rem', color: '#aaa', marginBottom: '2.5rem' }}>t CO₂/año</p>
+            <DotsLoader />
+          </>
         )}
       </div>
     </div>

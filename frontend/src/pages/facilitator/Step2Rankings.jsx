@@ -9,6 +9,25 @@ import {
   computeGroups,
 } from '../../components/RankingViews.jsx'
 
+function DotsLoader({ color = '#0a0a0a' }) {
+  return (
+    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+      {[0, 1, 2].map(i => (
+        <div key={i} style={{
+          width: 10, height: 10, borderRadius: '50%', background: color,
+          animation: `tmdot 1.2s ease-in-out ${i * 0.2}s infinite`,
+        }} />
+      ))}
+      <style>{`
+        @keyframes tmdot {
+          0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+          40%            { opacity: 1;   transform: scale(1); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
 export default function Step2Rankings() {
   const { code } = useParams()
   const navigate = useNavigate()
@@ -781,20 +800,9 @@ export default function Step2Rankings() {
           </div>
         </div>
       ) : (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2.5rem' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontWeight: 900, fontSize: 'clamp(5rem, 12vw, 9rem)', lineHeight: 1, color: '#0a0a0a', letterSpacing: '-0.02em' }}>
-              {total === 0 ? '–' : `${completed}/${total}`}
-            </div>
-            <div style={{ fontSize: '0.85rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '0.75rem' }}>
-              {total === 0 ? 'Esperando respuestas...' : completed === total && total > 0 ? 'Todos han completado' : 'han completado la calculadora'}
-            </div>
-            {total > 0 && (
-              <div style={{ height: 6, background: '#e5e5e5', borderRadius: 3, overflow: 'hidden', width: 260, margin: '1.5rem auto 0' }}>
-                <div style={{ height: '100%', width: `${progressPct}%`, background: completed >= total ? '#0a0a0a' : '#666', borderRadius: 3, transition: 'width 0.5s ease' }} />
-              </div>
-            )}
-          </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', padding: '2.5rem' }}>
+          <p style={{ fontSize: '1rem', color: '#888', margin: 0 }}>Esperando resultados...</p>
+          <DotsLoader color="#aaa" />
         </div>
       )}
     </div>
