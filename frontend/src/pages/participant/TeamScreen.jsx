@@ -328,10 +328,10 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
   const StackedBar = ({ areaAvg, total, maxVal, label, color = '#0a0a0a', showLegend = false }) => (
     <div style={{ marginBottom: showLegend ? 12 : 6 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-        <span style={{ fontSize: 11, color: '#888' }}>{label}</span>
-        <span style={{ fontSize: 11, fontWeight: 700, color }}>{total.toFixed(1)} t</span>
+        <span style={{ fontSize: '0.85rem', color: '#888' }}>{label}</span>
+        <span style={{ fontSize: '0.85rem', fontWeight: 700, color }}>{total.toFixed(1)} t</span>
       </div>
-      <div style={{ height: 18, background: '#f5f5f5', borderRadius: 4, overflow: 'hidden', display: 'flex', marginBottom: showLegend ? 6 : 6 }}>
+      <div style={{ height: 28, background: '#f5f5f5', borderRadius: 4, overflow: 'hidden', display: 'flex', marginBottom: showLegend ? 8 : 6 }}>
         {AREA_ORDER.map(area => {
           const pct = maxVal > 0 ? (areaAvg[area] / maxVal) * 100 : 0
           if (pct < 0.1) return null
@@ -339,15 +339,15 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
         })}
       </div>
       {showLegend && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px 1rem', marginTop: 4 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px', marginTop: 4 }}>
           {AREA_META.filter(a => (areaAvg[a.key] || 0) > 0.001).map(a => {
             const areaPct = total > 0 ? Math.round((areaAvg[a.key] / total) * 100) : 0
             return (
-              <div key={a.key} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.78rem' }}>
-                <div style={{ width: 7, height: 7, borderRadius: 2, background: a.color, flexShrink: 0 }} />
-                <span style={{ color: '#555' }}>{a.label}</span>
-                <span style={{ fontWeight: 700, color: '#333' }}>{(areaAvg[a.key] || 0).toFixed(1)}t</span>
-                <span style={{ color: '#bbb' }}>{areaPct}%</span>
+              <div key={a.key} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <div style={{ width: 10, height: 10, borderRadius: 2, background: a.color, flexShrink: 0 }} />
+                <span style={{ fontSize: '0.82rem', color: '#555' }}>{a.label}</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#333' }}>{(areaAvg[a.key] || 0).toFixed(1)}t</span>
+                <span style={{ fontSize: '0.82rem', color: '#aaa' }}>{areaPct}%</span>
               </div>
             )
           })}
@@ -415,7 +415,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
 
       {/* Body */}
       {showValues ? (
-        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '350px 1fr', gap: 'clamp(0.5rem, 2vw, 1.25rem)', maxWidth: 1200, margin: '0 auto', padding: 'clamp(0.75rem, 2vw, 1.25rem)', alignItems: 'start', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1.8fr', gap: 'clamp(0.5rem, 2vw, 1.25rem)', maxWidth: 1200, margin: '0 auto', padding: 'clamp(0.75rem, 2vw, 1.25rem)', alignItems: 'start', width: '100%', boxSizing: 'border-box' }}>
 
           {/* Columna izquierda — desglose antes/después */}
           <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 14, padding: '1.25rem' }}>
