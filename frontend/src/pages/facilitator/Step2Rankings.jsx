@@ -335,14 +335,22 @@ export default function Step2Rankings() {
                     {selected.length === 0 ? (
                       <p style={{ fontSize: '0.78rem', color: '#ccc', fontStyle: 'italic' }}>Sin acciones seleccionadas aún</p>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '0.75rem' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.6rem', marginBottom: '0.75rem' }}>
                         {selected.map(id => {
                           const a = ACTIONS.find(x => x.id === id)
                           if (!a) return null
                           return (
-                            <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f5f5f5', borderRadius: 10, padding: '0.5rem 0.75rem' }}>
-                              <span style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</span>
-                              <button onClick={() => handleToggleAction(group, id)} style={{ background: 'transparent', border: 'none', color: '#bbb', cursor: 'pointer', fontSize: '0.9rem', padding: '0 2px' }}>✕</button>
+                            <div key={id} style={{ position: 'relative', display: 'flex', flexDirection: 'column', borderRadius: 10, border: '1px solid #e5e5e5', background: '#fff', overflow: 'hidden' }}>
+                              <img
+                                src={a.image}
+                                alt=""
+                                style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', display: 'block', borderRadius: '10px 10px 0 0', filter: 'grayscale(100%)' }}
+                                onError={e => { e.currentTarget.style.display = 'none' }}
+                              />
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.6rem 0.75rem' }}>
+                                <span style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</span>
+                                <button onClick={() => handleToggleAction(group, id)} style={{ background: 'transparent', border: 'none', color: '#bbb', cursor: 'pointer', fontSize: '0.9rem', padding: '0 2px' }}>✕</button>
+                              </div>
                             </div>
                           )
                         })}
@@ -457,6 +465,13 @@ export default function Step2Rankings() {
   // ── Step3Results helper ───────────────────────────────────────────────────────
   function Step3Results({ step3Data, ranking, sessionGroups }) {
     const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste']
+
+    function getCategory(tons) {
+      if (tons < 4)  return 'bajo'
+      if (tons < 7)  return 'medio'
+      if (tons < 10) return 'alto'
+      return 'muy alto'
+    }
     const A_COLORS = {
       transport:   '#38bdf8',
       energy:      '#f59e0b',
@@ -535,21 +550,42 @@ export default function Step2Rankings() {
           <div>
             <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', marginBottom: '0.85rem' }}>Equipos</div>
             {enrichedTeams.map((team, i) => {
-              const areaAvg  = getGroupAreaAvg(team.group)
+              const areaAvg   = getGroupAreaAvg(team.group)
               const areaAfter = getGroupAreaAfter(team.group, areaAvg)
+              const cat       = getCategory(team.originalTons || 0)
+              const catBadge  = {
+                bajo:      { label: '🌿 Huella reducida',  color: '#16a34a', bg: 'rgba(74,222,128,0.1)'  },
+                medio:     { label: '🌱 Huella moderada',  color: '#ca8a04', bg: 'rgba(251,191,36,0.1)'  },
+                alto:      { label: '🌍 Huella elevada',   color: '#ea580c', bg: 'rgba(251,146,60,0.1)'  },
+                'muy alto':{ label: '🔥 Huella muy alta',  color: '#dc2626', bg: 'rgba(248,113,113,0.1)' },
+              }[cat]
               return (
-                <div key={team.group} style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '0.85rem 0.9rem', marginBottom: '0.6rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: 900, fontSize: '1rem', color: '#0a0a0a', width: 22 }}>#{i + 1}</span>
-                    <span style={{ fontWeight: 700, fontSize: '0.9rem', flex: 1, color: '#0a0a0a' }}>{team.group}</span>
-                    {team.totalReduction > 0 && (
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#16a34a', background: 'rgba(74,222,128,0.1)', padding: '0.2rem 0.65rem', borderRadius: '999px' }}>
-                        −{(team.totalReduction / 1000).toFixed(1)} t
+                <div key={team.group} style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 14, padding: '1.25rem', marginBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
+                    <span style={{ fontWeight: 900, fontSize: '1rem', color: '#ccc', minWidth: 24 }}>#{i + 1}</span>
+                    <span style={{ fontWeight: 700, fontSize: '1rem', flex: 1, color: '#0a0a0a' }}>{team.group}</span>
+                    {catBadge && (
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: catBadge.color, background: catBadge.bg, padding: '0.2rem 0.7rem', borderRadius: 999, border: '1px solid currentColor' }}>
+                        {catBadge.label}
                       </span>
                     )}
                   </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1rem' }}>
+                    <span style={{ fontWeight: 900, fontSize: '1.6rem', color: '#0a0a0a' }}>{(team.originalTons || 0).toFixed(1)}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#aaa' }}>t</span>
+                    <span style={{ fontSize: '1.2rem', color: '#ccc' }}>→</span>
+                    <span style={{ fontWeight: 900, fontSize: '1.6rem', color: '#16a34a' }}>{(team.newTons || 0).toFixed(1)}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#aaa' }}>t</span>
+                  </div>
                   <StackedBar areaAvg={areaAvg}   total={team.originalTons || 0} maxVal={maxOriginal} label="Antes" />
                   <StackedBar areaAvg={areaAfter} total={team.newTons || 0}      maxVal={maxOriginal} label="Después" muted />
+                  {team.totalReduction > 0 && (
+                    <div style={{ textAlign: 'right', marginTop: 8 }}>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#16a34a' }}>
+                        −{(team.totalReduction / 1000).toFixed(3)} t
+                      </span>
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -570,7 +606,7 @@ export default function Step2Rankings() {
                     background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12,
                     overflow: 'hidden',
                   }}>
-                    <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 1, background: 'rgba(0,0,0,0.6)', color: '#fff', borderRadius: 6, padding: '2px 7px', fontSize: '0.7rem', fontWeight: 900 }}>
+                    <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 1, background: 'rgba(0,0,0,0.6)', color: '#fff', borderRadius: 6, padding: '2px 8px', fontSize: '0.7rem', fontWeight: 900 }}>
                       #{i + 1}
                     </div>
                     <img
@@ -579,12 +615,12 @@ export default function Step2Rankings() {
                       style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: '12px 12px 0 0', display: 'block' }}
                       onError={e => { e.currentTarget.style.display = 'none' }}
                     />
-                    <div style={{ padding: '0.6rem 0.75rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ flex: 1, fontSize: '0.78rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{a.label}</span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>−{(a.co2Reduction / 1000).toFixed(1)} t</span>
+                    <div style={{ padding: '0.75rem' }}>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{a.label}</div>
+                      <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#16a34a', marginTop: 6 }}>
+                        −{(a.co2Reduction / 1000).toFixed(3)} t CO₂
                       </div>
-                      <div style={{ fontSize: '0.68rem', color: '#bbb', marginTop: '0.2rem' }}>
+                      <div style={{ fontSize: '0.68rem', color: '#bbb' }}>
                         {a.count}/{sessionGroups.length} equipos
                       </div>
                     </div>
