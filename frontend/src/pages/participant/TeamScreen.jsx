@@ -346,46 +346,16 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
       <Navbar group={group} />
 
       {/* Header oscuro — huella actual */}
-      <div style={{ background: '#000000', padding: '2rem 3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', textAlign: 'center' }}>
-        <div>
-          <p style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.45)', margin: '0 0 0.3rem' }}>
-            Huella actual del equipo
-          </p>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, justifyContent: 'center' }}>
-            <span style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', color: '#fff', lineHeight: 1 }}>
-              {teamAvg.toFixed(1)}
-            </span>
-            <span style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>t CO₂/año · media</span>
-          </div>
+      <div style={{ background: '#000000', padding: '2.5rem 2rem 3rem', textAlign: 'center', color: '#fff' }}>
+        <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.5, margin: '0 0 0.6rem' }}>
+          Huella actual del equipo
+        </p>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <span style={{ fontWeight: 900, fontSize: 'clamp(3.5rem, 10vw, 5.5rem)', lineHeight: 1 }}>
+            {teamAvg.toFixed(1)}
+          </span>
+          <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>t CO₂/año</span>
         </div>
-
-        {(() => {
-          const areaTotal = Object.values(areaAvgBefore).reduce((s, v) => s + v, 0)
-          const COLORS_LOCAL = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
-          return areaTotal > 0 ? (
-            <div style={{ width: '100%', maxWidth: 500 }}>
-              <div style={{ display: 'flex', height: 12, borderRadius: 999, overflow: 'hidden', marginBottom: '0.5rem' }}>
-                {AREA_ORDER.map(area => {
-                  const pct = (areaAvgBefore[area] / areaTotal) * 100
-                  if (pct < 0.5) return null
-                  return <div key={area} style={{ width: `${pct}%`, background: COLORS_LOCAL[area] }} />
-                })}
-              </div>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                {AREA_ORDER.map(area => {
-                  const pct = Math.round((areaAvgBefore[area] / areaTotal) * 100)
-                  if (!pct) return null
-                  return (
-                    <div key={area} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: 'rgba(255,255,255,0.6)' }}>
-                      <div style={{ width: 8, height: 8, borderRadius: 2, background: COLORS_LOCAL[area] }} />
-                      {SHORT[area]} {pct}%
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          ) : null
-        })()}
       </div>
 
       {/* Body — acciones confirmadas */}
@@ -394,7 +364,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
           Acciones confirmadas para vuestro equipo
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', maxWidth: 900, margin: '0 auto' }}>
           {sortedActions.map(action => (
             <div key={action.id} style={{
               display: 'flex', flexDirection: 'column',
@@ -560,22 +530,49 @@ export default function TeamScreen() {
   if (phase === 'step3') {
     const tAvg = teamResults.length ? mean(teamResults.map(r => r.tons)) : 0
     if (!confirmedActions) {
+      const cat    = tAvg > 0 ? getCategory(tAvg) : null
+      const catCfg = cat ? CATEGORY_CONFIG[cat] : null
       return (
         <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', flexDirection: 'column' }}>
           <Navbar group={group} />
-          {tAvg > 0 && (
-            <div style={{ background: '#f5f5f5', padding: '2rem', textAlign: 'center', borderBottom: '1px solid #e5e5e5' }}>
-              <p style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.14em', color: '#aaa', margin: '0 0 0.4rem' }}>
-                Huella media actual del equipo
-              </p>
-              <p style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 8vw, 4rem)', lineHeight: 1, color: '#0a0a0a', margin: 0 }}>
-                {tAvg.toFixed(1)} <span style={{ fontSize: '1rem', color: '#888', fontWeight: 500 }}>t CO₂/año</span>
-              </p>
+
+          {/* Hero negro */}
+          <div style={{ background: '#0a0a0a', color: '#fff', padding: '2.5rem 2rem 3rem', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.5, margin: '0 0 0.6rem' }}>
+              Huella media · {group}
+            </p>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <span style={{ fontWeight: 900, fontSize: 'clamp(3.5rem, 10vw, 5.5rem)', lineHeight: 1 }}>
+                {tAvg > 0 ? tAvg.toFixed(1) : '–'}
+              </span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>t CO₂/año</span>
             </div>
-          )}
-          <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 14, margin: '1.5rem', padding: '1.5rem', textAlign: 'center' }}>
-            <p style={{ color: '#0a0a0a', fontWeight: 700, margin: '0 0 0.4rem' }}>Esperando acciones del equipo</p>
-            <p style={{ color: '#999', fontSize: '0.85rem', margin: 0 }}>El facilitador está eligiendo las acciones para vuestro equipo...</p>
+            {catCfg && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: '0.9rem', background: 'rgba(255,255,255,0.18)', padding: '0.35rem 0.9rem', borderRadius: 4, fontSize: '0.8rem', fontWeight: 700 }}>
+                {catCfg.label}
+              </div>
+            )}
+            <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.5rem' }}>
+              {teamResults.length} miembro{teamResults.length !== 1 ? 's' : ''} han completado
+            </div>
+          </div>
+
+          {/* Body — cards de espera */}
+          <div style={{ flex: 1, padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', width: '100%', maxWidth: 700 }}>
+              {[
+                { icon: 'ti-leaf',  title: 'Reducción de huella',   body: 'El facilitador está preparando las acciones para vuestro equipo' },
+                { icon: 'ti-clock', title: 'En breve',               body: 'Las acciones aparecerán aquí cuando el facilitador las confirme' },
+                { icon: 'ti-users', title: 'Trabajo en equipo',      body: 'Cada equipo recibirá un plan de acción personalizado' },
+              ].map(({ icon, title, body }) => (
+                <div key={icon} style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 14, padding: '1.5rem', textAlign: 'center' }}>
+                  <i className={`ti ${icon}`} style={{ fontSize: '2rem', color: '#0a0a0a', display: 'block', marginBottom: '0.75rem' }} />
+                  <p style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0a0a0a', margin: '0 0 0.4rem' }}>{title}</p>
+                  <p style={{ fontSize: '0.78rem', color: '#999', margin: 0, lineHeight: 1.5 }}>{body}</p>
+                </div>
+              ))}
+            </div>
+            <DotsLoader />
           </div>
         </div>
       )
