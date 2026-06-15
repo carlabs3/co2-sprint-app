@@ -204,6 +204,8 @@ export default function Step2Rankings() {
     const originalAvg = groupAvgTons[group] || 0
     const newCarbonTons = Math.max(0, originalAvg - totalReduction / 1000)
 
+    console.log('[handleConfirmTeam]', { group, originalAvg, totalReduction, newCarbonTons })
+
     socket.emit('team:confirmActions', {
       sessionCode: code,
       group,
@@ -388,24 +390,32 @@ export default function Step2Rankings() {
                   </div>
 
                   {/* Listado de acciones */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem' }}>
                     {ACTIONS.filter(a => filter3Area === 'all' || a.area === filter3Area).map(a => {
                       const isSel = selected.includes(a.id)
                       return (
                         <div key={a.id}
                           onClick={() => handleToggleAction(group, a.id)}
                           style={{
-                            padding: '0.75rem 1rem', borderRadius: 12, cursor: 'pointer',
+                            position: 'relative', display: 'flex', flexDirection: 'column',
+                            borderRadius: 12, cursor: 'pointer', overflow: 'hidden',
                             border: `1px solid ${isSel ? '#0a0a0a' : '#e5e5e5'}`,
                             background: isSel ? '#f5f5f5' : '#fff',
-                            display: 'flex', alignItems: 'center', gap: '0.75rem',
                           }}
                         >
-                          <div style={{ width: 16, height: 16, borderRadius: 4, flexShrink: 0, border: `2px solid ${isSel ? '#0a0a0a' : '#ccc'}`, background: isSel ? '#0a0a0a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 1, width: 16, height: 16, borderRadius: 4, border: `2px solid ${isSel ? '#0a0a0a' : '#ccc'}`, background: isSel ? '#0a0a0a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {isSel && <span style={{ color: '#fff', fontSize: 10, fontWeight: 900, lineHeight: 1 }}>✓</span>}
                           </div>
-                          <span style={{ fontSize: '1rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
-                          <span style={{ flex: 1, fontSize: '0.82rem', fontWeight: isSel ? 600 : 400, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</span>
+                          <img
+                            src={a.image}
+                            alt=""
+                            style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: '12px 12px 0 0', display: 'block' }}
+                            onError={e => { e.currentTarget.style.display = 'none' }}
+                          />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.6rem 0.75rem' }}>
+                            <span style={{ fontSize: '1rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
+                            <span style={{ flex: 1, fontSize: '0.82rem', fontWeight: isSel ? 600 : 400, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</span>
+                          </div>
                         </div>
                       )
                     })}
@@ -449,10 +459,26 @@ export default function Step2Rankings() {
   // ── Step3Results helper ───────────────────────────────────────────────────────
   function Step3Results({ step3Data, ranking, sessionGroups }) {
     const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste']
-    const A_COLORS = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
+    const A_COLORS = {
+      transport:   '#38bdf8',
+      energy:      '#f59e0b',
+      food:        '#4ade80',
+      consumption: '#a855f7',
+      waste:       '#f472b6',
+    }
 
     const sortedTeams = [...(step3Data.teams || [])].sort((a, b) => (b.totalReduction || 0) - (a.totalReduction || 0))
-    const maxOriginal = Math.max(...sortedTeams.map(t => t.originalTons || 0), 0.1)
+    const enrichedTeams = sortedTeams.map(team => {
+      if (team.originalTons != null && team.originalTons > 0) return team
+      const members = ranking.filter(r => r.group === team.group)
+      const originalTons = members.length
+        ? members.reduce((s, r) => s + r.tons, 0) / members.length
+        : 0
+      const newTons = Math.max(0, originalTons - (team.totalReduction || 0) / 1000)
+      return { ...team, originalTons, newTons }
+    })
+    const allActionsSorted = [...(step3Data.actionStats || [])].sort((a, b) => b.count - a.count)
+    const maxOriginal = Math.max(...enrichedTeams.map(t => t.originalTons || 0), 0.1)
 
     const getGroupAreaAvg = (group) => {
       const members = ranking.filter(r => r.group === group)
@@ -492,11 +518,11 @@ export default function Step2Rankings() {
       </div>
     )
 
-    const globalBefore = step3Data.teams?.length
-      ? step3Data.teams.reduce((s, t) => s + (t.originalTons || 0), 0) / step3Data.teams.length
+    const globalBefore = enrichedTeams.length
+      ? enrichedTeams.reduce((s, t) => s + (t.originalTons || 0), 0) / enrichedTeams.length
       : 0
-    const globalAfter = step3Data.teams?.length
-      ? step3Data.teams.reduce((s, t) => s + (t.newTons || 0), 0) / step3Data.teams.length
+    const globalAfter = enrichedTeams.length
+      ? enrichedTeams.reduce((s, t) => s + (t.newTons || 0), 0) / enrichedTeams.length
       : 0
     const globalAreaAvg = AREA_ORDER.reduce((acc, area) => {
       acc[area] = ranking.length ? ranking.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / ranking.length : 0
@@ -510,7 +536,7 @@ export default function Step2Rankings() {
           {/* Column 1: Teams */}
           <div>
             <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', marginBottom: '0.85rem' }}>Equipos</div>
-            {sortedTeams.map((team, i) => {
+            {enrichedTeams.map((team, i) => {
               const areaAvg  = getGroupAreaAvg(team.group)
               const areaAfter = getGroupAreaAfter(team.group, areaAvg)
               return (
@@ -531,25 +557,44 @@ export default function Step2Rankings() {
             })}
           </div>
 
-          {/* Column 2: Global distribution */}
+          {/* Column 2: Top actions */}
           <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', marginBottom: '0.85rem' }}>Distribución global</div>
-            <div style={{ padding: '0.85rem 0.9rem', background: '#ffffff', borderRadius: '12px', border: '1px solid #e5e5e5', marginBottom: '0.75rem' }}>
-              <StackedBar areaAvg={globalAreaAvg} total={globalBefore} maxVal={globalBefore} label="Media antes" />
-              <StackedBar areaAvg={globalAreaAvg} total={globalAfter}  maxVal={globalBefore} label="Media después" muted />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', padding: '0.5rem', background: 'rgba(74,222,128,0.1)', borderRadius: '999px' }}>
-                <span style={{ fontWeight: 700, fontSize: '1rem', color: '#16a34a' }}>−{(globalBefore - globalAfter).toFixed(1)} t</span>
-                <span style={{ fontSize: '0.65rem', color: '#16a34a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ahorro medio</span>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', marginBottom: '0.85rem' }}>
+              Acciones más elegidas
+            </div>
+            {allActionsSorted.length === 0 ? (
+              <div style={{ color: '#ccc', fontSize: '0.8rem', fontStyle: 'italic' }}>Sin acciones aún</div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem' }}>
+                {allActionsSorted.map((a, i) => (
+                  <div key={a.id} style={{
+                    position: 'relative', display: 'flex', flexDirection: 'column',
+                    background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12,
+                    overflow: 'hidden',
+                  }}>
+                    <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 1, background: 'rgba(0,0,0,0.6)', color: '#fff', borderRadius: 6, padding: '2px 7px', fontSize: '0.7rem', fontWeight: 900 }}>
+                      #{i + 1}
+                    </div>
+                    <img
+                      src={a.image}
+                      alt=""
+                      style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: '12px 12px 0 0', display: 'block' }}
+                      onError={e => { e.currentTarget.style.display = 'none' }}
+                    />
+                    <div style={{ padding: '0.6rem 0.75rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: '1rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
+                        <span style={{ flex: 1, fontSize: '0.78rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{a.label}</span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>−{(a.co2Reduction / 1000).toFixed(1)} t</span>
+                      </div>
+                      <div style={{ fontSize: '0.68rem', color: '#bbb', marginTop: '0.2rem' }}>
+                        {a.count}/{sessionGroups.length} equipos
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-              {AREA_ORDER.map(area => (
-                <div key={area} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.72rem' }}>
-                  <div style={{ width: 10, height: 10, borderRadius: 2, background: A_COLORS[area], flexShrink: 0 }} />
-                  <span style={{ flex: 1, color: '#666' }}>{AREA_LABEL[area]}</span>
-                </div>
-              ))}
-            </div>
+            )}
 
             {!winnersRevealed && step3Data.allConfirmedFinal && (
               <button
@@ -558,22 +603,6 @@ export default function Step2Rankings() {
               >
                 Revelar ganadores →
               </button>
-            )}
-
-            {/* Action stats */}
-            {step3Data.actionStats?.length > 0 && (
-              <div style={{ marginTop: '1.5rem' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', marginBottom: '0.6rem' }}>Acciones más elegidas</div>
-                {step3Data.actionStats.slice(0, 6).map(a => (
-                  <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '5px 0', borderBottom: '1px solid #f5f5f5' }}>
-                    <span style={{ fontSize: '1rem' }}>{AREA_EMOJI[a.area]}</span>
-                    <span style={{ flex: 1, fontSize: '0.72rem', color: '#0a0a0a' }}>{a.label}</span>
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700, background: '#f5f5f5', padding: '2px 8px', borderRadius: '999px', color: '#0a0a0a' }}>
-                      {a.count}/{sessionGroups.length}
-                    </span>
-                  </div>
-                ))}
-              </div>
             )}
           </div>
         </div>

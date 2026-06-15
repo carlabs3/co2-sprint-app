@@ -448,22 +448,30 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
           Acciones confirmadas para vuestro equipo
         </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: 560, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', margin: '0 auto' }}>
           {sortedActions.map(action => (
             <div key={action.id} style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              background: '#fff', border: '1px solid #e5e5e5',
-              borderRadius: 14, padding: '1rem 1.25rem',
+              display: 'flex', flexDirection: 'column',
+              borderRadius: 14, border: '1px solid #e5e5e5', background: '#fff',
+              overflow: 'hidden',
             }}>
-              <span style={{ fontSize: '1.4rem', flexShrink: 0 }}>{AREA_EMOJI[action.area]}</span>
-              <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, textAlign: 'left' }}>{action.label}</span>
-              {showValues ? (
-                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>
-                  −{(action.co2Reduction / 1000).toFixed(1)} t
-                </span>
-              ) : (
-                <span style={{ fontSize: '0.85rem', color: '#ccc', flexShrink: 0 }}>···</span>
-              )}
+              <img
+                src={action.image}
+                alt=""
+                style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: '14px 14px 0 0', display: 'block' }}
+                onError={e => { e.currentTarget.style.display = 'none' }}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0.85rem 1rem' }}>
+                <span style={{ fontSize: '1.4rem', flexShrink: 0 }}>{AREA_EMOJI[action.area]}</span>
+                <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, textAlign: 'left' }}>{action.label}</span>
+                {showValues ? (
+                  <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>
+                    −{(action.co2Reduction / 1000).toFixed(1)} t
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '0.85rem', color: '#ccc', flexShrink: 0 }}>···</span>
+                )}
+              </div>
             </div>
           ))}
         </div>
