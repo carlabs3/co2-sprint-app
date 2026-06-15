@@ -552,7 +552,7 @@ export default function Step2Rankings() {
             {enrichedTeams.map((team, i) => {
               const areaAvg   = getGroupAreaAvg(team.group)
               const areaAfter = getGroupAreaAfter(team.group, areaAvg)
-              const cat       = getCategory(team.originalTons || 0)
+              const cat       = getCategory(team.newTons || 0)
               const catBadge  = {
                 bajo:      { label: '🌿 Huella reducida',  color: '#16a34a', bg: 'rgba(74,222,128,0.1)'  },
                 medio:     { label: '🌱 Huella moderada',  color: '#ca8a04', bg: 'rgba(251,191,36,0.1)'  },
@@ -600,7 +600,9 @@ export default function Step2Rankings() {
               <div style={{ color: '#ccc', fontSize: '0.8rem', fontStyle: 'italic' }}>Sin acciones aún</div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem' }}>
-                {allActionsSorted.map((a, i) => (
+                {allActionsSorted.map((a, i) => {
+                  const enrichedAction = ACTIONS.find(x => x.id === a.id)
+                  return (
                   <div key={a.id} style={{
                     position: 'relative', display: 'flex', flexDirection: 'column',
                     background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12,
@@ -610,7 +612,7 @@ export default function Step2Rankings() {
                       #{i + 1}
                     </div>
                     <img
-                      src={a.image}
+                      src={enrichedAction?.image}
                       alt=""
                       style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: '12px 12px 0 0', display: 'block' }}
                       onError={e => { e.currentTarget.style.display = 'none' }}
@@ -625,7 +627,8 @@ export default function Step2Rankings() {
                       </div>
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             )}
 
