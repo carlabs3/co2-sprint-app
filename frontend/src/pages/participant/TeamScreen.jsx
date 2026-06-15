@@ -159,15 +159,15 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
     .map(a => ({ name: a.label, value: areaAvgMap[a.key], color: a.color }))
     .filter(d => d.value > 0.001)
 
-  // Horizontal bars (scale 0–10 t)
-  const BAR_MAX   = 10
-  const pct = v => `${Math.min((v / BAR_MAX) * 100, 100).toFixed(1)}%`
+  // Horizontal bars (dynamic scale)
+  const BAR_MAX    = Math.max(12, Math.ceil(Math.max(teamAvg, SPAIN_AVG, sessionAvg ?? 0) * 1.3 / 2) * 2)
+  const pct        = v => `${Math.min((v / BAR_MAX) * 100, 100).toFixed(1)}%`
   const TARGET_PCT = `${(2 / BAR_MAX) * 100}%`
 
   const bars = [
     { label: group,          value: teamAvg,    color: '#0a0a0a', bold: true },
-    ...(sessionAvg != null ? [{ label: 'Media sesión', value: sessionAvg, color: '#aaa',    bold: false }] : []),
-    { label: 'Media España',  value: SPAIN_AVG,  color: '#d4d4d4', bold: false },
+    ...(sessionAvg != null ? [{ label: 'Media sesión', value: sessionAvg, color: '#38bdf8', bold: false }] : []),
+    { label: 'Media España',  value: SPAIN_AVG,  color: '#4ade80', bold: false },
   ]
 
   return (
@@ -177,53 +177,21 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
 
       {/* Hero */}
       <div style={{ background: '#0a0a0a', color: '#fff', padding: '2.5rem 2rem 3rem' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: '2rem 4rem', alignItems: 'flex-start' }}>
-          {/* Left: big number */}
-          <div style={{ flex: '1 1 180px' }}>
-            <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.5, margin: '0 0 0.6rem' }}>
-              Huella media · {group}
-            </p>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', flexWrap: 'wrap' }}>
-              <span style={{ fontWeight: 900, fontSize: 'clamp(3.5rem, 10vw, 5.5rem)', lineHeight: 1 }}>
-                {teamAvg.toFixed(1)}
-              </span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>t CO₂/año</span>
-            </div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: '0.9rem', background: 'rgba(255,255,255,0.18)', padding: '0.35rem 0.9rem', borderRadius: 4, fontSize: '0.8rem', fontWeight: 700 }}>
-              {catCfg.label}
-            </div>
+        <div style={{ maxWidth: 960, margin: '0 auto', textAlign: 'center' }}>
+          <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.5, margin: '0 0 0.6rem' }}>
+            Huella media · {group}
+          </p>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <span style={{ fontWeight: 900, fontSize: 'clamp(3.5rem, 10vw, 5.5rem)', lineHeight: 1 }}>
+              {teamAvg.toFixed(1)}
+            </span>
+            <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>t CO₂/año</span>
           </div>
-
-          {/* Right: 3 stats */}
-          <div style={{ flex: '1 1 300px', display: 'flex', flexWrap: 'wrap', gap: '1.25rem 3rem', alignItems: 'flex-start', paddingTop: '0.25rem' }}>
-            {[
-              {
-                big: vsSesion != null ? `${vsSesion > 0 ? '+' : ''}${vsSesion}%` : '–',
-                label: 'Vs. sesión',
-                sub: sessionAvg != null ? `media: ${sessionAvg.toFixed(1)} t` : '–',
-                highlight: vsSesion != null && vsSesion < 0,
-              },
-              {
-                big: `${vsSpain > 0 ? '+' : ''}${vsSpain}%`,
-                label: 'Vs. España',
-                sub: `media: ${SPAIN_AVG} t`,
-                highlight: vsSpain < 0,
-              },
-              {
-                big: `${teamResults.length}`,
-                label: 'Miembros',
-                sub: 'han completado',
-                highlight: false,
-              },
-            ].map(({ big, label, sub, highlight }) => (
-              <div key={label}>
-                <span style={{ fontWeight: 900, fontSize: 'clamp(1.6rem, 4.5vw, 2.2rem)', display: 'block', lineHeight: 1, marginBottom: '0.2rem', color: highlight ? '#a8d8a0' : '#fff' }}>
-                  {big}
-                </span>
-                <span style={{ fontSize: '0.63rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.5, display: 'block' }}>{label}</span>
-                <span style={{ fontSize: '0.75rem', opacity: 0.75, display: 'block', marginTop: '0.1rem' }}>{sub}</span>
-              </div>
-            ))}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: '0.9rem', background: 'rgba(255,255,255,0.18)', padding: '0.35rem 0.9rem', borderRadius: 4, fontSize: '0.8rem', fontWeight: 700 }}>
+            {catCfg.label}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.5rem' }}>
+            {teamResults.length} miembro{teamResults.length !== 1 ? 's' : ''} han completado
           </div>
         </div>
       </div>
@@ -287,7 +255,7 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
                   <span style={{ fontSize: '0.78rem', color: bold ? '#0a0a0a' : '#888', fontWeight: bold ? 700 : 500 }}>{label}</span>
                   <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#0a0a0a' }}>{value.toFixed(1)} t</span>
                 </div>
-                <div style={{ height: 32, background: '#f5f5f5', borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
+                <div style={{ height: 40, background: '#f5f5f5', borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
                   <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: pct(value), background: color, borderRadius: 6, transition: 'width 0.7s ease' }} />
                   {/* 2t objective marker */}
                   <div style={{ position: 'absolute', top: 0, bottom: 0, left: TARGET_PCT, width: 2, background: '#e05555', opacity: 0.6 }} />
@@ -298,7 +266,7 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
 
           {/* X axis */}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.6rem', paddingTop: '0.4rem', borderTop: '1px solid #e5e5e5' }}>
-            {[0, 2, 4, 6, 8, 10].map(v => (
+            {Array.from({ length: BAR_MAX / 2 + 1 }, (_, i) => i * 2).map(v => (
               <span key={v} style={{ fontSize: '0.62rem', color: '#ccc' }}>{v}t</span>
             ))}
           </div>
