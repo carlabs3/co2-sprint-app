@@ -268,9 +268,7 @@ export default function FacilitatorDashboard() {
                     </button>
                   ) : (
                     <Link
-                      to={session.status === 'closed'
-                        ? `/session/${session.code}/stats`
-                        : `/session/${session.code}/rankings`}
+                      to={`/session/${session.code}/rankings`}
                       style={{ flex: 1 }}
                     >
                       <button style={{ ...s.btnOpen, width: '100%' }}>

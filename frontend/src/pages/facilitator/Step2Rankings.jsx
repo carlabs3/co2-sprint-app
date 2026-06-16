@@ -118,7 +118,7 @@ export default function Step2Rankings() {
     socket.on('team:confirmed', ({ group, confirmed, confirmedFinal }) => {
       setTeamConfirmations(prev => ({ ...prev, [group]: { confirmed, confirmedFinal } }))
     })
-    socket.on('step3:revealed', () => setStep3Revealed(true))
+    socket.on('step3:revealed', () => { setStep3Revealed(true); fetchStep3Data() })
     socket.on('winners:revealed', () => setWinnersRevealed(true))
 
     return () => {
@@ -537,21 +537,39 @@ export default function Step2Rankings() {
       return after
     }
 
-    const StackedBar = ({ areaAvg, total, maxVal, label, muted = false }) => (
-      <div style={{ marginBottom: 6 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-          <span style={{ fontSize: '0.65rem', color: '#aaa' }}>{label}</span>
-          <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#000' }}>{total.toFixed(1)} t</span>
+    const AREA_LABELS_S3 = { transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación', consumption: 'Consumo', waste: 'Digital' }
+
+    const StackedBar = ({ areaAvg, total, maxVal, label, muted = false }) => {
+      const areaSum = AREA_ORDER.reduce((s, a) => s + (areaAvg[a] || 0), 0)
+      return (
+        <div style={{ marginBottom: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+            <span style={{ fontSize: '0.65rem', color: '#aaa' }}>{label}</span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#000' }}>{total.toFixed(1)} t</span>
+          </div>
+          <div style={{ height: 12, background: '#f0f0f0', borderRadius: 2, overflow: 'hidden', display: 'flex', marginBottom: 5 }}>
+            {AREA_ORDER.map(area => {
+              const pct = maxVal > 0 ? (areaAvg[area] / maxVal) * 100 : 0
+              if (pct < 0.1) return null
+              return <div key={area} style={{ width: `${pct}%`, background: A_COLORS[area], opacity: muted ? 0.7 : 1 }} />
+            })}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px' }}>
+            {AREA_ORDER.filter(area => (areaAvg[area] || 0) > 0).map(area => {
+              const areaPct = areaSum > 0 ? Math.round((areaAvg[area] / areaSum) * 100) : 0
+              return (
+                <div key={area} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '0.72rem' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: 2, background: A_COLORS[area], flexShrink: 0 }} />
+                  <span style={{ color: '#666' }}>{AREA_LABELS_S3[area]}</span>
+                  <span style={{ fontWeight: 700, color: '#333' }}>{(areaAvg[area] || 0).toFixed(1)}t</span>
+                  <span style={{ color: '#bbb' }}>{areaPct}%</span>
+                </div>
+              )
+            })}
+          </div>
         </div>
-        <div style={{ height: 12, background: '#f0f0f0', borderRadius: 2, overflow: 'hidden', display: 'flex' }}>
-          {AREA_ORDER.map(area => {
-            const pct = maxVal > 0 ? (areaAvg[area] / maxVal) * 100 : 0
-            if (pct < 0.1) return null
-            return <div key={area} style={{ width: `${pct}%`, background: A_COLORS[area], opacity: muted ? 0.7 : 1 }} />
-          })}
-        </div>
-      </div>
-    )
+      )
+    }
 
     const globalBefore = enrichedTeams.length
       ? enrichedTeams.reduce((s, t) => s + (t.originalTons || 0), 0) / enrichedTeams.length
