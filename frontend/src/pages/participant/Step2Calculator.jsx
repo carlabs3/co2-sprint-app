@@ -168,7 +168,7 @@ function groteskCard(isSel, isNone = false, areaColor = '#0a0a0a', extra = {}) {
     padding: '16px 10px',
     fontSize: 14,
     fontWeight: isSel ? 500 : 400,
-    color: isSel ? 'rgba(0,0,0,0.75)' : isNone ? '#bbb' : '#0a0a0a',
+    color: isSel ? 'rgba(0,0,0,0.75)' : '#0a0a0a',
     lineHeight: 1.3,
     letterSpacing: '-0.01em',
     textAlign: 'center',
