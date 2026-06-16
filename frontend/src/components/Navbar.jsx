@@ -15,7 +15,7 @@ const styles = {
   },
   logo: {
     fontWeight: 700,
-    fontSize: '1.15rem',
+    fontSize: '1.5rem',
     letterSpacing: '-0.02em',
     color: '#ffffff',
   },
@@ -76,9 +76,7 @@ export default function Navbar() {
             </Link>
             <button style={styles.btnSalir} onClick={handleLogout}>Salir</button>
           </>
-        ) : (
-          <Link to="/login" style={styles.link}>Login Facilitador</Link>
-        )}
+        ) : null}
       </div>
     </nav>
   )

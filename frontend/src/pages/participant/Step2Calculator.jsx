@@ -455,17 +455,20 @@ export default function Step2Calculator() {
         minHeight: 'calc(100dvh - 52px)', background: '#f5f5f5',
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        padding: '2rem', textAlign: 'center',
+        padding: '2rem', textAlign: 'left',
         fontFamily: "'Instrument Sans', sans-serif",
       }}>
         <div style={{ display: 'flex', gap: 12, marginBottom: 32, fontSize: 24 }}>
           {AREAS.map(a => <span key={a.id}>{a.emoji}</span>)}
         </div>
-        <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.02em', color: '#0a0a0a', marginBottom: 16 }}>
-          Tu huella personal
+        <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', color: '#0a0a0a', marginBottom: 16 }}>
+          Antes de empezar
         </h1>
-        <p style={{ fontSize: 15, lineHeight: 1.6, color: '#666', maxWidth: 320, marginBottom: 36 }}>
-          Responde pensando solo en ti — no en tu familia ni compañeros de piso. Son 5 áreas, unos 3 minutos.
+        <p style={{ fontSize: 15, lineHeight: 1.7, color: '#444', maxWidth: 340, marginBottom: 8, textAlign: 'left' }}>
+          ¡Es un cuestionario individual! Responde a las preguntas de forma personal, no en nombre de tu hogar. Por supuesto, algunos elementos son compartidos (mi vivienda con mi familia, el coche con las personas con las que comparto trayecto, etc.). Esto se tendrá en cuenta al calcular tu huella de carbono, así que no te preocupes.
+        </p>
+        <p style={{ fontSize: 15, lineHeight: 1.7, color: '#0a0a0a', fontWeight: 700, maxWidth: 340, marginBottom: 36, textAlign: 'left' }}>
+          Las preguntas se refieren a tu vida personal, no a tu actividad profesional.
         </p>
         <button
           onClick={() => setShowIntro(false)}
