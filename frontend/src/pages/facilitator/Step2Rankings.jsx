@@ -515,12 +515,16 @@ export default function Step2Rankings() {
       return { ...team, originalTons, newTons }
     })
     const allActionsSorted = [...(step3Data.actionStats || [])].sort((a, b) => b.count - a.count)
-    const sorted = [...allActionsSorted].sort((a, b) => {
-      if (sortBy === 'count')          return b.count - a.count
-      if (sortBy === 'reduction_desc') return b.co2Reduction - a.co2Reduction
-      if (sortBy === 'reduction_asc')  return a.co2Reduction - b.co2Reduction
-      return 0
-    })
+    const sorted = sortBy === 'count'
+      ? [...allActionsSorted].sort((a, b) => b.count - a.count)
+      : [...ACTIONS].sort((a, b) =>
+          sortBy === 'reduction_desc'
+            ? b.co2Reduction - a.co2Reduction
+            : a.co2Reduction - b.co2Reduction
+        ).map(a => ({
+            ...a,
+            count: allActionsSorted.find(x => x.id === a.id)?.count ?? 0,
+          }))
     const maxOriginal = Math.max(...enrichedTeams.map(t => t.originalTons || 0), 0.1)
 
     const getGroupAreaAvg = (group) => {
@@ -643,7 +647,7 @@ export default function Step2Rankings() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.85rem' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888' }}>
-                Acciones más elegidas
+                Resumen de acciones
               </div>
               <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
                 {[
@@ -689,8 +693,10 @@ export default function Step2Rankings() {
                       <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#16a34a', marginTop: 6 }}>
                         −{(a.co2Reduction / 1000).toFixed(3)} t CO₂
                       </div>
-                      <div style={{ fontSize: '0.68rem', color: '#bbb' }}>
-                        {a.count}/{sessionGroups.length} equipos
+                      <div style={{ fontSize: '0.68rem', color: a.count > 0 ? '#16a34a' : '#bbb' }}>
+                        {a.count > 0
+                          ? `${a.count}/${sessionGroups.length} equipos`
+                          : 'Sin elegir'}
                       </div>
                     </div>
                   </div>
