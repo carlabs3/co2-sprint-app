@@ -525,6 +525,13 @@ export default function Step2Rankings() {
             ...a,
             count: allActionsSorted.find(x => x.id === a.id)?.count ?? 0,
           }))
+    const actionTeams = {}
+    ;(step3Data.teams || []).forEach(team => {
+      (team.actions || []).forEach(id => {
+        if (!actionTeams[id]) actionTeams[id] = []
+        actionTeams[id].push(team.group)
+      })
+    })
     const maxOriginal = Math.max(...enrichedTeams.map(t => t.originalTons || 0), 0.1)
 
     const getGroupAreaAvg = (group) => {
@@ -693,9 +700,9 @@ export default function Step2Rankings() {
                       <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#16a34a', marginTop: 6 }}>
                         −{(a.co2Reduction / 1000).toFixed(3)} t CO₂
                       </div>
-                      <div style={{ fontSize: '0.68rem', color: a.count > 0 ? '#16a34a' : '#bbb' }}>
-                        {a.count > 0
-                          ? `${a.count}/${sessionGroups.length} equipos`
+                      <div style={{ fontSize: '0.68rem', color: (actionTeams[a.id]?.length > 0) ? '#16a34a' : '#bbb', lineHeight: 1.4 }}>
+                        {actionTeams[a.id]?.length > 0
+                          ? actionTeams[a.id].join(', ')
                           : 'Sin elegir'}
                       </div>
                     </div>
