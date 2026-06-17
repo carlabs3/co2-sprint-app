@@ -502,7 +502,7 @@ export default function Step2Rankings() {
       waste:       '#f472b6',
     }
 
-    const [sortBy, setSortBy] = useState('count')
+    const [actionSort, setActionSort] = useState('elegidas')
 
     const sortedTeams = [...(step3Data.teams || [])].sort((a, b) => (b.totalReduction || 0) - (a.totalReduction || 0))
     const enrichedTeams = sortedTeams.map(team => {
@@ -515,12 +515,20 @@ export default function Step2Rankings() {
       return { ...team, originalTons, newTons }
     })
     const allActionsSorted = [...(step3Data.actionStats || [])].sort((a, b) => b.count - a.count)
-    const sorted = [...allActionsSorted].sort((a, b) => {
-      if (sortBy === 'count')          return b.count - a.count
-      if (sortBy === 'reduction_desc') return b.co2Reduction - a.co2Reduction
-      if (sortBy === 'reduction_asc')  return a.co2Reduction - b.co2Reduction
-      return 0
+
+    const actionTeamsMap = {}
+    ;(step3Data.teams || []).forEach(team => {
+      (team.actions || []).forEach(id => {
+        if (!actionTeamsMap[id]) actionTeamsMap[id] = []
+        actionTeamsMap[id].push(team.group)
+      })
     })
+    const displayedActions = actionSort === 'elegidas'
+      ? allActionsSorted
+      : actionSort === 'mayor'
+        ? [...ACTIONS].sort((a, b) => b.co2Reduction - a.co2Reduction)
+        : [...ACTIONS].sort((a, b) => a.co2Reduction - b.co2Reduction)
+
     const maxOriginal = Math.max(...enrichedTeams.map(t => t.originalTons || 0), 0.1)
 
     const getGroupAreaAvg = (group) => {
@@ -639,74 +647,59 @@ export default function Step2Rankings() {
             })}
           </div>
 
-          {/* Column 2: Top actions */}
+          {/* Column 3: Actions summary */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.85rem' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888' }}>
-                Acciones más elegidas
-              </div>
-              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                {[
-                  { id: 'count',          label: 'Más elegidas'  },
-                  { id: 'reduction_desc', label: 'Mayor impacto' },
-                  { id: 'reduction_asc',  label: 'Menor impacto' },
-                ].map(opt => (
-                  <button key={opt.id} onClick={() => setSortBy(opt.id)} style={{
-                    padding: '0.25rem 0.75rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 600,
-                    background: sortBy === opt.id ? '#0a0a0a' : 'transparent',
-                    color:      sortBy === opt.id ? '#fff'    : '#666',
-                    border:    `1px solid ${sortBy === opt.id ? '#0a0a0a' : '#e5e5e5'}`,
-                    cursor: 'pointer',
-                  }}>
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', marginBottom: '0.75rem' }}>
+              Resumen de acciones
             </div>
-            {allActionsSorted.length === 0 ? (
-              <div style={{ color: '#ccc', fontSize: '0.8rem', fontStyle: 'italic' }}>Sin acciones aún</div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem' }}>
-                {sorted.map((a, i) => {
-                  const enrichedAction = ACTIONS.find(x => x.id === a.id)
-                  return (
-                  <div key={a.id} style={{
-                    position: 'relative', display: 'flex', flexDirection: 'column',
-                    background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12,
-                    overflow: 'hidden',
-                  }}>
-                    <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 1, background: 'rgba(0,0,0,0.6)', color: '#fff', borderRadius: 6, padding: '2px 8px', fontSize: '0.7rem', fontWeight: 900 }}>
-                      #{i + 1}
-                    </div>
-                    <img
-                      src={enrichedAction?.image}
-                      alt=""
-                      style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: '12px 12px 0 0', display: 'block' }}
-                      onError={e => { e.currentTarget.style.display = 'none' }}
-                    />
-                    <div style={{ padding: '0.75rem' }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{a.label}</div>
-                      <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#16a34a', marginTop: 6 }}>
-                        −{(a.co2Reduction / 1000).toFixed(3)} t CO₂
-                      </div>
-                      <div style={{ fontSize: '0.68rem', color: '#bbb' }}>
-                        {a.count}/{sessionGroups.length} equipos
-                      </div>
-                    </div>
-                  </div>
-                  )
-                })}
-              </div>
-            )}
 
-            {!winnersRevealed && step3Data.allConfirmedFinal && !isClosed && (
-              <button
-                onClick={handleRevealWinners}
-                style={{ width: '100%', marginTop: '1.5rem', padding: '0.9rem', background: '#0a0a0a', color: '#fff', border: 'none', borderRadius: '999px', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer' }}
-              >
-                Revelar ganadores →
-              </button>
-            )}
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: '0.35rem', marginBottom: '0.85rem', flexWrap: 'wrap' }}>
+              {[
+                { id: 'elegidas', label: 'Más elegidas' },
+                { id: 'mayor',    label: 'Mayor impacto' },
+                { id: 'menor',    label: 'Menor impacto' },
+              ].map(t => (
+                <button key={t.id} onClick={() => setActionSort(t.id)} style={{
+                  padding: '0.25rem 0.7rem', borderRadius: 999, fontSize: '0.68rem', fontWeight: 600,
+                  border: `1.5px solid ${actionSort === t.id ? '#2d5a27' : '#e0e0d8'}`,
+                  background: actionSort === t.id ? '#2d5a27' : 'transparent',
+                  color: actionSort === t.id ? '#fff' : '#666',
+                  cursor: 'pointer',
+                }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ maxHeight: '55vh', overflowY: 'auto' }}>
+              {displayedActions.map((a, i) => {
+                const teams = actionTeamsMap[a.id] || []
+                const isChosen = teams.length > 0
+                return (
+                  <div key={a.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', padding: '7px 0', borderBottom: '0.5px solid #f0f0f0', opacity: actionSort !== 'elegidas' && !isChosen ? 0.45 : 1 }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 900, color: '#ccc', width: 18, flexShrink: 0, paddingTop: 2 }}>{i + 1}</span>
+                    <span style={{ fontSize: '0.95rem', flexShrink: 0 }}>{AREA_EMOJI[a.area]}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 500, lineHeight: 1.3 }}>{a.label}</div>
+                      {teams.length > 0 && (
+                        <div style={{ fontSize: '0.62rem', color: '#2d5a27', marginTop: '0.2rem', fontWeight: 600 }}>
+                          {teams.join(', ')}
+                        </div>
+                      )}
+                    </div>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#2d5a27', flexShrink: 0 }}>
+                      −{(a.co2Reduction / 1000).toFixed(1)}t
+                    </span>
+                    {actionSort === 'elegidas' && (
+                      <span style={{ fontSize: '0.65rem', background: '#f0f7ee', color: '#2d5a27', padding: '1px 6px', borderRadius: 20, fontWeight: 600, flexShrink: 0 }}>
+                        {a.count}×
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>
