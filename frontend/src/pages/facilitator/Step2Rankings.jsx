@@ -502,6 +502,8 @@ export default function Step2Rankings() {
       waste:       '#f472b6',
     }
 
+    const [sortBy, setSortBy] = useState('count')
+
     const sortedTeams = [...(step3Data.teams || [])].sort((a, b) => (b.totalReduction || 0) - (a.totalReduction || 0))
     const enrichedTeams = sortedTeams.map(team => {
       if (team.originalTons != null && team.originalTons > 0) return team
@@ -513,6 +515,12 @@ export default function Step2Rankings() {
       return { ...team, originalTons, newTons }
     })
     const allActionsSorted = [...(step3Data.actionStats || [])].sort((a, b) => b.count - a.count)
+    const sorted = [...allActionsSorted].sort((a, b) => {
+      if (sortBy === 'count')          return b.count - a.count
+      if (sortBy === 'reduction_desc') return b.co2Reduction - a.co2Reduction
+      if (sortBy === 'reduction_asc')  return a.co2Reduction - b.co2Reduction
+      return 0
+    })
     const maxOriginal = Math.max(...enrichedTeams.map(t => t.originalTons || 0), 0.1)
 
     const getGroupAreaAvg = (group) => {
@@ -633,14 +641,33 @@ export default function Step2Rankings() {
 
           {/* Column 2: Top actions */}
           <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', marginBottom: '0.85rem' }}>
-              Acciones más elegidas
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.85rem' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888' }}>
+                Acciones más elegidas
+              </div>
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                {[
+                  { id: 'count',          label: 'Más elegidas'  },
+                  { id: 'reduction_desc', label: 'Mayor impacto' },
+                  { id: 'reduction_asc',  label: 'Menor impacto' },
+                ].map(opt => (
+                  <button key={opt.id} onClick={() => setSortBy(opt.id)} style={{
+                    padding: '0.25rem 0.75rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 600,
+                    background: sortBy === opt.id ? '#0a0a0a' : 'transparent',
+                    color:      sortBy === opt.id ? '#fff'    : '#666',
+                    border:    `1px solid ${sortBy === opt.id ? '#0a0a0a' : '#e5e5e5'}`,
+                    cursor: 'pointer',
+                  }}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
             {allActionsSorted.length === 0 ? (
               <div style={{ color: '#ccc', fontSize: '0.8rem', fontStyle: 'italic' }}>Sin acciones aún</div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem' }}>
-                {allActionsSorted.map((a, i) => {
+                {sorted.map((a, i) => {
                   const enrichedAction = ACTIONS.find(x => x.id === a.id)
                   return (
                   <div key={a.id} style={{
