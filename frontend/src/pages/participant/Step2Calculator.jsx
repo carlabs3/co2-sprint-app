@@ -611,19 +611,23 @@ export default function Step2Calculator() {
                 style={{
                   flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center',
                   padding: '10px 0 8px',
-                  fontSize: 19,
-                  position: 'relative',
-                  background: status === 'active' ? '#fff' : 'transparent',
-                  borderBottom: status === 'active' ? `3px solid ${a.color}` : '3px solid transparent',
-                  marginBottom: status === 'active' ? '-3px' : '0',
                   opacity: status === 'inactive' ? 0.2 : 1,
                   cursor: status !== 'inactive' ? 'pointer' : 'default',
                 }}
               >
-                <img src={AREA_ICON_URLS[a.id]} width={22} height={22} alt="" />
-                {status === 'done' && (
-                  <div style={{ position: 'absolute', top: 4, right: 6, width: 13, height: 13, borderRadius: '50%', background: '#0a0a0a', color: '#fff', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✓</div>
-                )}
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: (status === 'active' || status === 'done') ? a.color : 'transparent',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'background 0.2s ease',
+                }}>
+                  <img
+                    src={AREA_ICON_URLS[a.id]}
+                    width={22} height={22}
+                    alt=""
+                    style={{ filter: (status === 'active' || status === 'done') ? 'brightness(0) invert(1)' : 'none' }}
+                  />
+                </div>
               </div>
             )
           })}
