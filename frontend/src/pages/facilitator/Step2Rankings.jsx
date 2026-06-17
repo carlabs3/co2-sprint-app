@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import api from '../../utils/api.js'
 import { socket } from '../../utils/socket.js'
-import { ACTIONS, AREA_EMOJI, AREA_LABEL } from '../../utils/actions.js'
+import { ACTIONS, AREA_ICON_URL, AREA_LABEL } from '../../utils/actions.js'
 import {
   DistributionView, GroupsView,
   computeGroups,
@@ -401,17 +401,19 @@ export default function Step2Rankings() {
                   {/* Filtros por categoría */}
                   <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
                     {['transport','energy','food','consumption','waste'].map(area => {
-                      const labels = { transport: '🚗 Transporte', energy: '🏠 Hogar', food: '🥗 Alimentación', consumption: '🛍 Consumo', waste: '📱 Digital' }
+                      const labels = { transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación', consumption: 'Compras y hábitos', waste: 'Vida Digital' }
                       const colors = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
                       const isActive = filter3Area === area
                       return (
                         <button key={area} onClick={() => setFilter3Area(area === filter3Area ? 'all' : area)} style={{
+                          display: 'flex', alignItems: 'center', gap: '0.35rem',
                           padding: '0.3rem 0.85rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 600,
                           background: isActive ? colors[area] : 'transparent',
                           color: isActive ? '#0a0a0a' : '#666',
                           border: `1px solid ${isActive ? colors[area] : '#e5e5e5'}`,
                           cursor: 'pointer',
                         }}>
+                          <img src={AREA_ICON_URL[area]} width={14} height={14} alt="" style={{ flexShrink: 0 }} />
                           {labels[area]}
                         </button>
                       )

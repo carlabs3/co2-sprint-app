@@ -1,9 +1,9 @@
-export const AREA_EMOJI = {
-  transport:   '🚗',
-  energy:      '🏠',
-  food:        '🥗',
-  consumption: '🛍️',
-  waste:       '💻',
+export const AREA_ICON_URL = {
+  transport:   '/icons/transport.svg',
+  energy:      '/icons/energy.svg',
+  food:        '/icons/food.svg',
+  consumption: '/icons/consumption.svg',
+  waste:       '/icons/waste.svg',
 }
 
 export const AREA_COLOR = {

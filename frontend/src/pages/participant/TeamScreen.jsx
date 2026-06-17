@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { PieChart, Pie, Cell } from 'recharts'
 import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
-import { ACTIONS, AREA_EMOJI } from '../../utils/actions.js'
+import { ACTIONS, AREA_ICON_URL } from '../../utils/actions.js'
 import WaitingForFacilitator from '../../components/WaitingForFacilitator.jsx'
 
 // Normalize group name for comparison: "Equipo A" === "equipo-a"

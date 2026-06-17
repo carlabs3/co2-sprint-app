@@ -2,7 +2,6 @@ export const AREA_QUESTIONS = [
   {
     areaId: 'transport',
     areaLabel: 'Transporte',
-    areaEmoji: '🚗',
     areaColor: '#4a90d9',
     questions: [
       {
@@ -93,7 +92,6 @@ export const AREA_QUESTIONS = [
   {
     areaId: 'energy',
     areaLabel: 'Vivienda',
-    areaEmoji: '🏠',
     areaColor: '#e8a020',
     questions: [
       {
@@ -198,7 +196,6 @@ export const AREA_QUESTIONS = [
   {
     areaId: 'food',
     areaLabel: 'Alimentación',
-    areaEmoji: '🥗',
     areaColor: '#5aab5a',
     questions: [
       {
@@ -324,7 +321,6 @@ export const AREA_QUESTIONS = [
   {
     areaId: 'consumption',
     areaLabel: 'Compras y hábitos',
-    areaEmoji: '🛍️',
     areaColor: '#b07a30',
     questions: [
       {
@@ -420,7 +416,6 @@ export const AREA_QUESTIONS = [
   {
     areaId: 'waste',
     areaLabel: 'Vida Digital',
-    areaEmoji: '📱',
     areaColor: '#7a7aaa',
     questions: [
       {

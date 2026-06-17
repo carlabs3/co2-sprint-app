@@ -25,7 +25,6 @@ const AREA_ICON_URLS = {
 const AREAS = AREA_QUESTIONS.map(a => ({
   id: a.areaId,
   label: a.areaLabel,
-  emoji: a.areaEmoji,
   questions: a.questions,
   ...AREA_VISUAL[a.areaId],
 }))
@@ -465,8 +464,8 @@ export default function Step2Calculator() {
         padding: '2rem', textAlign: 'left',
         fontFamily: "'Instrument Sans', sans-serif",
       }}>
-        <div style={{ display: 'flex', gap: 12, marginBottom: 32, fontSize: 24 }}>
-          {AREAS.map(a => <span key={a.id}>{a.emoji}</span>)}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 32 }}>
+          {AREAS.map(a => <img key={a.id} src={AREA_ICON_URLS[a.id]} width={24} height={24} alt="" />)}
         </div>
         <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', color: '#0a0a0a', marginBottom: 16 }}>
           Antes de empezar

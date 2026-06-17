@@ -52,11 +52,11 @@ function getCategory(tons) {
 
 // Areas ordered for the detail section
 const AREAS = [
-  { id: 'transport',   label: 'Transporte',   emoji: '🚗', color: '#38bdf8' },
-  { id: 'energy',      label: 'Hogar',        emoji: '🏠', color: '#f59e0b' },
-  { id: 'food',        label: 'Alimentación', emoji: '🥗', color: '#4ade80' },
-  { id: 'consumption', label: 'Consumo',      emoji: '🛍️', color: '#a855f7' },
-  { id: 'waste',       label: 'Digital',      emoji: '📱', color: '#f472b6' },
+  { id: 'transport',   label: 'Transporte',        iconUrl: '/icons/transport.svg',   color: '#38bdf8' },
+  { id: 'energy',      label: 'Vivienda',           iconUrl: '/icons/energy.svg',      color: '#f59e0b' },
+  { id: 'food',        label: 'Alimentación',       iconUrl: '/icons/food.svg',        color: '#4ade80' },
+  { id: 'consumption', label: 'Compras y hábitos',  iconUrl: '/icons/consumption.svg', color: '#a855f7' },
+  { id: 'waste',       label: 'Vida Digital',       iconUrl: '/icons/waste.svg',       color: '#f472b6' },
 ]
 
 const SUBCATEGORIES = {
@@ -181,7 +181,7 @@ const SUBCATEGORIES = {
   ],
 }
 
-function AreaDetailCard({ areaId, areaLabel, areaEmoji, areaColor, areaTons, subcategories, answers, totalTons, maxAreaTons }) {
+function AreaDetailCard({ areaId, areaLabel, areaIconUrl, areaColor, areaTons, subcategories, answers, totalTons, maxAreaTons }) {
   const [expanded, setExpanded] = useState(false)
 
   const subcatValues = subcategories.map(sub => ({
@@ -196,7 +196,7 @@ function AreaDetailCard({ areaId, areaLabel, areaEmoji, areaColor, areaTons, sub
     <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 8, overflow: 'hidden', marginBottom: 8 }}>
       <div onClick={() => setExpanded(e => !e)}
         style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', gap: 10, cursor: 'pointer' }}>
-        <span style={{ fontSize: 18, width: 22, textAlign: 'center' }}>{areaEmoji}</span>
+        <img src={areaIconUrl} width={18} height={18} alt="" style={{ flexShrink: 0 }} />
         <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: '#0a0a0a' }}>{areaLabel}</span>
         <span style={{ fontSize: 13, fontWeight: 700, color: areaColor }}>{areaTons.toFixed(1)}t</span>
         <span style={{ fontSize: 10, color: '#aaa', marginLeft: 4 }}>
@@ -573,7 +573,7 @@ export default function Step2Results() {
                   key={area.id}
                   areaId={area.id}
                   areaLabel={area.label}
-                  areaEmoji={area.emoji}
+                  areaIconUrl={area.iconUrl}
                   areaColor={area.color}
                   areaTons={areas[area.id] || 0}
                   subcategories={SUBCATEGORIES[area.id] || []}
