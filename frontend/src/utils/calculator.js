@@ -34,6 +34,7 @@ export const MAP = {
   pets:        { bigDog: 1100, medDog: 770, smallDog: 400, cat: 310, none: 0 },
   hygiene:     { '22a': 13, '22b': 18, '22c': 39 },
   smoking:     { '23a': 0, '23b': 20, '23c': 11, '23d': 46, '23e': 102 },
+  sports:      { pool: 25, ball: 88, golf: 88, nautical: 88, motor: 88, ski: 138, gym: 72, martial: 88, cycling: 10, none: 0 },
 
   // ── DIGITAL ──
   videoCalls:  { none: 0, less1h: 8, '1to2h': 18, more2h: 38 },
@@ -134,7 +135,8 @@ export function calculator(answers) {
     sum('appliances', answers.appliances) +
     sum('pets', answers.pets) +
     get('hygiene', answers.hygiene) +
-    get('smoking', answers.smoking)
+    get('smoking', answers.smoking) +
+    sum('sports', answers.sports)
 
   // ── Huella digital + servicios públicos ────────────────────────────────────
   const digitalKg =

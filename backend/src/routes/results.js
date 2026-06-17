@@ -34,6 +34,7 @@ const MAP = {
   pets:          { bigDog: 1100, medDog: 770, smallDog: 400, cat: 310, none: 0 },
   hygiene:       { '22a': 13, '22b': 18, '22c': 39 },
   smoking:       { '23a': 0, '23b': 20, '23c': 11, '23d': 46, '23e': 102 },
+  sports:        { pool: 25, ball: 88, golf: 88, nautical: 88, motor: 88, ski: 138, gym: 72, martial: 88, cycling: 10, none: 0 },
   videoCalls:    { none: 0, less1h: 8, '1to2h': 18, more2h: 38 },
   streaming:     { none: 0, '1to2h': 16, '2to4h': 34, more4h: 69 },
   socialMedia:   { none: 0, less1h: 16, '1to2h': 39, more2h: 82 },
@@ -81,7 +82,7 @@ const SUBCATS = {
   consumption: [
     { label: 'Moda',                         calc: (a) => MAP.clothes[a.clothes] || 0 },
     { label: 'Tecnología',                   calc: (a) => (Array.isArray(a.electronics) ? a.electronics : []).reduce((s, v) => s + (MAP.electronics[v] || 0), 0) + (Array.isArray(a.appliances) ? a.appliances : []).reduce((s, v) => s + (MAP.appliances[v] || 0), 0) },
-    { label: 'Estilo de vida',               calc: (a) => ['bigDog', 'medDog', 'smallDog', 'cat'].filter(p => a.pets?.includes(p)).reduce((s, p) => s + (MAP.pets[p] || 0), 0) + (MAP.hygiene[a.hygiene] || 0) + (MAP.smoking[a.smoking] || 0) },
+    { label: 'Estilo de vida',               calc: (a) => ['bigDog', 'medDog', 'smallDog', 'cat'].filter(p => a.pets?.includes(p)).reduce((s, p) => s + (MAP.pets[p] || 0), 0) + (MAP.hygiene[a.hygiene] || 0) + (MAP.smoking[a.smoking] || 0) + (Array.isArray(a.sports) ? a.sports.filter(s => s !== 'none').reduce((sum, s) => sum + (MAP.sports[s] || 0), 0) : 0) },
   ],
   waste: [
     { label: 'Uso de pantallas',             calc: (a) => (MAP.videoCalls[a.videoCalls] || 0) + (MAP.streaming[a.streaming] || 0) + (MAP.socialMedia[a.socialMedia] || 0) },

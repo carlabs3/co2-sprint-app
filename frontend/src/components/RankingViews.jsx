@@ -165,7 +165,7 @@ const AREA_SUBCATEGORIES = {
   consumption: [
     { label: 'Moda',                        keys: ['clothes'] },
     { label: 'Tecnología',                  keys: ['electronics', 'appliances'] },
-    { label: 'Estilo de vida',              keys: ['pets', 'hygiene', 'smoking'] },
+    { label: 'Estilo de vida',              keys: ['pets', 'hygiene', 'smoking', 'sports'] },
   ],
   waste: [
     { label: 'Uso de pantallas',            keys: ['videoCalls', 'streaming', 'socialMedia'] },
@@ -231,6 +231,9 @@ function getContribution(answers, key) {
     case 'pets':         return ['bigDog','medDog','smallDog','cat'].filter(p => answers.pets?.includes(p)).reduce((s, p) => s + (MAP.pets[p] || 0), 0)
     case 'hygiene':      return MAP.hygiene[answers.hygiene] || 0
     case 'smoking':      return MAP.smoking[answers.smoking] || 0
+    case 'sports':       return Array.isArray(answers.sports)
+      ? answers.sports.filter(s => s !== 'none').reduce((sum, s) => sum + (MAP.sports[s] || 0), 0)
+      : 0
     case 'videoCalls':   return MAP.videoCalls[answers.videoCalls] || 0
     case 'streaming':    return MAP.streaming[answers.streaming] || 0
     case 'socialMedia':  return MAP.socialMedia[answers.socialMedia] || 0
