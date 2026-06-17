@@ -609,24 +609,19 @@ export default function Step2Calculator() {
               <div key={a.id} onClick={() => handleAreaClick(ai)}
                 style={{
                   flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center',
-                  padding: '10px 0 8px',
+                  padding: '12px 0',
+                  background: (status === 'active' || status === 'done') ? a.color : 'transparent',
                   opacity: status === 'inactive' ? 0.2 : 1,
                   cursor: status !== 'inactive' ? 'pointer' : 'default',
+                  transition: 'background 0.2s ease',
                 }}
               >
-                <div style={{
-                  width: 36, height: 36, borderRadius: 10,
-                  background: (status === 'active' || status === 'done') ? a.color : 'transparent',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'background 0.2s ease',
-                }}>
-                  <img
-                    src={AREA_ICON_URLS[a.id]}
-                    width={22} height={22}
-                    alt=""
-                    style={{ filter: (status === 'active' || status === 'done') ? 'brightness(0) invert(1)' : 'none' }}
-                  />
-                </div>
+                <img
+                  src={AREA_ICON_URLS[a.id]}
+                  width={22} height={22}
+                  alt=""
+                  style={{ filter: (status === 'active' || status === 'done') ? 'brightness(0) invert(1)' : 'none' }}
+                />
               </div>
             )
           })}
