@@ -86,6 +86,7 @@ export const AREA_QUESTIONS = [
           { value: 'mostly',  label: '3–5 días/semana (principalmente remoto)' },
           { value: 'partial', label: '1–2 días/semana' },
           { value: 'never',   label: 'Nunca, voy a la oficina todos los días' },
+          { value: 'na',      label: 'No aplica a mi trabajo' },
         ],
       },
     ],
