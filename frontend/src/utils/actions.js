@@ -25,12 +25,12 @@ export const AREA_LABEL = {
 export const ACTIONS = [
   // TRANSPORTE
   { id: 't01', area: 'transport', co2Reduction: 230,  label: 'Tomo el tren en lugar del avión para una escapada de fin de semana',              description: 'Ejemplo: Madrid–Santiago de Compostela.', image: '/actions/t01.png' },
-  { id: 't02', area: 'transport', co2Reduction: 1000, label: 'Viajo en coche (2 personas) a Cantabria en lugar de volar a las Islas',            description: 'Elijo destino nacional y comparto el trayecto.', image: '/actions/t02.png' },
-  { id: 't03', area: 'transport', co2Reduction: 150,  label: 'Tomo el autobús en lugar del coche para mis desplazamientos diarios',              description: 'El autobús urbano emite hasta 6× menos CO₂ por pasajero.', image: '/actions/t03.png' },
-  { id: 't04', area: 'transport', co2Reduction: 130,  label: 'Voy en bicicleta en lugar de utilizar el coche para mis desplazamientos diarios',  description: 'Cero emisiones y mejor salud.', image: '/actions/t04.png' },
-  { id: 't05', area: 'transport', co2Reduction: 2200, label: 'Tomo el tren en lugar del coche para mis desplazamientos diarios',                description: 'El tren de cercanías emite hasta 10× menos que el coche.', image: '/actions/t05.png' },
-  { id: 't06', area: 'transport', co2Reduction: 3000, label: 'Elijo un vuelo de corta distancia en lugar de uno transoceánico para mis vacaciones', description: 'Voy a Lisboa en vez de Nueva York.', image: '/actions/t06.png' },
-  { id: 't07', area: 'transport', co2Reduction: 1900, label: 'Comparto coche con otras dos personas los fines de semana',                       description: 'Ejemplo: Madrid–Bilbao (700 km ida y vuelta).', image: '/actions/t07.png' },
+  { id: 't02', area: 'transport', co2Reduction: 1000, label: 'Cambio las vacaciones a las Islas por Cantabria, y el avión por el coche, viajamos al menos dos.',            description: 'Elijo destino nacional y comparto el trayecto.', image: '/actions/t02.png' },
+  { id: 't03', area: 'transport', co2Reduction: 250,  label: 'Tomo el autobús en lugar del coche para mis desplazamientos diarios',              description: 'El autobús urbano emite hasta 6× menos CO₂ por pasajero.', image: '/actions/t03.png' },
+  { id: 't04', area: 'transport', co2Reduction: 130,  label: 'Voy en bicicleta en lugar del coche',  description: 'Cero emisiones y mejor salud.', image: '/actions/t04.png' },
+  { id: 't05', area: 'transport', co2Reduction: 560, label: 'Tomo el tren en lugar del coche para mis desplazamientos diarios',                description: 'El tren de cercanías emite hasta 10× menos que el coche.', image: '/actions/t05.png' },
+  { id: 't06', area: 'transport', co2Reduction: 2500, label: 'Elijo un vuelo de corta distancia en lugar de uno transoceánico para mis vacaciones', description: 'Voy a Lisboa en vez de Nueva York.', image: '/actions/t06.png' },
+  { id: 't07', area: 'transport', co2Reduction: 350, label: 'Comparto coche con tres personas para mis desplazamientos diarios',                       description: 'Ejemplo: Madrid–Bilbao (700 km ida y vuelta).', image: '/actions/t07.png' },
 
   // VIVIENDA / ENERGÍA
   { id: 'v01', area: 'energy', co2Reduction: 800, label: 'Sustituyo la caldera de gas por una bomba de calor',                            description: 'Además, reduzco mi factura energética.', image: '/actions/v01.png' },
