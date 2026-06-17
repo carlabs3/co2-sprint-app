@@ -73,9 +73,9 @@ const SUBCATEGORIES = {
     {
       label: 'Vuelos',
       calc: (answers) => (
-        (answers.flights?.includes('flightShort')  ? 824  : 0) +
-        (answers.flights?.includes('flightMedium') ? 1879 : 0) +
-        (answers.flights?.includes('flightLong')   ? 2627 : 0)
+        (answers.flightShort  || 0) * 550  +
+        (answers.flightMedium || 0) * 1252 +
+        (answers.flightLong   || 0) * 1752
       ) / 1000,
     },
     {

@@ -14,6 +14,7 @@ const MAP = {
   train:         { '3a': 21, '3b': 126, '3c': 630, '3d': 0 },
   moto:          { '4a': 11, '4b': 57, '4c': 228, '4d': 0 },
   urbanMobility: { '5a': 0, '5b': 2, '5c': 4, '5d': 5, '5e': 44 },
+  telework:      { na: 0, never: 0, partial: -200, mostly: -600, always: -800 },
   heatingSmall:  { '26a': 0, '26b': 625, '26c': 975,  '26d': 1429, '26e': 230, '26f': 375, '26g': 668 },
   heatingMedium: { '26a': 0, '26b': 750, '26c': 1170, '26d': 1715, '26e': 276, '26f': 450, '26g': 802 },
   heatingLarge:  { '26a': 0, '26b': 781, '26c': 1219, '26d': 1787, '26e': 288, '26f': 469, '26g': 835 },
@@ -61,8 +62,9 @@ function calcAlcohol(alcohol = {}) {
 const SUBCATS = {
   transport: [
     { label: 'Vehículo privado',            calc: (a) => !a.carKm || a.carKm === 'km_e' ? 0 : a.carType === 'electric' ? (MAP.electricCar[a.carKm] || 0) : (MAP.carKm[a.carKm] || 0) },
-    { label: 'Vuelos',                       calc: (a) => (a.flights?.includes('flightShort') ? 824 : 0) + (a.flights?.includes('flightMedium') ? 1879 : 0) + (a.flights?.includes('flightLong') ? 2627 : 0) },
+    { label: 'Vuelos',                       calc: (a) => (a.flightShort || 0) * 550 + (a.flightMedium || 0) * 1252 + (a.flightLong || 0) * 1752 },
     { label: 'Transporte público y activo',  calc: (a) => (MAP.train[a.train] || 0) + (MAP.moto[a.moto] || 0) + (MAP.urbanMobility[a.urbanMobility] || 0) },
+    { label: 'Teletrabajo',                  calc: (a) => MAP.telework[a.telework] ?? 0, negative: true },
   ],
   energy: [
     { label: 'Calefacción y agua caliente',  calc: (a) => { const div = MAP.householdSize[a.householdSize] ?? 2; let h = 0; if (a.homeType === '25a') h = MAP.heatingSmall[a.heating] ?? 0; else if (a.homeType === '25b') h = MAP.heatingMedium[a.heating] ?? 0; else if (a.homeType === '25c') h = MAP.heatingLarge[a.heating] ?? 0; return h / div } },

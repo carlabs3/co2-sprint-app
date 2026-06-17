@@ -48,7 +48,7 @@ const homeTypeLabels = {
   '25c': 'casa grande (más de 180 m²)',
 }
 
-function NightsInput({ question, answers, onChange }) {
+function NightsInput({ question, answers, onChange, unit = 'noches' }) {
   const handleChange = (value, delta) => {
     const current = answers[value] || 0
     const newVal = Math.max(0, current + delta)
@@ -77,13 +77,13 @@ function NightsInput({ question, answers, onChange }) {
             <button onClick={() => handleChange(opt.value, 1)}
               style={{ width: '26px', height: '26px', borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
           </div>
-          <span style={{ fontSize: '10px', color: '#aaa', width: '32px' }}>noches</span>
+          <span style={{ fontSize: '10px', color: '#aaa', width: '32px' }}>{unit}</span>
         </div>
       ))}
       {totalNights > 0 && (
         <div style={{ background: '#f5f5f5', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '11px', color: '#888' }}>Total noches</span>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: '#0a0a0a' }}>{totalNights} noches</span>
+          <span style={{ fontSize: '11px', color: '#888' }}>Total {unit}</span>
+          <span style={{ fontSize: '12px', fontWeight: 600, color: '#0a0a0a' }}>{totalNights} {unit}</span>
         </div>
       )}
     </div>
@@ -332,10 +332,10 @@ export default function Step2Calculator() {
   const question = area.questions[questionIndex]
   const isFirst  = areaIndex === 0 && questionIndex === 0
   const isLast   = areaIndex === AREAS.length - 1 && questionIndex === area.questions.length - 1
-  const canNext  = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.type === 'drinks' || question.isSensibilization || answers[question.id] !== undefined
+  const canNext  = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.type === 'flights' || question.type === 'drinks' || question.isSensibilization || answers[question.id] !== undefined
 
   function isAreaDone(ai) {
-    return AREAS[ai].questions.every(q => isSkipped(q) || q.type === 'multi' || q.type === 'nights' || q.type === 'drinks' || q.isSensibilization || answers[q.id] !== undefined)
+    return AREAS[ai].questions.every(q => isSkipped(q) || q.type === 'multi' || q.type === 'nights' || q.type === 'flights' || q.type === 'drinks' || q.isSensibilization || answers[q.id] !== undefined)
   }
 
   function getAreaStatus(ai) {
@@ -371,7 +371,7 @@ export default function Step2Calculator() {
   function handleNext(overrideAnswers = null) {
     const currentAnswers = overrideAnswers ?? answers
     // Recompute canNext with the actual answers (avoids stale state in timeouts)
-    const currentCanNext = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.type === 'drinks' || question.isSensibilization || currentAnswers[question.id] !== undefined
+    const currentCanNext = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.type === 'flights' || question.type === 'drinks' || question.isSensibilization || currentAnswers[question.id] !== undefined
     if (!currentCanNext) return
     if (isLast) {
       const calcResult = calculator(currentAnswers)
@@ -558,6 +558,10 @@ export default function Step2Calculator() {
           <div style={{ padding: '0 28px 16px', maxWidth: 640, flex: 1, overflowY: 'auto' }}>
             {question.type === 'drinks' ? (
               <DrinksInput question={question} answers={answers} onChange={setAnswers} />
+            ) : question.type === 'flights' ? (
+              <div style={{ '--area-color': '#4a90d9', '--area-bg': '#e8f2fd' }}>
+                <NightsInput question={question} answers={answers} onChange={setAnswers} unit="vuelo/s" />
+              </div>
             ) : question.type === 'nights' ? (
               <div style={{ '--area-color': '#0a0a0a', '--area-bg': '#f5f5f5' }}>
                 <NightsInput question={question} answers={answers} onChange={setAnswers} />
@@ -653,6 +657,10 @@ export default function Step2Calculator() {
         <div style={{ padding: '0 16px 8px', flex: 1, overflowY: 'auto', background: '#f5f5f5' }}>
           {question.type === 'drinks' ? (
             <DrinksInput question={question} answers={answers} onChange={setAnswers} />
+          ) : question.type === 'flights' ? (
+            <div style={{ '--area-color': '#4a90d9', '--area-bg': '#e8f2fd' }}>
+              <NightsInput question={question} answers={answers} onChange={setAnswers} unit="vuelo/s" />
+            </div>
           ) : question.type === 'nights' ? (
             <div style={{ '--area-color': '#0a0a0a', '--area-bg': '#f5f5f5' }}>
               <NightsInput question={question} answers={answers} onChange={setAnswers} />

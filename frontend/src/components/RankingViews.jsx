@@ -148,6 +148,7 @@ const AREA_SUBCATEGORIES = {
     { label: 'Vehículo privado',           keys: ['carKm'] },
     { label: 'Vuelos',                      keys: ['flights'] },
     { label: 'Transporte público y activo', keys: ['train', 'moto', 'urbanMobility'] },
+    { label: 'Teletrabajo',                 keys: ['telework'], negative: true },
   ],
   energy: [
     { label: 'Calefacción y agua caliente', keys: ['heating'] },
@@ -182,7 +183,8 @@ function getContribution(answers, key) {
         ? (MAP.electricCar[answers.carKm] || 0)
         : (MAP.carKm[answers.carKm] || 0)
     }
-    case 'flights':      return ((answers.flights?.includes('flightShort') ? 824 : 0) + (answers.flights?.includes('flightMedium') ? 1879 : 0) + (answers.flights?.includes('flightLong') ? 2627 : 0))
+    case 'flights':      return (answers.flightShort || 0) * 550 + (answers.flightMedium || 0) * 1252 + (answers.flightLong || 0) * 1752
+    case 'telework':     return MAP.telework[answers.telework] ?? 0
     case 'train':        return MAP.train[answers.train] || 0
     case 'moto':         return MAP.moto[answers.moto] || 0
     case 'urbanMobility':return MAP.urbanMobility[answers.urbanMobility] || 0

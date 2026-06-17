@@ -7,6 +7,7 @@ export const MAP = {
   train:         { '3a': 21, '3b': 126, '3c': 630, '3d': 0 },
   moto:          { '4a': 11, '4b': 57, '4c': 228, '4d': 0 },
   urbanMobility: { '5a': 0, '5b': 2, '5c': 4, '5d': 5, '5e': 44 },
+  telework:      { na: 0, never: 0, partial: -200, mostly: -600, always: -800 },
 
   // ── VIVIENDA ── (3 tablas de calefacción por tipo de vivienda)
   heatingSmall:  { '26a': 0, '26b': 625, '26c': 975,  '26d': 1429, '26e': 230, '26f': 375, '26g': 668 },
@@ -74,13 +75,14 @@ export function calculator(answers) {
     : answers.carType === 'electric'
       ? (MAP.electricCar[answers.carKm] ?? 0)
       : (MAP.carKm[answers.carKm] ?? 0)
-  const flightsKg = (answers.flights?.includes('flightShort')  ? 824  : 0)
-                  + (answers.flights?.includes('flightMedium') ? 1879 : 0)
-                  + (answers.flights?.includes('flightLong')   ? 2627 : 0)
+  const flightsKg = (answers.flightShort  || 0) * 550
+                  + (answers.flightMedium || 0) * 1252
+                  + (answers.flightLong   || 0) * 1752
   const transportKg = carKg + flightsKg
     + get('train', answers.train)
     + get('moto', answers.moto)
     + get('urbanMobility', answers.urbanMobility)
+    + get('telework', answers.telework)
 
   // ── Hogar ───────────────────────────────────────────────────────────────────
   const div = MAP.householdSize[answers.householdSize] ?? 2
