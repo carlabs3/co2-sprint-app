@@ -14,6 +14,13 @@ const AREA_VISUAL = {
   consumption: { color: '#a855f7', bg: '#fdf4e8', iconBg: '#f5e6cc' },
   waste:       { color: '#f472b6', bg: '#f0f0f8', iconBg: '#e0e0f0' },
 }
+const AREA_ICON_URLS = {
+  transport:   '/icons/transport.svg',
+  energy:      '/icons/energy.svg',
+  food:        '/icons/food.svg',
+  consumption: '/icons/consumption.svg',
+  waste:       '/icons/waste.svg',
+}
 
 const AREAS = AREA_QUESTIONS.map(a => ({
   id: a.areaId,
@@ -506,7 +513,7 @@ export default function Step2Calculator() {
                   cursor: status !== 'inactive' ? 'pointer' : 'default',
                 }}
               >
-                <span style={{ fontSize: 17, flexShrink: 0 }}>{a.emoji}</span>
+                <img src={AREA_ICON_URLS[a.id]} width={22} height={22} alt="" style={{ flexShrink: 0 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12.5, fontWeight: isAct ? 500 : 400, color: isDone ? '#0a0a0a' : '#0a0a0a', letterSpacing: '-0.01em' }}>
                     {a.label}
@@ -613,7 +620,7 @@ export default function Step2Calculator() {
                   cursor: status !== 'inactive' ? 'pointer' : 'default',
                 }}
               >
-                {a.emoji}
+                <img src={AREA_ICON_URLS[a.id]} width={22} height={22} alt="" />
                 {status === 'done' && (
                   <div style={{ position: 'absolute', top: 4, right: 6, width: 13, height: 13, borderRadius: '50%', background: '#0a0a0a', color: '#fff', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✓</div>
                 )}

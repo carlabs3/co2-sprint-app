@@ -92,7 +92,7 @@ export const AREA_QUESTIONS = [
   },
   {
     areaId: 'energy',
-    areaLabel: 'Hogar',
+    areaLabel: 'Vivienda',
     areaEmoji: '🏠',
     areaColor: '#e8a020',
     questions: [
@@ -323,7 +323,7 @@ export const AREA_QUESTIONS = [
   },
   {
     areaId: 'consumption',
-    areaLabel: 'Consumo',
+    areaLabel: 'Compras y hábitos',
     areaEmoji: '🛍️',
     areaColor: '#b07a30',
     questions: [
@@ -419,7 +419,7 @@ export const AREA_QUESTIONS = [
   },
   {
     areaId: 'waste',
-    areaLabel: 'Huella Digital',
+    areaLabel: 'Vida Digital',
     areaEmoji: '📱',
     areaColor: '#7a7aaa',
     questions: [
