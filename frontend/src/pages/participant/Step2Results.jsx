@@ -59,7 +59,7 @@ const AREAS = [
   { id: 'food',           label: 'Alimentación',       iconUrl: '/icons/food.svg',        color: '#4ade80' },
   { id: 'consumption',    label: 'Compras y hábitos',  iconUrl: '/icons/consumption.svg', color: '#a855f7' },
   { id: 'waste',          label: 'Vida digital',       iconUrl: '/icons/waste.svg',       color: '#f472b6' },
-  { id: 'publicServices', label: 'Servicios públicos', iconUrl: '/icons/waste.svg',       color: '#94a3b8' },
+  { id: 'publicServices', label: 'Servicios públicos', iconUrl: '/icons/public-services.svg', color: '#94a3b8' },
 ]
 
 const SUBCATEGORIES = {
@@ -599,27 +599,6 @@ export default function Step2Results() {
             </div>
           )
         })()}
-
-        {/* ── public services card ── */}
-        <p style={{ fontSize: '0.88rem', color: '#888', marginBottom: '0.6rem', fontStyle: 'italic' }}>
-          ...y a esto hay que sumarle lo que pagamos entre todos...
-        </p>
-        <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 8, padding: '10px 12px', marginBottom: '1rem' }}>
-  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-    <span style={{ fontSize: 18, width: 22, textAlign: 'center' }}>🏛️</span>
-    <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: '#0a0a0a' }}>Servicios públicos</span>
-    <span style={{ fontSize: 13, fontWeight: 700, color: '#888' }}>{(areas.publicServices || 1.5).toFixed(1)}t</span>
-    <span style={{ fontSize: 10, color: '#aaa' }}>
-      {carbonTons > 0 ? Math.round(((areas.publicServices || 1.5) / carbonTons) * 100) : 0}%
-    </span>
-  </div>
-          <p style={{ fontSize: '0.88rem', color: '#555', margin: 0, lineHeight: 1.65 }}>
-            Una parte de tu huella proviene de los servicios que usamos colectivamente: sanidad, educación,
-            infraestructuras, administración y defensa. Este coste —estimado en{' '}
-            <strong>1.500 kg CO₂/año por persona</strong> en España— se reparte de forma igualitaria entre
-            toda la ciudadanía y no depende de tus hábitos individuales.
-          </p>
-        </div>
 
         {/* ── middle row: spain + percentile ── */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
