@@ -174,8 +174,7 @@ function isWeekDistributionValid(question, answers) {
 
 function WeekDistributionInput({ question, answers, onChange }) {
   const dist = answers[question.id] || {}
-  const isDouble = question.allowDouble ? (answers.breakfastDouble || false) : false
-  const maxDays = isDouble ? 14 : (question.maxDays || 7)
+  const maxDays = question.maxDays || 7
   const noneOption = question.options.find(o => o.isNone)
   const noneActive = noneOption ? (dist[noneOption.value] || 0) > 0 : false
   const nonNoneTotal = Object.entries(dist)
@@ -263,7 +262,7 @@ function WeekDistributionInput({ question, answers, onChange }) {
             )}
           </div>
           <span style={{ fontSize: 14, color: answers.breakfastDouble ? '#e8a020' : '#666' }}>
-            También almuerzo (×1.5)
+            También almuerzo a media mañana
           </span>
         </div>
       )}
