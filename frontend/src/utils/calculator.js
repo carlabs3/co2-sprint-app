@@ -36,8 +36,8 @@ export const MAP = {
 
   // ── DIGITAL ──
   videoCalls:  { vc_none: 0, vc_sometimes: 8, vc_often: 18, vc_lots: 38 },
-  streaming:   { st_none: 0, st_little: 8, st_often: 28, st_lots: 56 },
-  socialMedia: { sm_none: 0, sm_little: 16, sm_often: 39, sm_lots: 82 },
+  streaming:   { st_none: 0, st_little: 8, st_often: 42, st_lots: 84 },
+  socialMedia: { sm_none: 0, sm_little: 16, sm_often: 58, sm_lots: 117 },
   aiUsage:     { none: 0, low: 25, medium: 100, high: 250 },
 }
 

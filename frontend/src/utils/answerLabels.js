@@ -450,8 +450,8 @@ export const AREA_QUESTIONS = [
         options: [
           { value: 'st_none',   label: 'No veo nada' },
           { value: 'st_little', label: 'Poco (1–3 h/semana)' },
-          { value: 'st_often',  label: 'Bastante (4–10 h/semana)' },
-          { value: 'st_lots',   label: 'Mucho (+10 h/semana)' },
+          { value: 'st_often',  label: 'Bastante (1–2 h/día)' },
+          { value: 'st_lots',   label: 'Mucho (más de 3 h/día)' },
         ],
       },
       {
@@ -461,8 +461,8 @@ export const AREA_QUESTIONS = [
         options: [
           { value: 'sm_none',   label: 'No tengo redes sociales' },
           { value: 'sm_little', label: 'Poco (1–3 h/semana)' },
-          { value: 'sm_often',  label: 'Bastante (4–10 h/semana)' },
-          { value: 'sm_lots',   label: 'Mucho (+10 h/semana)' },
+          { value: 'sm_often',  label: 'Bastante (1–2 h/día)' },
+          { value: 'sm_lots',   label: 'Mucho (más de 3 h/día)' },
         ],
       },
       {

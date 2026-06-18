@@ -34,8 +34,8 @@ const MAP = {
   smoking:       { '23a': 0, '23b': 20, '23c': 11, '23d': 46, '23e': 102 },
   sports:        { outdoor: 0, cycling: 10, racket: 43, pool: 43, gym: 31, fitness: 43, martial: 43, athletics: 43, equestrian: 43, golf: 43, nautical: 43, ski: 93, motor: 43, climbing: 43, none: 0 },
   videoCalls:    { vc_none: 0, vc_sometimes: 8, vc_often: 18, vc_lots: 38 },
-  streaming:     { st_none: 0, st_little: 8, st_often: 28, st_lots: 56 },
-  socialMedia:   { sm_none: 0, sm_little: 16, sm_often: 39, sm_lots: 82 },
+  streaming:     { st_none: 0, st_little: 8, st_often: 42, st_lots: 84 },
+  socialMedia:   { sm_none: 0, sm_little: 16, sm_often: 58, sm_lots: 117 },
   aiUsage:       { none: 0, low: 25, medium: 100, high: 250 },
 }
 
