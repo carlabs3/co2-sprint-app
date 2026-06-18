@@ -17,11 +17,12 @@ function groupMatches(recordGroup, urlGroup) {
 }
 
 const AREA_META = [
-  { key: 'transport',   label: 'Transporte',   color: '#38bdf8' },
-  { key: 'energy',      label: 'Vivienda',     color: '#f59e0b' },
-  { key: 'food',        label: 'Alimentación', color: '#4ade80' },
-  { key: 'consumption', label: 'Compras y hábitos', color: '#a855f7' },
-  { key: 'waste',       label: 'Vida digital',     color: '#f472b6' },
+  { key: 'transport',      label: 'Transporte',        color: '#38bdf8' },
+  { key: 'energy',         label: 'Vivienda',          color: '#f59e0b' },
+  { key: 'food',           label: 'Alimentación',      color: '#4ade80' },
+  { key: 'consumption',    label: 'Compras y hábitos', color: '#a855f7' },
+  { key: 'waste',          label: 'Vida digital',      color: '#f472b6' },
+  { key: 'publicServices', label: 'Servicios públicos', color: '#94a3b8' },
 ]
 
 const SPAIN_AVG = 8.1
@@ -298,9 +299,9 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
 function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showValues }) {
   const { actions = [], newCarbonTons = 0, totalReduction = 0 } = confirmedData || {}
 
-  const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste']
-  const COLORS = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
-  const SHORT   = { transport: 'Trans.', energy: 'Viv.', food: 'Alim.', consumption: 'Cons.', waste: 'Dig.' }
+  const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste', 'publicServices']
+  const COLORS = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6', publicServices: '#94a3b8' }
+  const SHORT   = { transport: 'Trans.', energy: 'Viv.', food: 'Alim.', consumption: 'Cons.', waste: 'Dig.', publicServices: 'Serv.' }
 
   const areaAvgBefore = {}
   AREA_ORDER.forEach(area => {
@@ -309,7 +310,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
       : 0
   })
 
-  const areaRed = { transport: 0, energy: 0, food: 0, consumption: 0, waste: 0 }
+  const areaRed = { transport: 0, energy: 0, food: 0, consumption: 0, waste: 0, publicServices: 0 }
   actions.forEach(id => {
     const a = ACTIONS.find(x => x.id === id)
     if (a) areaRed[a.area] = (areaRed[a.area] || 0) + a.co2Reduction / 1000

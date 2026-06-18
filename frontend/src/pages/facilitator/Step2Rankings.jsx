@@ -297,14 +297,14 @@ export default function Step2Rankings() {
 
             const groupMembers = ranking.filter(r => r.group === group)
             const areaAvg = {}
-            ;['transport','energy','food','consumption','waste'].forEach(area => {
+            ;['transport','energy','food','consumption','waste','publicServices'].forEach(area => {
               areaAvg[area] = groupMembers.length
                 ? groupMembers.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / groupMembers.length
                 : 0
             })
             const areaTotal = Object.values(areaAvg).reduce((s, v) => s + v, 0)
-            const AREA_COLORS_LOCAL = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
-            const AREA_LABELS_LOCAL = { transport: 'Transp.', energy: 'Vivienda', food: 'Alim.', consumption: 'Compras', waste: 'Digital' }
+            const AREA_COLORS_LOCAL = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6', publicServices: '#94a3b8' }
+            const AREA_LABELS_LOCAL = { transport: 'Transp.', energy: 'Vivienda', food: 'Alim.', consumption: 'Compras', waste: 'Digital', publicServices: 'Serv. púb.' }
 
             return (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'start' }}>
@@ -324,14 +324,14 @@ export default function Step2Rankings() {
                     {areaTotal > 0 && (
                       <>
                         <div style={{ display: 'flex', height: 12, borderRadius: 999, overflow: 'hidden', marginBottom: '0.6rem' }}>
-                          {['transport','energy','food','consumption','waste'].map(area => {
+                          {['transport','energy','food','consumption','waste','publicServices'].map(area => {
                             const pct = areaTotal > 0 ? (areaAvg[area] / areaTotal) * 100 : 0
                             if (pct < 0.5) return null
                             return <div key={area} style={{ width: `${pct}%`, background: AREA_COLORS_LOCAL[area] }} />
                           })}
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 12px' }}>
-                          {['transport','energy','food','consumption','waste'].map(area => {
+                          {['transport','energy','food','consumption','waste','publicServices'].map(area => {
                             const pct = areaTotal > 0 ? Math.round((areaAvg[area] / areaTotal) * 100) : 0
                             if (!pct) return null
                             return (
@@ -488,7 +488,7 @@ export default function Step2Rankings() {
 
   // ── Step3Results helper ───────────────────────────────────────────────────────
   function Step3Results({ step3Data, ranking, sessionGroups }) {
-    const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste']
+    const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste', 'publicServices']
 
     function getCategory(tons) {
       if (tons < 4)  return 'bajo'
@@ -497,11 +497,12 @@ export default function Step2Rankings() {
       return 'muy alto'
     }
     const A_COLORS = {
-      transport:   '#38bdf8',
-      energy:      '#f59e0b',
-      food:        '#4ade80',
-      consumption: '#a855f7',
-      waste:       '#f472b6',
+      transport:      '#38bdf8',
+      energy:         '#f59e0b',
+      food:           '#4ade80',
+      consumption:    '#a855f7',
+      waste:          '#f472b6',
+      publicServices: '#94a3b8',
     }
 
     const [sortBy, setSortBy] = useState('count')
@@ -546,7 +547,7 @@ export default function Step2Rankings() {
 
     const getGroupAreaAfter = (group, areaAvg) => {
       const teamData = step3Data.teams?.find(t => t.group === group)
-      const red = { transport: 0, energy: 0, food: 0, consumption: 0, waste: 0 }
+      const red = { transport: 0, energy: 0, food: 0, consumption: 0, waste: 0, publicServices: 0 }
       if (teamData?.actions) {
         teamData.actions.forEach(id => {
           const a = ACTIONS.find(x => x.id === id)
@@ -558,7 +559,7 @@ export default function Step2Rankings() {
       return after
     }
 
-    const AREA_LABELS_S3 = { transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación', consumption: 'Compras y hábitos', waste: 'Vida digital' }
+    const AREA_LABELS_S3 = { transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación', consumption: 'Compras y hábitos', waste: 'Vida digital', publicServices: 'Servicios públicos' }
 
     const StackedBar = ({ areaAvg, total, maxVal, label, muted = false }) => {
       const areaSum = AREA_ORDER.reduce((s, a) => s + (areaAvg[a] || 0), 0)
