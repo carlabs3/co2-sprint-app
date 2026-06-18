@@ -824,7 +824,7 @@ export default function Step2Calculator() {
 
 
         {/* Options — flex 1, tarjetas blancas sobre fondo claro */}
-        <div style={{ padding: '0 16px 8px', flex: 1, overflowY: 'auto', background: '#f5f5f5' }}>
+        <div style={{ padding: '0 16px 8px', flex: 1, overflowY: 'auto', background: '#f5f5f5', paddingBottom: 100 }}>
           {question.type === 'drinks' ? (
             <DrinksInput question={question} answers={answers} onChange={setAnswers} />
           ) : question.type === 'flights' ? (
@@ -850,7 +850,7 @@ export default function Step2Calculator() {
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '10px 16px 14px', display: 'flex', gap: 8, flexShrink: 0, background: '#f5f5f5', borderTop: `1px solid ${BORDER}` }}>
+        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '10px 16px 24px', display: 'flex', gap: 8, background: '#f5f5f5', borderTop: `1px solid ${BORDER}`, zIndex: 10 }}>
           <button onClick={handlePrev} disabled={isFirst}
             style={{ width: 48, height: 48, borderRadius: 999, border: `1px solid ${BORDER}`, background: '#fff', color: isFirst ? '#e5e5e5' : '#0a0a0a', fontSize: 16, cursor: isFirst ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
           >←</button>
