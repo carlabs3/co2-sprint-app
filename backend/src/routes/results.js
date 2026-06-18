@@ -13,19 +13,17 @@ const MAP = {
   pool:          { privatePool: 50, communityPool: 17, noPool: 0 },
   train:         { '3a': 21, '3b': 126, '3c': 630, '3d': 0 },
   moto:          { '4a': 11, '4b': 57, '4c': 228, '4d': 0 },
-  urbanMobility: { '5a': 0, '5b': 2, '5c': 4, '5d': 5, '5e': 44 },
-  telework:      { na: 0, never: 0, partial: -200, mostly: -600, always: -800 },
+  urbanMobility: { '5a': 0, '5b': 15, '5c': 30, '5d': 38, '5e': 210, '5f': 330 },
+  telework:      { never: 0, partial: -50, mostly: -150, always: -300 },
   heatingSmall:  { '26a': 0, '26b': 625, '26c': 975,  '26d': 1429, '26e': 230, '26f': 375, '26g': 668 },
   heatingMedium: { '26a': 0, '26b': 750, '26c': 1170, '26d': 1715, '26e': 276, '26f': 450, '26g': 802 },
   heatingLarge:  { '26a': 0, '26b': 781, '26c': 1219, '26d': 1787, '26e': 288, '26f': 469, '26g': 835 },
-  renewable:     { 'a': -720, 'b': -200, 'c': 0 },
+  renewable:     { 'a': -720, 'b': -150, 'c': 0 },
   householdSize: { '1': 1, '2': 2, '3': 3, '4': 4, '4+': 4 },
   homeHabits:    { closeWindows: -47, thermostat19: -47, ledBulbs: -4, ecoPrograms: -36, none: 0 },
-  breakfast:     { '6a': 1081, '6b': 1633, '6c': 2595, '6d': 291, '6e': 1924 },
-  milkType:      { 'a': 232, 'b': 82, 'c': 89, 'd': 64, 'e': 0 },
-  hotDrinks:     { '7a': 0, '7b': 594, '7c': 18, '7d': 395, '7e': 124 },
-  lunch:         { '9a': 110, '9b': 186, '9c': 317, '9d': 293, '9e': 1087, '9f': 2296, '9g': 745 },
-  dinner:        { '10a': 110, '10b': 186, '10c': 317, '10d': 293, '10e': 1087, '10f': 2296, '10g': 745 },
+  breakfastDaily: { '6a': 0.4, '6b': 0.81, '6c': 0.33, '6d': 0.11, '6e': 0.71, '6f': 0 },
+  hotDrinksDaily: { '7a': 0, '7b': 1.63, '7c': 0.05, '7d_cow': 1.52, '7d_veg': 0.56, '7d_chai': 0.95, '7e': 0.16 },
+  mealDaily:      { '9a': 0.3, '9b': 0.51, '9c': 1.35, '9d': 1.20, '9e': 6.29, '10a': 0.3, '10b': 0.51, '10c': 1.35, '10d': 1.20, '10e': 6.29, 'none': 0 },
   bottledWater:  { '13a': 97, '13b': 49, '13c': 0 },
   foodHabits:    { localFood: -75, composting: -146, noFoodWaste: -80, none: 0 },
   clothes:       { '15a': 75, '15b': 99, '15c': 187, '15d': 396, '15e': 594, '15f': 891, '15g': 15 },
@@ -34,18 +32,18 @@ const MAP = {
   pets:          { bigDog: 1100, medDog: 770, smallDog: 400, cat: 310, none: 0 },
   hygiene:       { '22a': 13, '22b': 18, '22c': 39 },
   smoking:       { '23a': 0, '23b': 20, '23c': 11, '23d': 46, '23e': 102 },
-  sports:        { pool: 25, ball: 88, golf: 88, nautical: 88, motor: 88, ski: 138, gym: 72, martial: 88, cycling: 10, none: 0 },
-  videoCalls:    { none: 0, less1h: 8, '1to2h': 18, more2h: 38 },
-  streaming:     { none: 0, '1to2h': 16, '2to4h': 34, more4h: 69 },
-  socialMedia:   { none: 0, less1h: 16, '1to2h': 39, more2h: 82 },
+  sports:        { outdoor: 0, cycling: 10, racket: 43, pool: 43, gym: 31, fitness: 43, martial: 43, athletics: 43, equestrian: 43, golf: 43, nautical: 43, ski: 93, motor: 43, climbing: 43, none: 0 },
+  videoCalls:    { vc_none: 0, vc_sometimes: 8, vc_often: 18, vc_lots: 38 },
+  streaming:     { st_none: 0, st_little: 8, st_often: 28, st_lots: 56 },
+  socialMedia:   { sm_none: 0, sm_little: 16, sm_often: 39, sm_lots: 82 },
   aiUsage:       { none: 0, low: 25, medium: 100, high: 250 },
 }
 
 const ALCOHOL_FACTORS = {
-  soda:    0.472 * 0.25 * 52,
-  wine:    1.19  * 0.15 * 52,
-  beer:    1.12  * 0.33 * 52,
-  spirits: 1.12  * 0.05 * 52,
+  soda:    6,
+  wine:    9,
+  beer:    19,
+  spirits: 3,
 }
 
 function calcAlcohol(alcohol = {}) {
@@ -75,9 +73,17 @@ const SUBCATS = {
     { label: 'Hábitos de eficiencia',        calc: (a) => ['closeWindows', 'thermostat19', 'ledBulbs', 'ecoPrograms'].filter(h => a.homeHabits?.includes(h)).reduce((s, h) => s + (MAP.homeHabits[h] || 0), 0), negative: true },
   ],
   food: [
-    { label: 'Dieta diaria',                 calc: (a) => (MAP.breakfast[a.breakfast] || 0) + (MAP.lunch[a.lunch] || 0) + (MAP.dinner[a.dinner] || 0) },
-    { label: 'Bebidas',                      calc: (a) => (MAP.milkType[a.milkType] || 0) + (Array.isArray(a.hotDrinks) ? a.hotDrinks : [a.hotDrinks]).reduce((s, v) => s + (MAP.hotDrinks[v] || 0), 0) + (MAP.bottledWater[a.bottledWater] || 0) + calcAlcohol(a.alcohol) },
-    { label: 'Hábitos sostenibles',          calc: (a) => ['localFood', 'composting', 'noFoodWaste'].filter(h => a.foodHabits?.includes(h)).reduce((s, h) => s + (MAP.foodHabits[h] || 0), 0), negative: true },
+    { label: 'Dieta diaria', calc: (a) => {
+      const breakfast = Object.entries(a.breakfastDays || {}).reduce((s, [t, d]) => s + (MAP.breakfastDaily[t] ?? 0) * d * 52, 0)
+      const lunch     = Object.entries(a.lunchDays    || {}).reduce((s, [t, d]) => s + (MAP.mealDaily[t]      ?? 0) * d * 52, 0)
+      const dinner    = Object.entries(a.dinnerDays   || {}).reduce((s, [t, d]) => s + (MAP.mealDaily[t]      ?? 0) * d * 52, 0)
+      return breakfast + lunch + dinner + (a.deliveryPerWeek || 0) * 3 * 52
+    }},
+    { label: 'Bebidas', calc: (a) => {
+      const hotKg = Object.entries(a.hotDrinksCount || {}).reduce((s, [t, c]) => s + (MAP.hotDrinksDaily[t] ?? 0) * c * 365, 0)
+      return hotKg + (MAP.bottledWater[a.bottledWater] || 0) + calcAlcohol(a.alcohol)
+    }},
+    { label: 'Hábitos sostenibles', calc: (a) => ['localFood', 'composting', 'noFoodWaste'].filter(h => a.foodHabits?.includes(h)).reduce((s, h) => s + (MAP.foodHabits[h] || 0), 0), negative: true },
   ],
   consumption: [
     { label: 'Moda',                         calc: (a) => MAP.clothes[a.clothes] || 0 },

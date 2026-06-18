@@ -64,38 +64,49 @@ function getAnswerDistribution(ranking, areaId) {
   const areaData = AREA_QUESTIONS.find(a => a.areaId === areaId)
   if (!areaData) return []
 
-  return areaData.questions.map(q => {
-    const counts = {}
-    let total = 0
+  return areaData.questions
+    .filter(q => q.type !== 'stepper')
+    .map(q => {
+      const counts = {}
+      let total = 0
 
-    for (const p of ranking) {
-      const raw = p.answers?.[q.id]
-      if (q.type === 'single') {
-        if (raw !== undefined) {
-          const matched = q.options.find(o => o.value === raw)
-          if (matched) counts[matched.label] = (counts[matched.label] || 0) + 1
+      for (const p of ranking) {
+        const raw = p.answers?.[q.id]
+        if (q.type === 'single') {
+          if (raw !== undefined) {
+            const matched = q.options.find(o => o.value === raw)
+            if (matched) counts[matched.label] = (counts[matched.label] || 0) + 1
+            total++
+          }
+        } else if (q.type === 'weekDistribution' || q.type === 'dailyCount') {
+          const dist = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {}
+          for (const opt of q.options) {
+            if ((dist[opt.value] || 0) > 0) {
+              counts[opt.label] = (counts[opt.label] || 0) + 1
+            }
+          }
+          total++
+        } else {
+          const selected = Array.isArray(raw) ? raw : []
+          for (const opt of q.options) {
+            if (selected.includes(opt.value)) {
+              counts[opt.label] = (counts[opt.label] || 0) + 1
+            }
+          }
           total++
         }
-      } else {
-        const selected = Array.isArray(raw) ? raw : []
-        for (const opt of q.options) {
-          if (selected.includes(opt.value)) {
-            counts[opt.label] = (counts[opt.label] || 0) + 1
-          }
-        }
-        total++
       }
-    }
 
-    const base = q.type === 'multi' ? Math.max(ranking.length, 1) : Math.max(total, 1)
-    const distribution = q.options.map(opt => ({
-      ...opt,
-      count: counts[opt.label] || 0,
-      pct: Math.round(((counts[opt.label] || 0) / base) * 100),
-    }))
-    const maxCount = Math.max(...distribution.map(d => d.count), 1)
-    return { question: q, distribution, total, maxCount }
-  })
+      const isMultiLike = q.type === 'multi' || q.type === 'weekDistribution' || q.type === 'dailyCount'
+      const base = isMultiLike ? Math.max(ranking.length, 1) : Math.max(total, 1)
+      const distribution = q.options.map(opt => ({
+        ...opt,
+        count: counts[opt.label] || 0,
+        pct: Math.round(((counts[opt.label] || 0) / base) * 100),
+      }))
+      const maxCount = Math.max(...distribution.map(d => d.count), 1)
+      return { question: q, distribution, total, maxCount }
+    })
 }
 
 function getMostFrequent(values) {
@@ -158,9 +169,9 @@ const AREA_SUBCATEGORIES = {
     { label: 'Hábitos de eficiencia',       keys: ['homeHabits'],  negative: true },
   ],
   food: [
-    { label: 'Dieta diaria',                keys: ['breakfast', 'lunch', 'dinner'] },
-    { label: 'Bebidas',                     keys: ['milkType', 'hotDrinks', 'alcohol', 'bottledWater'] },
-    { label: 'Hábitos sostenibles',         keys: ['foodHabits'],  negative: true },
+    { label: 'Dieta diaria',        keys: ['breakfastDays', 'lunchDays', 'dinnerDays', 'deliveryPerWeek'] },
+    { label: 'Bebidas',             keys: ['hotDrinksCount', 'alcohol', 'bottledWater'] },
+    { label: 'Hábitos sostenibles', keys: ['foodHabits'], negative: true },
   ],
   consumption: [
     { label: 'Moda',                        keys: ['clothes'] },
@@ -214,12 +225,12 @@ function getContribution(answers, key) {
     case 'campingNights':return (answers.campingNights || 0) * 5
     case 'airbnbNights': return (answers.airbnbNights || 0) * 20
     case 'secondHome':   return answers.secondHome === 'yes' ? 500 : 0
-    case 'breakfast':    return MAP.breakfast[answers.breakfast] || 0
-    case 'lunch':        return MAP.lunch[answers.lunch] || 0
-    case 'dinner':       return MAP.dinner[answers.dinner] || 0
-    case 'milkType':     return MAP.milkType[answers.milkType] || 0
-    case 'hotDrinks':    return MAP.hotDrinks[answers.hotDrinks] || 0
-    case 'alcohol':      return calcAlcohol(answers) || 0
+    case 'breakfastDays':  return Object.entries(answers.breakfastDays || {}).reduce((s, [t, d]) => s + (MAP.breakfastDaily[t] ?? 0) * d * 52, 0)
+    case 'hotDrinksCount': return Object.entries(answers.hotDrinksCount || {}).reduce((s, [t, c]) => s + (MAP.hotDrinksDaily[t] ?? 0) * c * 365, 0)
+    case 'lunchDays':      return Object.entries(answers.lunchDays || {}).reduce((s, [t, d]) => s + (MAP.mealDaily[t] ?? 0) * d * 52, 0)
+    case 'dinnerDays':     return Object.entries(answers.dinnerDays || {}).reduce((s, [t, d]) => s + (MAP.mealDaily[t] ?? 0) * d * 52, 0)
+    case 'deliveryPerWeek':return (answers.deliveryPerWeek || 0) * 3 * 52
+    case 'alcohol':        return calcAlcohol(answers) || 0
     case 'bottledWater': return MAP.bottledWater[answers.bottledWater] || 0
     case 'foodHabits': {
       const h = Array.isArray(answers.foodHabits) ? answers.foodHabits : []

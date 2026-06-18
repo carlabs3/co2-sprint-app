@@ -19,11 +19,9 @@ export const MAP = {
   homeHabits:    { closeWindows: -47, thermostat19: -47, ledBulbs: -4, ecoPrograms: -36, none: 0 },
 
   // ── ALIMENTACIÓN ──
-  breakfast:    { '6a': 1081, '6b': 1633, '6c': 2595, '6d': 291, '6e': 1924 },
-  milkType:     { 'a': 232, 'b': 82, 'c': 89, 'd': 64, 'e': 0 },
-  hotDrinks:    { '7a': 0, '7b': 594, '7c': 18, '7d': 395, '7e': 124 },
-  lunch:        { '9a': 110, '9b': 186, '9c': 317, '9d': 293, '9e': 1087, '9f': 2296, '9g': 745 },
-  dinner:       { '10a': 110, '10b': 186, '10c': 317, '10d': 293, '10e': 1087, '10f': 2296, '10g': 745 },
+  breakfastDaily: { '6a': 0.4, '6b': 0.81, '6c': 0.33, '6d': 0.11, '6e': 0.71, '6f': 0 }, // kgCO2e/día
+  hotDrinksDaily: { '7a': 0, '7b': 1.63, '7c': 0.05, '7d_cow': 1.52, '7d_veg': 0.56, '7d_chai': 0.95, '7e': 0.16 }, // kgCO2e/unidad/día
+  mealDaily:      { '9a': 0.3, '9b': 0.51, '9c': 1.35, '9d': 1.20, '9e': 6.29, '10a': 0.3, '10b': 0.51, '10c': 1.35, '10d': 1.20, '10e': 6.29, 'none': 0 }, // kgCO2e/día
   bottledWater: { '13a': 97, '13b': 49, '13c': 0 },
   foodHabits:   { localFood: -75, composting: -146, noFoodWaste: -80, none: 0 },
 
@@ -34,21 +32,21 @@ export const MAP = {
   pets:        { bigDog: 1100, medDog: 770, smallDog: 400, cat: 310, none: 0 },
   hygiene:     { '22a': 13, '22b': 18, '22c': 39 },
   smoking:     { '23a': 0, '23b': 20, '23c': 11, '23d': 46, '23e': 102 },
-  sports:      { pool: 25, ball: 88, golf: 88, nautical: 88, motor: 88, ski: 138, gym: 72, martial: 88, cycling: 10, none: 0 },
+  sports:      { outdoor: 0, cycling: 10, racket: 43, pool: 43, gym: 31, fitness: 43, martial: 43, athletics: 43, equestrian: 43, golf: 43, nautical: 43, ski: 93, motor: 43, climbing: 43, none: 0 },
 
   // ── DIGITAL ──
-  videoCalls:  { none: 0, less1h: 8, '1to2h': 18, more2h: 38 },
-  streaming:   { none: 0, '1to2h': 16, '2to4h': 34, more4h: 69 },
-  socialMedia: { none: 0, less1h: 16, '1to2h': 39, more2h: 82 },
+  videoCalls:  { vc_none: 0, vc_sometimes: 8, vc_often: 18, vc_lots: 38 },
+  streaming:   { st_none: 0, st_little: 8, st_often: 28, st_lots: 56 },
+  socialMedia: { sm_none: 0, sm_little: 16, sm_often: 39, sm_lots: 82 },
   aiUsage:     { none: 0, low: 25, medium: 100, high: 250 },
 }
 
-// Bebidas alcohólicas — kgCO2e por unidad/semana × 52 semanas
+// Bebidas alcohólicas — kgCO2e/año por unidad/semana
 const ALCOHOL_FACTORS = {
-  soda:    0.472 * 0.25 * 52, // ~6.1 kg/unidad/año
-  wine:    1.19  * 0.15 * 52, // ~9.3 kg/copa/año
-  beer:    1.12  * 0.33 * 52, // ~19.2 kg/botellín/año
-  spirits: 1.12  * 0.05 * 52, // ~2.9 kg/copa/año
+  soda:    6,   // kg/año por 1 refresco/semana
+  wine:    9,   // kg/año por 1 copa/semana
+  beer:    19,  // kg/año por 1 botellín/semana
+  spirits: 3,   // kg/año por 1 copa destilado/semana
 }
 
 export function calcAlcohol(alcohol = {}) {
@@ -117,15 +115,29 @@ export function calculator(answers) {
   )
 
   // ── Alimentación ────────────────────────────────────────────────────────────
+  const breakfastKg = Object.entries(answers.breakfastDays || {})
+    .reduce((s, [type, days]) => s + (MAP.breakfastDaily[type] ?? 0) * days * 52, 0)
+
+  const hotDrinksKg = Object.entries(answers.hotDrinksCount || {})
+    .reduce((s, [type, count]) => s + (MAP.hotDrinksDaily[type] ?? 0) * count * 365, 0)
+
+  const lunchKg = Object.entries(answers.lunchDays || {})
+    .reduce((s, [type, days]) => s + (MAP.mealDaily[type] ?? 0) * days * 52, 0)
+
+  const dinnerKg = Object.entries(answers.dinnerDays || {})
+    .reduce((s, [type, days]) => s + (MAP.mealDaily[type] ?? 0) * days * 52, 0)
+
+  const deliveryKg = (answers.deliveryPerWeek || 0) * 3 * 52
+
   const foodKg = Math.max(0,
-    get('breakfast', answers.breakfast) +
-    get('milkType', answers.milkType) +
-    sum('hotDrinks', answers.hotDrinks) +
+    breakfastKg +
+    hotDrinksKg +
     calcAlcohol(answers.alcohol) +
-    get('lunch', answers.lunch) +
-    get('dinner', answers.dinner) +
+    lunchKg +
+    dinnerKg +
     get('bottledWater', answers.bottledWater) +
-    sum('foodHabits', answers.foodHabits)
+    sum('foodHabits', answers.foodHabits) +
+    deliveryKg
   )
 
   // ── Consumo ─────────────────────────────────────────────────────────────────

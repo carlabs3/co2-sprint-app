@@ -161,6 +161,183 @@ function DrinksInput({ question, answers, onChange }) {
   )
 }
 
+function isWeekDistributionValid(question, answers) {
+  const dist = answers[question.id] || {}
+  const noneOption = question.options.find(o => o.isNone)
+  if (noneOption && (dist[noneOption.value] || 0) > 0) return true
+  const max = answers[`${question.id}_double`] ? 14 : (question.maxDays || 7)
+  const total = Object.entries(dist)
+    .filter(([k]) => !noneOption || k !== noneOption.value)
+    .reduce((s, [, v]) => s + v, 0)
+  return total === max
+}
+
+function WeekDistributionInput({ question, answers, onChange }) {
+  const dist = answers[question.id] || {}
+  const isDouble = question.allowDouble ? (answers[`${question.id}_double`] || false) : false
+  const maxDays = isDouble ? 14 : (question.maxDays || 7)
+  const noneOption = question.options.find(o => o.isNone)
+  const noneActive = noneOption ? (dist[noneOption.value] || 0) > 0 : false
+  const nonNoneTotal = Object.entries(dist)
+    .filter(([k]) => !noneOption || k !== noneOption.value)
+    .reduce((s, [, v]) => s + v, 0)
+  const isValid = noneActive || nonNoneTotal === maxDays
+
+  function handleChange(value, delta) {
+    const current = dist[value] || 0
+    const newVal = Math.max(0, current + delta)
+    if (noneOption && value === noneOption.value) {
+      if (newVal > 0) {
+        const newDist = {}
+        question.options.forEach(o => { newDist[o.value] = 0 })
+        newDist[noneOption.value] = 1
+        onChange({ ...answers, [question.id]: newDist })
+      } else {
+        onChange({ ...answers, [question.id]: { ...dist, [value]: 0 } })
+      }
+      return
+    }
+    const projected = nonNoneTotal + (newVal - (dist[value] || 0))
+    if (projected > maxDays) return
+    const newDist = { ...dist, [value]: newVal }
+    if (noneOption && newVal > 0) newDist[noneOption.value] = 0
+    onChange({ ...answers, [question.id]: newDist })
+  }
+
+  function handleDoubleToggle() {
+    onChange({ ...answers, [`${question.id}_double`]: !isDouble, [question.id]: {} })
+  }
+
+  return (
+    <div>
+      {question.allowDouble && (
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, cursor: 'pointer', padding: '8px 12px', background: isDouble ? '#0a0a0a' : '#fff', border: `1px solid ${isDouble ? '#0a0a0a' : '#e5e5e5'}`, borderRadius: 10 }}>
+          <input type="checkbox" checked={isDouble} onChange={handleDoubleToggle} style={{ accentColor: '#fff' }} />
+          <span style={{ fontSize: 12, color: isDouble ? '#fff' : '#555', fontWeight: isDouble ? 600 : 400 }}>Desayuno y almuerzo (× 2) — máx. 14 días</span>
+        </label>
+      )}
+      <div style={{ background: '#f5f5f5', borderRadius: 8, padding: '8px 12px', marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {noneActive ? (
+          <span style={{ fontSize: 12, color: '#555', fontWeight: 500 }}>Sin ingesta seleccionada</span>
+        ) : (
+          <>
+            <span style={{ fontSize: 12, color: '#888' }}>{nonNoneTotal} / {maxDays} días</span>
+            {isValid
+              ? <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 600 }}>✓ Completo</span>
+              : <span style={{ fontSize: 11, color: '#f59e0b' }}>Distribuye los {maxDays} días</span>
+            }
+          </>
+        )}
+      </div>
+      {question.options.map(opt => {
+        const val = dist[opt.value] || 0
+        const active = val > 0
+        const isNoneOpt = opt.isNone
+        return (
+          <div key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, marginBottom: 6, border: `1px solid ${active ? '#0a0a0a' : '#e5e5e5'}`, background: '#ffffff', opacity: (noneActive && !isNoneOpt) ? 0.4 : 1 }}>
+            <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: '#0a0a0a', lineHeight: 1.3 }}>{opt.label}</span>
+            {isNoneOpt ? (
+              <button onClick={() => handleChange(opt.value, active ? -1 : 1)} style={{ padding: '5px 14px', borderRadius: 8, border: `1.5px solid ${active ? '#0a0a0a' : '#e5e5e5'}`, background: active ? '#0a0a0a' : 'transparent', color: active ? '#fff' : '#0a0a0a', fontSize: 12, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                {active ? '✓' : 'Seleccionar'}
+              </button>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                <button onClick={() => handleChange(opt.value, -1)} style={{ width: 26, height: 26, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 14, fontWeight: 600, cursor: val === 0 ? 'default' : 'pointer', opacity: val === 0 ? 0.3 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                <span style={{ fontSize: 15, fontWeight: 700, width: 20, textAlign: 'center' }}>{val}</span>
+                <button onClick={() => handleChange(opt.value, 1)} style={{ width: 26, height: 26, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 14, fontWeight: 600, cursor: (nonNoneTotal >= maxDays || noneActive) ? 'default' : 'pointer', opacity: (nonNoneTotal >= maxDays || noneActive) ? 0.3 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+              </div>
+            )}
+            {!isNoneOpt && <span style={{ fontSize: 10, color: '#aaa', width: 26, textAlign: 'right' }}>días</span>}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function DailyCountInput({ question, answers, onChange }) {
+  const counts = answers[question.id] || {}
+  const noneOption = question.options.find(o => o.isNone)
+  const noneActive = noneOption ? (counts[noneOption.value] || 0) > 0 : false
+  const total = Object.entries(counts)
+    .filter(([k]) => !noneOption || k !== noneOption.value)
+    .reduce((s, [, v]) => s + v, 0)
+
+  function handleChange(value, delta) {
+    const current = counts[value] || 0
+    const newVal = Math.max(0, current + delta)
+    if (noneOption && value === noneOption.value) {
+      if (newVal > 0) {
+        const newCounts = {}
+        question.options.forEach(o => { newCounts[o.value] = 0 })
+        newCounts[noneOption.value] = 1
+        onChange({ ...answers, [question.id]: newCounts })
+      } else {
+        onChange({ ...answers, [question.id]: { ...counts, [value]: 0 } })
+      }
+      return
+    }
+    const newCounts = { ...counts, [value]: newVal }
+    if (noneOption && newVal > 0) newCounts[noneOption.value] = 0
+    onChange({ ...answers, [question.id]: newCounts })
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {total > 0 && (
+        <div style={{ background: '#f5f5f5', borderRadius: 8, padding: '7px 12px', display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+          <span style={{ fontSize: 11, color: '#aaa' }}>Total al día</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#0a0a0a' }}>{total} bebida{total !== 1 ? 's' : ''}</span>
+        </div>
+      )}
+      {question.options.map(opt => {
+        const val = counts[opt.value] || 0
+        const active = val > 0
+        const isNoneOpt = opt.isNone
+        return (
+          <div key={opt.value} style={{ background: '#fff', border: `1px solid ${active ? '#0a0a0a' : '#e5e5e5'}`, borderRadius: 12, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: '#0a0a0a' }}>{opt.label}</span>
+            {isNoneOpt ? (
+              <button onClick={() => handleChange(opt.value, active ? -1 : 1)} style={{ padding: '5px 14px', borderRadius: 8, border: `1.5px solid ${active ? '#0a0a0a' : '#e5e5e5'}`, background: active ? '#0a0a0a' : 'transparent', color: active ? '#fff' : '#0a0a0a', fontSize: 12, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                {active ? '✓' : 'Seleccionar'}
+              </button>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                <button onClick={() => handleChange(opt.value, -1)} style={{ width: 26, height: 26, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: val === 0 ? 'default' : 'pointer', opacity: val === 0 ? 0.3 : 1 }}>−</button>
+                <div style={{ textAlign: 'center', minWidth: 20 }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: '#0a0a0a' }}>{val}</div>
+                  <div style={{ fontSize: 9, color: '#aaa' }}>por día</div>
+                </div>
+                <button onClick={() => handleChange(opt.value, 1)} style={{ width: 26, height: 26, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: noneActive ? 'default' : 'pointer', opacity: noneActive ? 0.3 : 1 }}>+</button>
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function StepperInput({ question, answers, onChange }) {
+  const val = answers[question.id] || 0
+  const min = question.min ?? 0
+  const max = question.max ?? 20
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '24px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        <button onClick={() => onChange({ ...answers, [question.id]: Math.max(min, val - 1) })}
+          style={{ width: 48, height: 48, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 20, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: val === min ? 'default' : 'pointer', opacity: val === min ? 0.3 : 1 }}>−</button>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 52, fontWeight: 900, color: '#0a0a0a', lineHeight: 1 }}>{val}</div>
+          <div style={{ fontSize: 12, color: '#aaa', marginTop: 4 }}>por semana</div>
+        </div>
+        <button onClick={() => onChange({ ...answers, [question.id]: Math.min(max, val + 1) })}
+          style={{ width: 48, height: 48, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 20, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: val === max ? 'default' : 'pointer', opacity: val === max ? 0.3 : 1 }}>+</button>
+      </div>
+    </div>
+  )
+}
+
 // Grotesk card style — black on select, white on light background
 const CREAM = '#f5f5f5'
 const BORDER = '#e5e5e5'
@@ -338,10 +515,13 @@ export default function Step2Calculator() {
   const question = area.questions[questionIndex]
   const isFirst  = areaIndex === 0 && questionIndex === 0
   const isLast   = areaIndex === AREAS.length - 1 && questionIndex === area.questions.length - 1
-  const canNext  = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.type === 'flights' || question.type === 'drinks' || question.isSensibilization || answers[question.id] !== undefined
+  const canNext  = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.type === 'flights' || question.type === 'drinks' || question.type === 'dailyCount' || question.type === 'stepper' || question.isSensibilization || (question.type === 'weekDistribution' && isWeekDistributionValid(question, answers)) || answers[question.id] !== undefined
 
   function isAreaDone(ai) {
-    return AREAS[ai].questions.every(q => isSkipped(q) || q.type === 'multi' || q.type === 'nights' || q.type === 'flights' || q.type === 'drinks' || q.isSensibilization || answers[q.id] !== undefined)
+    return AREAS[ai].questions.every(q =>
+      isSkipped(q) || q.type === 'multi' || q.type === 'nights' || q.type === 'flights' || q.type === 'drinks' || q.type === 'dailyCount' || q.type === 'stepper' || q.isSensibilization ||
+      (q.type === 'weekDistribution' ? isWeekDistributionValid(q, answers) : answers[q.id] !== undefined)
+    )
   }
 
   function getAreaStatus(ai) {
@@ -377,7 +557,7 @@ export default function Step2Calculator() {
   function handleNext(overrideAnswers = null) {
     const currentAnswers = overrideAnswers ?? answers
     // Recompute canNext with the actual answers (avoids stale state in timeouts)
-    const currentCanNext = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.type === 'flights' || question.type === 'drinks' || question.isSensibilization || currentAnswers[question.id] !== undefined
+    const currentCanNext = isSkipped(question) || question.type === 'multi' || question.type === 'nights' || question.type === 'flights' || question.type === 'drinks' || question.type === 'dailyCount' || question.type === 'stepper' || question.isSensibilization || (question.type === 'weekDistribution' && isWeekDistributionValid(question, currentAnswers)) || currentAnswers[question.id] !== undefined
     if (!currentCanNext) return
     if (isLast) {
       const calcResult = calculator(currentAnswers)
@@ -438,7 +618,7 @@ export default function Step2Calculator() {
       <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
         {a.questions.map((q, qi) => {
           if (isSkipped(q)) return null
-          const done   = q.type === 'multi' || q.type === 'nights' || q.type === 'drinks' || q.isSensibilization || answers[q.id] !== undefined
+          const done   = q.type === 'multi' || q.type === 'nights' || q.type === 'drinks' || q.type === 'dailyCount' || q.type === 'stepper' || q.isSensibilization || (q.type === 'weekDistribution' ? isWeekDistributionValid(q, answers) : answers[q.id] !== undefined)
           const active = aIdx === areaIndex && qi === activeQIdx
           return (
             <div key={qi} style={{
@@ -572,6 +752,12 @@ export default function Step2Calculator() {
               <div style={{ '--area-color': '#0a0a0a', '--area-bg': '#f5f5f5' }}>
                 <NightsInput question={question} answers={answers} onChange={setAnswers} />
               </div>
+            ) : question.type === 'weekDistribution' ? (
+              <WeekDistributionInput question={question} answers={answers} onChange={setAnswers} />
+            ) : question.type === 'dailyCount' ? (
+              <DailyCountInput question={question} answers={answers} onChange={setAnswers} />
+            ) : question.type === 'stepper' ? (
+              <StepperInput question={question} answers={answers} onChange={setAnswers} />
             ) : (
               <OptionList
                 question={question} area={area} answers={answers}
@@ -670,6 +856,12 @@ export default function Step2Calculator() {
             <div style={{ '--area-color': '#0a0a0a', '--area-bg': '#f5f5f5' }}>
               <NightsInput question={question} answers={answers} onChange={setAnswers} />
             </div>
+          ) : question.type === 'weekDistribution' ? (
+            <WeekDistributionInput question={question} answers={answers} onChange={setAnswers} />
+          ) : question.type === 'dailyCount' ? (
+            <DailyCountInput question={question} answers={answers} onChange={setAnswers} />
+          ) : question.type === 'stepper' ? (
+            <StepperInput question={question} answers={answers} onChange={setAnswers} />
           ) : (
             <OptionList
               question={question} area={area} answers={answers}

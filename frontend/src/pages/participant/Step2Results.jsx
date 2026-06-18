@@ -131,15 +131,20 @@ const SUBCATEGORIES = {
   food: [
     {
       label: 'Dieta diaria',
-      calc: (answers) => ((MAP.breakfast[answers.breakfast] || 0) + (MAP.lunch[answers.lunch] || 0) + (MAP.dinner[answers.dinner] || 0)) / 1000,
+      calc: (answers) => {
+        const breakfast = Object.entries(answers.breakfastDays || {}).reduce((s, [t, d]) => s + (MAP.breakfastDaily[t] ?? 0) * d * 52, 0)
+        const lunch     = Object.entries(answers.lunchDays    || {}).reduce((s, [t, d]) => s + (MAP.mealDaily[t]      ?? 0) * d * 52, 0)
+        const dinner    = Object.entries(answers.dinnerDays   || {}).reduce((s, [t, d]) => s + (MAP.mealDaily[t]      ?? 0) * d * 52, 0)
+        const delivery  = (answers.deliveryPerWeek || 0) * 3 * 52
+        return (breakfast + lunch + dinner + delivery) / 1000
+      },
     },
     {
       label: 'Bebidas',
       calc: (answers) => {
-        const milkKg  = MAP.milkType[answers.milkType] || 0
-        const hotKg   = (Array.isArray(answers.hotDrinks) ? answers.hotDrinks : [answers.hotDrinks]).reduce((s, v) => s + (MAP.hotDrinks[v] || 0), 0)
+        const hotKg   = Object.entries(answers.hotDrinksCount || {}).reduce((s, [t, c]) => s + (MAP.hotDrinksDaily[t] ?? 0) * c * 365, 0)
         const waterKg = MAP.bottledWater[answers.bottledWater] || 0
-        return (milkKg + hotKg + waterKg + calcAlcohol(answers.alcohol)) / 1000
+        return (hotKg + waterKg + calcAlcohol(answers.alcohol)) / 1000
       },
     },
     {
