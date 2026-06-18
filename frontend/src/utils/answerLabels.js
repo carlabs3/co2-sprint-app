@@ -200,7 +200,7 @@ export const AREA_QUESTIONS = [
           { value: '6c', label: 'Tostadas, jamón y tomate' },
           { value: '6d', label: 'Solo fruta' },
           { value: '6e', label: 'Mix variado (huevo + fruta + tostadas)' },
-          { value: '6f', label: 'No desayuno', isNone: true },
+          { value: '6f', label: 'No desayuno' },
         ],
       },
       {
@@ -243,7 +243,7 @@ export const AREA_QUESTIONS = [
           { value: '9c', label: 'Carne blanca (pollo, pavo...)' },
           { value: '9d', label: 'Pescado' },
           { value: '9e', label: 'Carne roja (ternera, cerdo...)' },
-          { value: 'none', label: 'No como', isNone: true },
+          { value: 'none', label: 'No como' },
         ],
       },
       {
@@ -259,7 +259,7 @@ export const AREA_QUESTIONS = [
           { value: '10c', label: 'Carne blanca (pollo, pavo...)' },
           { value: '10d', label: 'Pescado' },
           { value: '10e', label: 'Carne roja (ternera, cerdo...)' },
-          { value: 'none', label: 'No ceno', isNone: true },
+          { value: 'none', label: 'No ceno' },
         ],
       },
       {

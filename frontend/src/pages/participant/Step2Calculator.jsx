@@ -163,80 +163,44 @@ function DrinksInput({ question, answers, onChange }) {
 
 function isWeekDistributionValid(question, answers) {
   const dist = answers[question.id] || {}
-  const noneOption = question.options.find(o => o.isNone)
-  if (noneOption && (dist[noneOption.value] || 0) > 0) return true
-  const max = answers[`${question.id}_double`] ? 14 : (question.maxDays || 7)
-  const total = Object.entries(dist)
-    .filter(([k]) => !noneOption || k !== noneOption.value)
-    .reduce((s, [, v]) => s + v, 0)
-  return total === max
+  const total = Object.values(dist).reduce((s, v) => s + v, 0)
+  return total === 7
 }
 
 function WeekDistributionInput({ question, answers, onChange }) {
   const dist = answers[question.id] || {}
   const maxDays = question.maxDays || 7
-  const noneOption = question.options.find(o => o.isNone)
-  const noneActive = noneOption ? (dist[noneOption.value] || 0) > 0 : false
-  const nonNoneTotal = Object.entries(dist)
-    .filter(([k]) => !noneOption || k !== noneOption.value)
-    .reduce((s, [, v]) => s + v, 0)
-  const isValid = noneActive || nonNoneTotal === maxDays
+  const total = Object.values(dist).reduce((s, v) => s + v, 0)
+  const isValid = total === maxDays
 
   function handleChange(value, delta) {
     const current = dist[value] || 0
     const newVal = Math.max(0, current + delta)
-    if (noneOption && value === noneOption.value) {
-      if (newVal > 0) {
-        const newDist = {}
-        question.options.forEach(o => { newDist[o.value] = 0 })
-        newDist[noneOption.value] = 1
-        onChange({ ...answers, [question.id]: newDist })
-      } else {
-        onChange({ ...answers, [question.id]: { ...dist, [value]: 0 } })
-      }
-      return
-    }
-    const projected = nonNoneTotal + (newVal - (dist[value] || 0))
-    if (projected > maxDays) return
-    const newDist = { ...dist, [value]: newVal }
-    if (noneOption && newVal > 0) newDist[noneOption.value] = 0
-    onChange({ ...answers, [question.id]: newDist })
+    if (delta > 0 && total >= maxDays) return
+    onChange({ ...answers, [question.id]: { ...dist, [value]: newVal } })
   }
 
   return (
     <div>
       <div style={{ background: '#f5f5f5', borderRadius: 8, padding: '8px 12px', marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        {noneActive ? (
-          <span style={{ fontSize: 12, color: '#555', fontWeight: 500 }}>Sin ingesta seleccionada</span>
-        ) : (
-          <>
-            <span style={{ fontSize: 12, color: '#888' }}>{nonNoneTotal} / {maxDays} días</span>
-            {isValid
-              ? <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 600 }}>✓ Completo</span>
-              : <span style={{ fontSize: 11, color: '#f59e0b' }}>Distribuye los {maxDays} días</span>
-            }
-          </>
-        )}
+        <span style={{ fontSize: 12, color: '#888' }}>{total} / {maxDays} días</span>
+        {isValid
+          ? <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 600 }}>✓ Completo</span>
+          : <span style={{ fontSize: 11, color: '#f59e0b' }}>Distribuye los {maxDays} días</span>
+        }
       </div>
       {question.options.map(opt => {
         const val = dist[opt.value] || 0
         const active = val > 0
-        const isNoneOpt = opt.isNone
         return (
-          <div key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, marginBottom: 6, border: `1px solid ${active ? '#0a0a0a' : '#e5e5e5'}`, background: '#ffffff', opacity: (noneActive && !isNoneOpt) ? 0.4 : 1 }}>
+          <div key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, marginBottom: 6, border: `1px solid ${active ? '#0a0a0a' : '#e5e5e5'}`, background: '#ffffff' }}>
             <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: '#0a0a0a', lineHeight: 1.3 }}>{opt.label}</span>
-            {isNoneOpt ? (
-              <button onClick={() => handleChange(opt.value, active ? -1 : 1)} style={{ padding: '5px 14px', borderRadius: 8, border: `1.5px solid ${active ? '#0a0a0a' : '#e5e5e5'}`, background: active ? '#0a0a0a' : 'transparent', color: active ? '#fff' : '#0a0a0a', fontSize: 12, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                {active ? '✓' : 'Seleccionar'}
-              </button>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                <button onClick={() => handleChange(opt.value, -1)} style={{ width: 26, height: 26, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 14, fontWeight: 600, cursor: val === 0 ? 'default' : 'pointer', opacity: val === 0 ? 0.3 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                <span style={{ fontSize: 15, fontWeight: 700, width: 20, textAlign: 'center' }}>{val}</span>
-                <button onClick={() => handleChange(opt.value, 1)} style={{ width: 26, height: 26, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 14, fontWeight: 600, cursor: (nonNoneTotal >= maxDays || noneActive) ? 'default' : 'pointer', opacity: (nonNoneTotal >= maxDays || noneActive) ? 0.3 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
-              </div>
-            )}
-            {!isNoneOpt && <span style={{ fontSize: 10, color: '#aaa', width: 26, textAlign: 'right' }}>días</span>}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+              <button onClick={() => handleChange(opt.value, -1)} style={{ width: 26, height: 26, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 14, fontWeight: 600, cursor: val === 0 ? 'default' : 'pointer', opacity: val === 0 ? 0.3 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+              <span style={{ fontSize: 15, fontWeight: 700, width: 20, textAlign: 'center' }}>{val}</span>
+              <button onClick={() => handleChange(opt.value, 1)} style={{ width: 26, height: 26, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 14, fontWeight: 600, cursor: total >= maxDays ? 'default' : 'pointer', opacity: total >= maxDays ? 0.3 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+            </div>
+            <span style={{ fontSize: 10, color: '#aaa', width: 26, textAlign: 'right' }}>días</span>
           </div>
         )
       })}
