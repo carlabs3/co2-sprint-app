@@ -28,7 +28,7 @@ export function computeGroups(ranking) {
   return Object.values(map).map(g => {
     const avgVal = g.items.reduce((s, r) => s + r.tons, 0) / g.items.length
     const areas = {}
-    ;['transport', 'energy', 'food', 'consumption', 'waste'].forEach(area => {
+    ;['transport', 'energy', 'food', 'consumption', 'waste', 'publicServices'].forEach(area => {
       areas[area] = g.items.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / g.items.length
     })
     return { name: g.name, avg: avgVal, count: g.items.length, category: getCategory(avgVal), areas }
@@ -136,16 +136,18 @@ export const SPAIN_AVERAGES = {
 }
 
 export const AREA_COLORS = {
-  transport:   '#38bdf8',
-  energy:      '#f59e0b',
-  food:        '#4ade80',
-  consumption: '#a855f7',
-  waste:       '#f472b6',
+  transport:      '#38bdf8',
+  energy:         '#f59e0b',
+  food:           '#4ade80',
+  consumption:    '#a855f7',
+  waste:          '#f472b6',
+  publicServices: '#94a3b8',
 }
 
 export const AREA_LABELS = {
   transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación',
   consumption: 'Compras y hábitos', waste: 'Vida digital',
+  publicServices: 'Servicios públicos',
 }
 
 export const CATEGORY_COLORS = { bajo: '#16a34a', medio: '#555555', alto: '#b07a30', 'muy alto': '#cc4444' }
@@ -181,6 +183,9 @@ const AREA_SUBCATEGORIES = {
   waste: [
     { label: 'Uso de pantallas',            keys: ['videoCalls', 'streaming', 'socialMedia'] },
     { label: 'Inteligencia artificial',     keys: ['aiUsage'] },
+  ],
+  publicServices: [
+    { label: 'Servicios colectivos', keys: ['publicServices'] },
   ],
 }
 
@@ -248,8 +253,9 @@ function getContribution(answers, key) {
     case 'videoCalls':   return MAP.videoCalls[answers.videoCalls] || 0
     case 'streaming':    return MAP.streaming[answers.streaming] || 0
     case 'socialMedia':  return MAP.socialMedia[answers.socialMedia] || 0
-    case 'aiUsage':      return MAP.aiUsage[answers.aiUsage] || 0
-    default:             return 0
+    case 'aiUsage':        return MAP.aiUsage[answers.aiUsage] || 0
+    case 'publicServices': return 1500
+    default:               return 0
   }
 }
 
@@ -400,11 +406,12 @@ export function DistributionView({ ranking }) {
   const maxBucket  = `${Math.floor(maxVal  / histStep) * histStep}–${Math.round((Math.floor(maxVal  / histStep) * histStep + histStep) * 100) / 100}`
 
   const areaAvg = {
-    transport:   avg(ranking.map(r => r.areas?.transport   ?? 0)),
-    energy:      avg(ranking.map(r => r.areas?.energy      ?? 0)),
-    food:        avg(ranking.map(r => r.areas?.food        ?? 0)),
-    consumption: avg(ranking.map(r => r.areas?.consumption ?? 0)),
-    waste:       avg(ranking.map(r => r.areas?.waste       ?? 0)),
+    transport:      avg(ranking.map(r => r.areas?.transport      ?? 0)),
+    energy:         avg(ranking.map(r => r.areas?.energy         ?? 0)),
+    food:           avg(ranking.map(r => r.areas?.food           ?? 0)),
+    consumption:    avg(ranking.map(r => r.areas?.consumption    ?? 0)),
+    waste:          avg(ranking.map(r => r.areas?.waste          ?? 0)),
+    publicServices: avg(ranking.map(r => r.areas?.publicServices ?? 0)),
   }
   const areaTotal = Object.values(areaAvg).reduce((s, v) => s + v, 0)
 
@@ -656,14 +663,15 @@ export function DistributionView({ ranking }) {
 
 // ── GroupsView ────────────────────────────────────────────────────────────────
 
-const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste']
+const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste', 'publicServices']
 const CATEGORY_LABEL_F = { bajo: 'baja', medio: 'media', alto: 'alta', 'muy alto': 'muy alta' }
 const AREA_LABEL_SHORT = {
-  transport:   'Transporte',
-  energy:      'Vivienda',
-  food:        'Alimentación',
-  consumption: 'Compras y hábitos',
-  waste:       'Vida digital',
+  transport:      'Transporte',
+  energy:         'Vivienda',
+  food:           'Alimentación',
+  consumption:    'Compras y hábitos',
+  waste:          'Vida digital',
+  publicServices: 'Servicios púb.',
 }
 
 export function GroupsView({ groups }) {

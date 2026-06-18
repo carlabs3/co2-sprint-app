@@ -174,7 +174,7 @@ function isWeekDistributionValid(question, answers) {
 
 function WeekDistributionInput({ question, answers, onChange }) {
   const dist = answers[question.id] || {}
-  const isDouble = question.allowDouble ? (answers[`${question.id}_double`] || false) : false
+  const isDouble = question.allowDouble ? (answers.breakfastDouble || false) : false
   const maxDays = isDouble ? 14 : (question.maxDays || 7)
   const noneOption = question.options.find(o => o.isNone)
   const noneActive = noneOption ? (dist[noneOption.value] || 0) > 0 : false
@@ -204,18 +204,8 @@ function WeekDistributionInput({ question, answers, onChange }) {
     onChange({ ...answers, [question.id]: newDist })
   }
 
-  function handleDoubleToggle() {
-    onChange({ ...answers, [`${question.id}_double`]: !isDouble, [question.id]: {} })
-  }
-
   return (
     <div>
-      {question.allowDouble && (
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, cursor: 'pointer', padding: '8px 12px', background: isDouble ? '#0a0a0a' : '#fff', border: `1px solid ${isDouble ? '#0a0a0a' : '#e5e5e5'}`, borderRadius: 10 }}>
-          <input type="checkbox" checked={isDouble} onChange={handleDoubleToggle} style={{ accentColor: '#fff' }} />
-          <span style={{ fontSize: 12, color: isDouble ? '#fff' : '#555', fontWeight: isDouble ? 600 : 400 }}>Desayuno y almuerzo (× 2) — máx. 14 días</span>
-        </label>
-      )}
       <div style={{ background: '#f5f5f5', borderRadius: 8, padding: '8px 12px', marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         {noneActive ? (
           <span style={{ fontSize: 12, color: '#555', fontWeight: 500 }}>Sin ingesta seleccionada</span>
@@ -251,6 +241,32 @@ function WeekDistributionInput({ question, answers, onChange }) {
           </div>
         )
       })}
+      {question.allowDouble && (
+        <div
+          onClick={() => onChange({ ...answers, breakfastDouble: !answers.breakfastDouble })}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '10px 12px', borderRadius: 12, marginTop: 8,
+            border: `1px solid ${answers.breakfastDouble ? '#e8a020' : '#e5e5e5'}`,
+            background: answers.breakfastDouble ? '#fff8ec' : '#fff',
+            cursor: 'pointer',
+          }}
+        >
+          <div style={{
+            width: 16, height: 16, borderRadius: 4, flexShrink: 0,
+            border: `1.5px solid ${answers.breakfastDouble ? '#e8a020' : '#ccc'}`,
+            background: answers.breakfastDouble ? '#e8a020' : 'transparent',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {answers.breakfastDouble && (
+              <span style={{ color: '#fff', fontSize: 10, fontWeight: 700 }}>✓</span>
+            )}
+          </div>
+          <span style={{ fontSize: 14, color: answers.breakfastDouble ? '#e8a020' : '#666' }}>
+            También almuerzo (×1.5)
+          </span>
+        </div>
+      )}
     </div>
   )
 }

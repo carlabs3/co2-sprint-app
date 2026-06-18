@@ -117,6 +117,7 @@ export function calculator(answers) {
   // ── Alimentación ────────────────────────────────────────────────────────────
   const breakfastKg = Object.entries(answers.breakfastDays || {})
     .reduce((s, [type, days]) => s + (MAP.breakfastDaily[type] ?? 0) * days * 52, 0)
+    * (answers.breakfastDouble ? 1.5 : 1)
 
   const hotDrinksKg = Object.entries(answers.hotDrinksCount || {})
     .reduce((s, [type, count]) => s + (MAP.hotDrinksDaily[type] ?? 0) * count * 365, 0)
@@ -150,27 +151,27 @@ export function calculator(answers) {
     get('smoking', answers.smoking) +
     sum('sports', answers.sports)
 
-  // ── Huella digital + servicios públicos ────────────────────────────────────
+  // ── Huella digital ─────────────────────────────────────────────────────────
   const digitalKg =
     get('videoCalls', answers.videoCalls) +
     get('streaming', answers.streaming) +
     get('socialMedia', answers.socialMedia) +
-    get('aiUsage', answers.aiUsage) +
-    PUBLIC_SERVICES_KG
+    get('aiUsage', answers.aiUsage)
 
   // ── Totales ─────────────────────────────────────────────────────────────────
-  const totalKg    = transportKg + housingKg + foodKg + consumptionKg + digitalKg
+  const totalKg    = transportKg + housingKg + foodKg + consumptionKg + digitalKg + PUBLIC_SERVICES_KG
   const carbonTons = parseFloat((totalKg / 1000).toFixed(2))
 
   return {
     carbonTons,
     carbonKg: Math.round(totalKg),
     areas: {
-      transport:   parseFloat((transportKg   / 1000).toFixed(2)),
-      energy:      parseFloat((housingKg     / 1000).toFixed(2)),
-      food:        parseFloat((foodKg        / 1000).toFixed(2)),
-      consumption: parseFloat((consumptionKg / 1000).toFixed(2)),
-      waste:       parseFloat((digitalKg     / 1000).toFixed(2)),
+      transport:      parseFloat((transportKg        / 1000).toFixed(2)),
+      energy:         parseFloat((housingKg          / 1000).toFixed(2)),
+      food:           parseFloat((foodKg             / 1000).toFixed(2)),
+      consumption:    parseFloat((consumptionKg      / 1000).toFixed(2)),
+      waste:          parseFloat((digitalKg          / 1000).toFixed(2)),
+      publicServices: parseFloat((PUBLIC_SERVICES_KG / 1000).toFixed(2)),
     },
     category: carbonTons < 4 ? 'bajo' : carbonTons < 7 ? 'medio' : carbonTons < 10 ? 'alto' : 'muy alto',
   }

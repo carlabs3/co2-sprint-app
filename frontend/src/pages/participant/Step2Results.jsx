@@ -28,19 +28,21 @@ const CATEGORY_MESSAGES = {
 }
 
 const AREA_LABELS = {
-  transport:   'Transporte',
-  energy:      'Vivienda',
-  food:        'Alimentación',
-  consumption: 'Compras y hábitos',
-  waste:       'Vida digital',
+  transport:      'Transporte',
+  energy:         'Vivienda',
+  food:           'Alimentación',
+  consumption:    'Compras y hábitos',
+  waste:          'Vida digital',
+  publicServices: 'Servicios públicos',
 }
 
 const AREA_COLORS = {
-  transport:   '#38bdf8',
-  energy:      '#f59e0b',
-  food:        '#4ade80',
-  consumption: '#a855f7',
-  waste:       '#f472b6',
+  transport:      '#38bdf8',
+  energy:         '#f59e0b',
+  food:           '#4ade80',
+  consumption:    '#a855f7',
+  waste:          '#f472b6',
+  publicServices: '#94a3b8',
 }
 
 function getCategory(tons) {
@@ -52,11 +54,12 @@ function getCategory(tons) {
 
 // Areas ordered for the detail section
 const AREAS = [
-  { id: 'transport',   label: 'Transporte',        iconUrl: '/icons/transport.svg',   color: '#38bdf8' },
-  { id: 'energy',      label: 'Vivienda',           iconUrl: '/icons/energy.svg',      color: '#f59e0b' },
-  { id: 'food',        label: 'Alimentación',       iconUrl: '/icons/food.svg',        color: '#4ade80' },
-  { id: 'consumption', label: 'Compras y hábitos',  iconUrl: '/icons/consumption.svg', color: '#a855f7' },
-  { id: 'waste',       label: 'Vida digital',        iconUrl: '/icons/waste.svg',       color: '#f472b6' },
+  { id: 'transport',      label: 'Transporte',        iconUrl: '/icons/transport.svg',   color: '#38bdf8' },
+  { id: 'energy',         label: 'Vivienda',           iconUrl: '/icons/energy.svg',      color: '#f59e0b' },
+  { id: 'food',           label: 'Alimentación',       iconUrl: '/icons/food.svg',        color: '#4ade80' },
+  { id: 'consumption',    label: 'Compras y hábitos',  iconUrl: '/icons/consumption.svg', color: '#a855f7' },
+  { id: 'waste',          label: 'Vida digital',       iconUrl: '/icons/waste.svg',       color: '#f472b6' },
+  { id: 'publicServices', label: 'Servicios públicos', iconUrl: '/icons/waste.svg',       color: '#94a3b8' },
 ]
 
 const SUBCATEGORIES = {
@@ -133,6 +136,7 @@ const SUBCATEGORIES = {
       label: 'Dieta diaria',
       calc: (answers) => {
         const breakfast = Object.entries(answers.breakfastDays || {}).reduce((s, [t, d]) => s + (MAP.breakfastDaily[t] ?? 0) * d * 52, 0)
+          * (answers.breakfastDouble ? 1.5 : 1)
         const lunch     = Object.entries(answers.lunchDays    || {}).reduce((s, [t, d]) => s + (MAP.mealDaily[t]      ?? 0) * d * 52, 0)
         const dinner    = Object.entries(answers.dinnerDays   || {}).reduce((s, [t, d]) => s + (MAP.mealDaily[t]      ?? 0) * d * 52, 0)
         const delivery  = (answers.deliveryPerWeek || 0) * 3 * 52
@@ -182,6 +186,12 @@ const SUBCATEGORIES = {
     {
       label: 'Inteligencia artificial',
       calc: (answers) => (MAP.aiUsage[answers.aiUsage] || 0) / 1000,
+    },
+  ],
+  publicServices: [
+    {
+      label: 'Sanidad, educación, infraestructuras...',
+      calc: () => 1.5,
     },
   ],
 }
@@ -531,8 +541,8 @@ export default function Step2Results() {
 
         {/* ── area donut chart ── */}
         {(() => {
-          const pieData = AREA_QUESTIONS
-            .map(a => ({ name: AREA_LABELS[a.areaId] || a.areaLabel, value: areas[a.areaId] ?? 0, color: AREA_COLORS[a.areaId] || '#ccc' }))
+          const pieData = AREAS
+            .map(a => ({ name: a.label, value: areas[a.id] ?? 0, color: a.color }))
             .filter(d => d.value > 0.001)
           const total = pieData.reduce((s, d) => s + d.value, 0)
           return (
@@ -599,9 +609,9 @@ export default function Step2Results() {
   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
     <span style={{ fontSize: 18, width: 22, textAlign: 'center' }}>🏛️</span>
     <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: '#0a0a0a' }}>Servicios públicos</span>
-    <span style={{ fontSize: 13, fontWeight: 700, color: '#888' }}>1.5t</span>
+    <span style={{ fontSize: 13, fontWeight: 700, color: '#888' }}>{(areas.publicServices || 1.5).toFixed(1)}t</span>
     <span style={{ fontSize: 10, color: '#aaa' }}>
-      {carbonTons > 0 ? Math.round((1.5 / (carbonTons + 1.5)) * 100) : 0}%
+      {carbonTons > 0 ? Math.round(((areas.publicServices || 1.5) / carbonTons) * 100) : 0}%
     </span>
   </div>
           <p style={{ fontSize: '0.88rem', color: '#555', margin: 0, lineHeight: 1.65 }}>

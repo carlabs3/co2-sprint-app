@@ -74,7 +74,7 @@ const SUBCATS = {
   ],
   food: [
     { label: 'Dieta diaria', calc: (a) => {
-      const breakfast = Object.entries(a.breakfastDays || {}).reduce((s, [t, d]) => s + (MAP.breakfastDaily[t] ?? 0) * d * 52, 0)
+      const breakfast = Object.entries(a.breakfastDays || {}).reduce((s, [t, d]) => s + (MAP.breakfastDaily[t] ?? 0) * d * 52, 0) * (a.breakfastDouble ? 1.5 : 1)
       const lunch     = Object.entries(a.lunchDays    || {}).reduce((s, [t, d]) => s + (MAP.mealDaily[t]      ?? 0) * d * 52, 0)
       const dinner    = Object.entries(a.dinnerDays   || {}).reduce((s, [t, d]) => s + (MAP.mealDaily[t]      ?? 0) * d * 52, 0)
       return breakfast + lunch + dinner + (a.deliveryPerWeek || 0) * 3 * 52
@@ -94,14 +94,18 @@ const SUBCATS = {
     { label: 'Uso de pantallas',             calc: (a) => (MAP.videoCalls[a.videoCalls] || 0) + (MAP.streaming[a.streaming] || 0) + (MAP.socialMedia[a.socialMedia] || 0) },
     { label: 'Inteligencia artificial',      calc: (a) => MAP.aiUsage[a.aiUsage] || 0 },
   ],
+  publicServices: [
+    { label: 'Servicios colectivos', calc: () => 1500 },
+  ],
 }
 
 const AREA_META = [
-  { id: 'transport',   label: 'Transporte',        emoji: '🚗', color: '#38bdf8' },
-  { id: 'energy',      label: 'Vivienda',          emoji: '🏡', color: '#f59e0b' },
-  { id: 'food',        label: 'Alimentación',      emoji: '🥗', color: '#4ade80' },
-  { id: 'consumption', label: 'Compras y hábitos', emoji: '🛍️', color: '#a855f7' },
-  { id: 'waste',       label: 'Vida digital',      emoji: '📱', color: '#f472b6' },
+  { id: 'transport',      label: 'Transporte',        emoji: '🚗', color: '#38bdf8' },
+  { id: 'energy',         label: 'Vivienda',          emoji: '🏡', color: '#f59e0b' },
+  { id: 'food',           label: 'Alimentación',      emoji: '🥗', color: '#4ade80' },
+  { id: 'consumption',    label: 'Compras y hábitos', emoji: '🛍️', color: '#a855f7' },
+  { id: 'waste',          label: 'Vida digital',      emoji: '📱', color: '#f472b6' },
+  { id: 'publicServices', label: 'Servicios públicos', emoji: '🏛️', color: '#94a3b8' },
 ]
 
 // ── Email route ───────────────────────────────────────────────────────────────
@@ -197,9 +201,13 @@ router.post('/send-email', async (req, res) => {
               <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#a855f7;margin-right:6px;vertical-align:middle;"></span>🛍️ Compras y hábitos</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.consumption || 0).toFixed(1)} t</td>
             </tr>
-            <tr>
+            <tr style="border-bottom: 1px solid #f0f0f0;">
               <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f472b6;margin-right:6px;vertical-align:middle;"></span>📱 Vida digital</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.waste || 0).toFixed(1)} t</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#94a3b8;margin-right:6px;vertical-align:middle;"></span>🏛️ Servicios públicos</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.publicServices || 1.5).toFixed(1)} t</td>
             </tr>
           </table>
 
