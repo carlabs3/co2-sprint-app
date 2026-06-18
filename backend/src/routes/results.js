@@ -173,8 +173,9 @@ router.post('/send-email', async (req, res) => {
       subject: `Tu huella de carbono — ${Number(carbonTons).toFixed(1)} t CO₂/año`,
       html: `
         <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-          <h1 style="color: #000000; font-size: 28px; margin-bottom: 8px;">Tu huella de carbono</h1>
-          <p style="color: #666; margin-bottom: 32px;">Resultado del taller Drop.</p>
+          <p style="font-size: 13px; color: #666; margin: 0 0 12px; line-height: 1.7;">Gracias por participar en nuestro taller CO₂ Sprint de Drop. 🌱</p>
+          <p style="font-size: 13px; color: #666; margin: 0 0 12px; line-height: 1.7;">Calcular tu huella no es un examen — es conocer tu punto de partida. Pero ese mismo número tiene otra lectura: cuanto mayor es nuestra huella, más dependemos de un sistema frágil. Y eso, poco a poco, podemos cambiarlo.</p>
+          <p style="font-size: 13px; color: #666; margin: 0 0 24px; line-height: 1.7;">Aquí tienes tus resultados:</p>
 
           <div style="background: #000000; border-radius: 12px; padding: 32px; text-align: center; margin-bottom: 24px;">
             <p style="color: rgba(255,255,255,0.55); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px;">Tu huella total</p>
@@ -213,19 +214,21 @@ router.post('/send-email', async (req, res) => {
           <h3 style="color: #1a1a1a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; margin: 32px 0 16px;">Detalle por categoría</h3>
           ${subcatHtml}
 
-          <p style="font-size: 13px; color: #888; font-style: italic; margin: 24px 0 8px;">...y a esto hay que sumarle lo que pagamos entre todos 🏛️</p>
-          <div style="background: #f5f5f5; border-radius: 8px; padding: 12px 16px; margin-top: 8px; margin-bottom: 32px;">
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="font-size: 13px; font-weight: 700; color: #555;">🏛️ Servicios públicos</td>
-                <td style="font-size: 11px; color: #aaa;">Fijo para todos en España — infraestructuras, sanidad, educación...</td>
-                <td style="font-size: 14px; font-weight: 700; color: #888; text-align: right; white-space: nowrap;">1.5 t</td>
-              </tr>
-            </table>
+          <div style="background: #f5f5f5; border-radius: 8px; padding: 16px 20px; margin: 24px 0;">
+            <p style="font-size: 13px; font-weight: 600; color: #1a1a1a; margin: 0 0 6px;">🎯 El objetivo: 2 t CO₂e por persona para 2050</p>
+            <p style="font-size: 12px; color: #666; margin: 0; line-height: 1.6;">El objetivo de España para alcanzar la neutralidad climática y contribuir a limitar el calentamiento global a +2°C.</p>
           </div>
 
-          <p style="color: #888; font-size: 11px; margin-top: 32px; text-align: center;">
-            Drop. · Taller de huella de carbono
+          <div style="border-top: 1px solid #f0f0f0; padding-top: 20px; margin-top: 8px;">
+            <p style="font-size: 13px; font-weight: 600; color: #1a1a1a; margin: 0 0 6px;">Importante: esto no va solo de ti</p>
+            <p style="font-size: 12px; color: #666; margin: 0 0 12px; line-height: 1.6;">La descarbonización es un esfuerzo colectivo.</p>
+            <p style="font-size: 12px; color: #666; margin: 0 0 8px; line-height: 1.6;">· El Estado puede acelerar la transición con leyes, ayudas e inversiones.</p>
+            <p style="font-size: 12px; color: #666; margin: 0 0 8px; line-height: 1.6;">· Los ayuntamientos configuran el entorno en el que vivimos: el transporte, los espacios, los servicios. Sus decisiones pueden impulsar prácticas más sostenibles locales.</p>
+            <p style="font-size: 12px; color: #666; margin: 0; line-height: 1.6;">· Las empresas trabajan para reducir progresivamente la huella de sus productos y servicios.</p>
+          </div>
+
+          <p style="font-size: 11px; color: #aaa; margin-top: 32px; text-align: center;">
+            Drop. · Taller de huella de carbono · Una iniciativa de Three o'clock
           </p>
         </div>
       `,
