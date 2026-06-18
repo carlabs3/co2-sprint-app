@@ -10,11 +10,11 @@ export const AREA_QUESTIONS = [
         info: 'Cuenta los km que haces al trabajo, escapadas y vacaciones. Si compartes coche habitualmente, cuenta los km totales.',
         type: 'single',
         options: [
-          { value: 'km_a', label: 'Solo para vacaciones (menos de 3.000 km)' },
-          { value: 'km_b', label: 'Vacaciones y fines de semana (3.000–10.000 km)' },
-          { value: 'km_c', label: 'Vacaciones, trabajo y escapadas (10.000–20.000 km)' },
-          { value: 'km_d', label: 'Lo uso para todo, más de 20.000 km' },
-          { value: 'km_e', label: 'No tengo coche / no lo uso' },
+          { value: 'km_a', label: 'Poco — menos de 3.000 km/año' },
+          { value: 'km_b', label: 'Uso moderado (3.000–10.000 km/año)' },
+          { value: 'km_c', label: 'Uso habitual (10.000–20.000 km/año)' },
+          { value: 'km_d', label: 'Lo uso mucho — más de 20.000 km/año' },
+          { value: 'km_e', label: 'No tengo coche o no lo uso' },
         ],
       },
       {
@@ -63,15 +63,16 @@ export const AREA_QUESTIONS = [
       },
       {
         id: 'urbanMobility',
-        text: 'Para trayectos cortos (menos de 2 km), ¿qué usas más?',
+        text: '¿Cómo te mueves habitualmente por la ciudad?',
         info: 'Los trayectos cortos en ciudad son donde hay más margen de mejora.',
         type: 'single',
         options: [
-          { value: '5a', label: 'Camino a pie' },
+          { value: '5a', label: 'A pie' },
           { value: '5b', label: 'Bicicleta convencional' },
           { value: '5c', label: 'Bicicleta eléctrica' },
           { value: '5d', label: 'Patinete eléctrico' },
-          { value: '5e', label: 'Taxi / Uber / Cabify' },
+          { value: '5e', label: 'Transporte público urbano (bus, metro, tranvía)' },
+          { value: '5f', label: 'Taxi / Uber / Cabify' },
         ],
       },
       {

@@ -6,14 +6,14 @@ export const MAP = {
   electricCar:   { km_a: 146, km_b: 775, km_c: 1550, km_d: 3600, km_e: 0 },
   train:         { '3a': 21, '3b': 126, '3c': 630, '3d': 0 },
   moto:          { '4a': 11, '4b': 57, '4c': 228, '4d': 0 },
-  urbanMobility: { '5a': 0, '5b': 2, '5c': 4, '5d': 5, '5e': 44 },
-  telework:      { na: 0, never: 0, partial: -200, mostly: -600, always: -800 },
+  urbanMobility: { '5a': 0, '5b': 15, '5c': 30, '5d': 38, '5e': 210, '5f': 330 },
+  telework:      {never: 0, partial: -50, mostly: -150, always: -300 },
 
   // ── VIVIENDA ── (3 tablas de calefacción por tipo de vivienda)
   heatingSmall:  { '26a': 0, '26b': 625, '26c': 975,  '26d': 1429, '26e': 230, '26f': 375, '26g': 668 },
   heatingMedium: { '26a': 0, '26b': 750, '26c': 1170, '26d': 1715, '26e': 276, '26f': 450, '26g': 802 },
   heatingLarge:  { '26a': 0, '26b': 781, '26c': 1219, '26d': 1787, '26e': 288, '26f': 469, '26g': 835 },
-  renewable:     { 'a': -720, 'b': -200, 'c': 0 },
+  renewable:     { 'a': -720, 'b': -150, 'c': 0 },
   householdSize: { '1': 1, '2': 2, '3': 3, '4': 4, '4+': 4 },
   pool:          { privatePool: 50, communityPool: 17, noPool: 0 }, // single now
   homeHabits:    { closeWindows: -47, thermostat19: -47, ledBulbs: -4, ecoPrograms: -36, none: 0 },
