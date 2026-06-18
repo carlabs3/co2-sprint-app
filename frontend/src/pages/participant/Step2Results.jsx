@@ -94,12 +94,11 @@ const SUBCATEGORIES = {
     {
       label: 'Calefacción y agua caliente',
       calc: (answers) => {
-        const div = MAP.householdSize[answers.householdSize] ?? 2
         let kg = 0
         if (answers.homeType === '25a')      kg = MAP.heatingSmall[answers.heating]  ?? 0
         else if (answers.homeType === '25b') kg = MAP.heatingMedium[answers.heating] ?? 0
         else if (answers.homeType === '25c') kg = MAP.heatingLarge[answers.heating]  ?? 0
-        return (kg / div) / 1000
+        return kg / 1000
       },
     },
     {

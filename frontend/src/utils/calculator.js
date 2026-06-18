@@ -14,7 +14,6 @@ export const MAP = {
   heatingMedium: { '26a': 0, '26b': 750, '26c': 1170, '26d': 1715, '26e': 276, '26f': 450, '26g': 802 },
   heatingLarge:  { '26a': 0, '26b': 781, '26c': 1219, '26d': 1787, '26e': 288, '26f': 469, '26g': 835 },
   renewable:     { 'a': -720, 'b': -150, 'c': 0 },
-  householdSize: { '1': 1, '2': 2, '3': 3, '4': 4, '4+': 4 },
   pool:          { privatePool: 50, communityPool: 17, noPool: 0 }, // single now
   homeHabits:    { closeWindows: -47, thermostat19: -47, ledBulbs: -4, ecoPrograms: -36, none: 0 },
 
@@ -84,8 +83,6 @@ export function calculator(answers) {
     + get('telework', answers.telework)
 
   // ── Hogar ───────────────────────────────────────────────────────────────────
-  const div = MAP.householdSize[answers.householdSize] ?? 2
-
   let heatingKg = 0
   if (answers.homeType === '25a')      heatingKg = MAP.heatingSmall[answers.heating]  ?? 0
   else if (answers.homeType === '25b') heatingKg = MAP.heatingMedium[answers.heating] ?? 0
@@ -102,7 +99,7 @@ export function calculator(answers) {
   const poolKg      = get('pool', answers.pool)
 
   const housingKg = Math.max(0,
-    (heatingKg / div) +
+    heatingKg +
     acKg +
     renewableKg +
     sum('homeHabits', answers.homeHabits) +

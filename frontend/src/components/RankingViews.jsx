@@ -205,14 +205,13 @@ function getContribution(answers, key) {
     case 'moto':         return MAP.moto[answers.moto] || 0
     case 'urbanMobility':return MAP.urbanMobility[answers.urbanMobility] || 0
     case 'heating': {
-      const div = MAP.householdSize[answers.householdSize] ?? 2
       let kg = 0
       if (answers.homeType === '25a')      kg = MAP.heatingSmall[answers.heating]  ?? MAP.heatingMedium[answers.heating] ?? 0
       else if (answers.homeType === '25b') kg = MAP.heatingMedium[answers.heating] ?? 0
       else                                 kg = MAP.heatingLarge[answers.heating]  ?? MAP.heatingMedium[answers.heating] ?? 0
-      return kg / div
+      return kg
     }
-    case 'hasAC':        return answers.hasAC === 'yes' ? (MAP.householdSize[answers.householdSize] ? 350 / MAP.householdSize[answers.householdSize] : 175) : 0
+    case 'hasAC':        return answers.hasAC === 'yes' ? 350 : 0
     case 'pool':         return MAP.pool?.[answers.pool] || 0
     case 'renewable':    return answers.renewable === 'yes' ? -300 : 0
     case 'homeHabits': {

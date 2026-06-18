@@ -96,18 +96,6 @@ export const AREA_QUESTIONS = [
     areaColor: '#e8a020',
     questions: [
       {
-        id: 'householdSize',
-        text: '¿Cuántas personas vivís en casa?',
-        info: 'El número de personas reparte los gastos energéticos del hogar. Afecta al cálculo per cápita de calefacción y agua caliente.',
-        type: 'single',
-        options: [
-          { value: '1',  label: '1 persona (vivo solo/a)' },
-          { value: '2',  label: '2 personas' },
-          { value: '3',  label: '3 personas' },
-          { value: '4+', label: '4 o más personas' },
-        ],
-      },
-      {
         id: 'homeType',
         text: '¿En qué tipo de vivienda vives?',
         info: 'El tamaño de la vivienda afecta directamente al consumo de calefacción y refrigeración.',

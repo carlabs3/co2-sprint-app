@@ -19,7 +19,6 @@ const MAP = {
   heatingMedium: { '26a': 0, '26b': 750, '26c': 1170, '26d': 1715, '26e': 276, '26f': 450, '26g': 802 },
   heatingLarge:  { '26a': 0, '26b': 781, '26c': 1219, '26d': 1787, '26e': 288, '26f': 469, '26g': 835 },
   renewable:     { 'a': -720, 'b': -150, 'c': 0 },
-  householdSize: { '1': 1, '2': 2, '3': 3, '4': 4, '4+': 4 },
   homeHabits:    { closeWindows: -47, thermostat19: -47, ledBulbs: -4, ecoPrograms: -36, none: 0 },
   breakfastDaily: { '6a': 0.4, '6b': 0.81, '6c': 0.33, '6d': 0.11, '6e': 0.71, '6f': 0 },
   hotDrinksDaily: { '7a': 0, '7b': 1.63, '7c': 0.05, '7d_cow': 1.52, '7d_veg': 0.56, '7d_chai': 0.95, '7e': 0.16 },
@@ -66,7 +65,7 @@ const SUBCATS = {
     { label: 'Teletrabajo',                  calc: (a) => MAP.telework[a.telework] ?? 0, negative: true },
   ],
   energy: [
-    { label: 'Calefacción y agua caliente',  calc: (a) => { const div = MAP.householdSize[a.householdSize] ?? 2; let h = 0; if (a.homeType === '25a') h = MAP.heatingSmall[a.heating] ?? 0; else if (a.homeType === '25b') h = MAP.heatingMedium[a.heating] ?? 0; else if (a.homeType === '25c') h = MAP.heatingLarge[a.heating] ?? 0; return h / div } },
+    { label: 'Calefacción y agua caliente',  calc: (a) => { let h = 0; if (a.homeType === '25a') h = MAP.heatingSmall[a.heating] ?? 0; else if (a.homeType === '25b') h = MAP.heatingMedium[a.heating] ?? 0; else if (a.homeType === '25c') h = MAP.heatingLarge[a.heating] ?? 0; return h } },
     { label: 'Refrigeración',                calc: (a) => a.hasAC === 'yes' ? (a.homeType === '25a' ? 350 : a.homeType === '25b' ? 420 : 438) : 0 },
     { label: 'Extras (piscina y vacaciones)', calc: (a) => (MAP.pool?.[a.pool] || 0) + (a.hotelNights || 0) * 8 + (a.hostelNights || 0) + (a.campingNights || 0) + (a.airbnbNights || 0) * 5 + (a.secondHome ? 250 : 0) },
     { label: 'Energía renovable',            calc: (a) => MAP.renewable[a.renewable] ?? 0, negative: true },
