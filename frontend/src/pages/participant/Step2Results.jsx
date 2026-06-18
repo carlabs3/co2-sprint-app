@@ -29,10 +29,10 @@ const CATEGORY_MESSAGES = {
 
 const AREA_LABELS = {
   transport:   'Transporte',
-  energy:      'Hogar',
+  energy:      'Vivienda',
   food:        'Alimentación',
-  consumption: 'Consumo',
-  waste:       'Huella Digital',
+  consumption: 'Compras y hábitos',
+  waste:       'Vida digital',
 }
 
 const AREA_COLORS = {
@@ -56,7 +56,7 @@ const AREAS = [
   { id: 'energy',      label: 'Vivienda',           iconUrl: '/icons/energy.svg',      color: '#f59e0b' },
   { id: 'food',        label: 'Alimentación',       iconUrl: '/icons/food.svg',        color: '#4ade80' },
   { id: 'consumption', label: 'Compras y hábitos',  iconUrl: '/icons/consumption.svg', color: '#a855f7' },
-  { id: 'waste',       label: 'Vida Digital',       iconUrl: '/icons/waste.svg',       color: '#f472b6' },
+  { id: 'waste',       label: 'Vida digital',        iconUrl: '/icons/waste.svg',       color: '#f472b6' },
 ]
 
 const SUBCATEGORIES = {

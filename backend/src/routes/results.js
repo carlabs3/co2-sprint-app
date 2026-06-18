@@ -98,10 +98,10 @@ const SUBCATS = {
 
 const AREA_META = [
   { id: 'transport',   label: 'Transporte',        emoji: '🚗', color: '#38bdf8' },
-  { id: 'energy',      label: 'Vivienda y energía', emoji: '🏡', color: '#f59e0b' },
-  { id: 'food',        label: 'Alimentación',       emoji: '🥗', color: '#4ade80' },
-  { id: 'consumption', label: 'Consumo',             emoji: '🛍️', color: '#a855f7' },
-  { id: 'waste',       label: 'Huella digital',      emoji: '📱', color: '#f472b6' },
+  { id: 'energy',      label: 'Vivienda',          emoji: '🏡', color: '#f59e0b' },
+  { id: 'food',        label: 'Alimentación',      emoji: '🥗', color: '#4ade80' },
+  { id: 'consumption', label: 'Compras y hábitos', emoji: '🛍️', color: '#a855f7' },
+  { id: 'waste',       label: 'Vida digital',      emoji: '📱', color: '#f472b6' },
 ]
 
 // ── Email route ───────────────────────────────────────────────────────────────
@@ -186,7 +186,7 @@ router.post('/send-email', async (req, res) => {
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.transport || 0).toFixed(1)} t</td>
             </tr>
             <tr style="border-bottom: 1px solid #f0f0f0;">
-              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f59e0b;margin-right:6px;vertical-align:middle;"></span>🏡 Vivienda y energía</td>
+              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f59e0b;margin-right:6px;vertical-align:middle;"></span>🏡 Vivienda</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.energy || 0).toFixed(1)} t</td>
             </tr>
             <tr style="border-bottom: 1px solid #f0f0f0;">
@@ -194,11 +194,11 @@ router.post('/send-email', async (req, res) => {
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.food || 0).toFixed(1)} t</td>
             </tr>
             <tr style="border-bottom: 1px solid #f0f0f0;">
-              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#a855f7;margin-right:6px;vertical-align:middle;"></span>🛍️ Consumo</td>
+              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#a855f7;margin-right:6px;vertical-align:middle;"></span>🛍️ Compras y hábitos</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.consumption || 0).toFixed(1)} t</td>
             </tr>
             <tr>
-              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f472b6;margin-right:6px;vertical-align:middle;"></span>📱 Huella digital</td>
+              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f472b6;margin-right:6px;vertical-align:middle;"></span>📱 Vida digital</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.waste || 0).toFixed(1)} t</td>
             </tr>
           </table>

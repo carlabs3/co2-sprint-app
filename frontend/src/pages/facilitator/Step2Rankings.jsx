@@ -304,7 +304,7 @@ export default function Step2Rankings() {
             })
             const areaTotal = Object.values(areaAvg).reduce((s, v) => s + v, 0)
             const AREA_COLORS_LOCAL = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
-            const AREA_LABELS_LOCAL = { transport: 'Transp.', energy: 'Hogar', food: 'Alim.', consumption: 'Cons.', waste: 'Digital' }
+            const AREA_LABELS_LOCAL = { transport: 'Transp.', energy: 'Vivienda', food: 'Alim.', consumption: 'Compras', waste: 'Digital' }
 
             return (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'start' }}>
@@ -401,7 +401,7 @@ export default function Step2Rankings() {
                   {/* Filtros por categoría */}
                   <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
                     {['transport','energy','food','consumption','waste'].map(area => {
-                      const labels = { transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación', consumption: 'Compras y hábitos', waste: 'Vida Digital' }
+                      const labels = { transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación', consumption: 'Compras y hábitos', waste: 'Vida digital' }
                       const colors = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
                       const isActive = filter3Area === area
                       return (
@@ -558,7 +558,7 @@ export default function Step2Rankings() {
       return after
     }
 
-    const AREA_LABELS_S3 = { transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación', consumption: 'Consumo', waste: 'Digital' }
+    const AREA_LABELS_S3 = { transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación', consumption: 'Compras y hábitos', waste: 'Vida digital' }
 
     const StackedBar = ({ areaAvg, total, maxVal, label, muted = false }) => {
       const areaSum = AREA_ORDER.reduce((s, a) => s + (areaAvg[a] || 0), 0)

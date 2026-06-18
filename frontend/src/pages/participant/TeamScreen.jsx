@@ -20,8 +20,8 @@ const AREA_META = [
   { key: 'transport',   label: 'Transporte',   color: '#38bdf8' },
   { key: 'energy',      label: 'Vivienda',     color: '#f59e0b' },
   { key: 'food',        label: 'Alimentación', color: '#4ade80' },
-  { key: 'consumption', label: 'Consumo',      color: '#a855f7' },
-  { key: 'waste',       label: 'Digital',      color: '#f472b6' },
+  { key: 'consumption', label: 'Compras y hábitos', color: '#a855f7' },
+  { key: 'waste',       label: 'Vida digital',     color: '#f472b6' },
 ]
 
 const SPAIN_AVG = 8.1

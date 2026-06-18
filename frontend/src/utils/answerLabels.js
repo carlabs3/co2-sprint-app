@@ -429,7 +429,7 @@ export const AREA_QUESTIONS = [
   },
   {
     areaId: 'waste',
-    areaLabel: 'Vida Digital',
+    areaLabel: 'Vida digital',
     areaColor: '#7a7aaa',
     questions: [
       {

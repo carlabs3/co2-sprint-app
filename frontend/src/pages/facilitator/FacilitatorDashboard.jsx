@@ -9,8 +9,8 @@ function formatDate(iso) {
 }
 
 const AREA_LABELS = {
-  transport: 'Transporte', energy: 'Energía', food: 'Alimentación',
-  consumption: 'Consumo', waste: 'Residuos',
+  transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación',
+  consumption: 'Compras y hábitos', waste: 'Vida digital',
 }
 
 const STATUS_LABEL = { draft: 'Borrador', waiting: 'En espera', active: 'Activa', actions: 'Fase acciones', closed: 'Cerrada' }

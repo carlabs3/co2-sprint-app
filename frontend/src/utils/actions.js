@@ -18,7 +18,7 @@ export const AREA_LABEL = {
   transport:   'Transporte',
   energy:      'Vivienda',
   food:        'Alimentación',
-  consumption: 'Consumo',
+  consumption: 'Compras y hábitos',
   waste:       'Vida digital',
 }
 

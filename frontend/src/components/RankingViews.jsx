@@ -124,10 +124,10 @@ function getMostFrequent(values) {
 export const HISTOGRAM_TABS = [
   { id: 'total',       label: 'Total',            color: '#1a1a1a' },
   { id: 'transport',   label: '🚗 Transporte',     color: '#38bdf8' },
-  { id: 'energy',      label: '🏠 Hogar',          color: '#f59e0b' },
-  { id: 'food',        label: '🥗 Alimentación',   color: '#4ade80' },
-  { id: 'consumption', label: '🛍 Consumo',         color: '#a855f7' },
-  { id: 'waste',       label: '📱 Huella Digital', color: '#f472b6' },
+  { id: 'energy',      label: '🏠 Vivienda',           color: '#f59e0b' },
+  { id: 'food',        label: '🥗 Alimentación',      color: '#4ade80' },
+  { id: 'consumption', label: '🛍 Compras y hábitos', color: '#a855f7' },
+  { id: 'waste',       label: '📱 Vida digital',      color: '#f472b6' },
 ]
 
 export const SPAIN_AVERAGES = {
@@ -144,7 +144,7 @@ export const AREA_COLORS = {
 }
 
 export const AREA_LABELS = {
-  transport: 'Transporte', energy: 'Hogar', food: 'Alimentación',
+  transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación',
   consumption: 'Compras y hábitos', waste: 'Vida digital',
 }
 
@@ -660,7 +660,7 @@ const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste']
 const CATEGORY_LABEL_F = { bajo: 'baja', medio: 'media', alto: 'alta', 'muy alto': 'muy alta' }
 const AREA_LABEL_SHORT = {
   transport:   'Transporte',
-  energy:      'Hogar',
+  energy:      'Vivienda',
   food:        'Alimentación',
   consumption: 'Compras y hábitos',
   waste:       'Vida digital',
