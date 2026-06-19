@@ -28,9 +28,10 @@ export function computeGroups(ranking) {
   return Object.values(map).map(g => {
     const avgVal = g.items.reduce((s, r) => s + r.tons, 0) / g.items.length
     const areas = {}
-    ;['transport', 'energy', 'food', 'consumption', 'waste', 'publicServices'].forEach(area => {
+    ;['transport', 'energy', 'food', 'consumption', 'waste'].forEach(area => {
       areas[area] = g.items.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / g.items.length
     })
+    areas.publicServices = 1.5
     return { name: g.name, avg: avgVal, count: g.items.length, category: getCategory(avgVal), areas }
   }).sort((a, b) => a.avg - b.avg)
 }
@@ -410,7 +411,7 @@ export function DistributionView({ ranking }) {
     food:           avg(ranking.map(r => r.areas?.food           ?? 0)),
     consumption:    avg(ranking.map(r => r.areas?.consumption    ?? 0)),
     waste:          avg(ranking.map(r => r.areas?.waste          ?? 0)),
-    publicServices: avg(ranking.map(r => r.areas?.publicServices ?? 0)),
+    publicServices: avg(ranking.map(r => r.areas?.publicServices > 0 ? r.areas.publicServices : 1.5)),
   }
   const areaTotal = Object.values(areaAvg).reduce((s, v) => s + v, 0)
 

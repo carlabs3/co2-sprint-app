@@ -163,7 +163,7 @@ function DrinksInput({ question, answers, onChange }) {
 
 function isWeekDistributionValid(question, answers) {
   const dist = answers[question.id] || {}
-  const total = Object.values(dist).reduce((s, v) => s + v, 0)
+  const total = Object.values(dist).reduce((s, v) => s + (Number(v) || 0), 0)
   return total === 7
 }
 
