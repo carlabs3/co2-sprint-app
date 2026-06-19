@@ -9,6 +9,7 @@ import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
 import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
 import { MAP, calcAlcohol } from '../../utils/calculator.js'
+import { fmtTons } from '../../utils/format.js'
 
 const SPAIN_AVG = 8.1
 const BAR_MAX_H = 120
@@ -212,7 +213,7 @@ function AreaDetailCard({ areaId, areaLabel, areaIconUrl, areaColor, areaTons, s
         style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', gap: 10, cursor: 'pointer' }}>
         <img src={areaIconUrl} width={18} height={18} alt="" style={{ flexShrink: 0 }} />
         <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: '#0a0a0a' }}>{areaLabel}</span>
-        <span style={{ fontSize: 13, fontWeight: 700, color: areaColor }}>{areaTons.toFixed(1)}t</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: areaColor }}>{fmtTons(areaTons)}t</span>
         <span style={{ fontSize: 10, color: '#aaa', marginLeft: 4 }}>
           {totalTons > 0 ? Math.round((areaTons / totalTons) * 100) : 0}%
         </span>
@@ -235,7 +236,7 @@ function AreaDetailCard({ areaId, areaLabel, areaIconUrl, areaColor, areaTons, s
                 }} />
               </div>
               <span style={{ fontSize: 13, fontWeight: 600, width: 36, textAlign: 'right', color: sub.negative ? '#16a34a' : areaColor }}>
-                {sub.tons.toFixed(2)}t
+                {fmtTons(sub.tons)}t
               </span>
             </div>
           ))}
@@ -516,7 +517,7 @@ export default function Step2Results() {
             <div style={{ flex: '1 1 160px', minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem', flexWrap: 'wrap' }}>
                 <span style={{ fontWeight: 900, fontSize: 'clamp(3.2rem, 11vw, 4.8rem)', lineHeight: 1, color: '#fff' }}>
-                  {carbonTons.toFixed(1)}
+                  {fmtTons(carbonTons)}
                 </span>
                 <span style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1.05rem)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#fff', opacity: 0.75 }}>
                   t CO₂/año
@@ -555,7 +556,7 @@ export default function Step2Results() {
                     </Pie>
                   </PieChart>
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                    <span style={{ fontWeight: 900, fontSize: '1.3rem', lineHeight: 1.1, color: '#0a0a0a' }}>{carbonTons.toFixed(1)}</span>
+                    <span style={{ fontWeight: 900, fontSize: '1.3rem', lineHeight: 1.1, color: '#0a0a0a' }}>{fmtTons(carbonTons)}</span>
                     <span style={{ fontSize: '0.8rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em' }}>t CO₂</span>
                   </div>
                 </div>
@@ -564,7 +565,7 @@ export default function Step2Results() {
                     <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                       <div style={{ width: 9, height: 9, background: d.color, borderRadius: 2, flexShrink: 0 }} />
                       <span style={{ fontSize: '0.78rem', color: '#555' }}>{d.name}</span>
-                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0a0a0a' }}>{d.value.toFixed(1)} t</span>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0a0a0a' }}>{fmtTons(d.value)} t</span>
                       <span style={{ fontSize: '0.72rem', color: '#bbb' }}>{total > 0 ? Math.round((d.value / total) * 100) : 0}%</span>
                     </div>
                   ))}
@@ -608,13 +609,13 @@ export default function Step2Results() {
             <CardTitle>Comparativa con España</CardTitle>
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '1.25rem', marginBottom: '1rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontWeight: 900, fontSize: '0.95rem', color: cfg.color }}>{carbonTons.toFixed(1)} t</span>
+                <span style={{ fontWeight: 900, fontSize: '0.95rem', color: cfg.color }}>{fmtTons(carbonTons)} t</span>
                 <div style={{ width: 80, height: userBarH, background: cfg.color, borderRadius: '3px 3px 0 0' }} />
                 <span style={{ fontSize: '0.72rem', color: '#888' }}>Tú</span>
               </div>
               <div style={{ paddingBottom: 24, fontSize: '0.7rem', color: '#ccc', fontWeight: 700 }}>VS</div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontWeight: 900, fontSize: '0.95rem', color: '#888' }}>{SPAIN_AVG.toFixed(1)} t</span>
+                <span style={{ fontWeight: 900, fontSize: '0.95rem', color: '#888' }}>{fmtTons(SPAIN_AVG)} t</span>
                 <div style={{ width: 80, height: spainBarH, background: '#d4d4d4', borderRadius: '3px 3px 0 0' }} />
                 <span style={{ fontSize: '0.72rem', color: '#888' }}>Media España</span>
               </div>

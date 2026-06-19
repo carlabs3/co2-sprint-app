@@ -5,6 +5,7 @@ import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
 import { ACTIONS, AREA_ICON_URL } from '../../utils/actions.js'
 import WaitingForFacilitator from '../../components/WaitingForFacilitator.jsx'
+import { fmtTons } from '../../utils/format.js'
 
 // Normalize group name for comparison: "Equipo A" === "equipo-a"
 function normalizeGroup(g) {
@@ -121,7 +122,7 @@ function CalculatingPhase({ group, teamResults }) {
               Huella media del equipo · en curso
             </p>
             <div style={{ fontWeight: 900, fontSize: 'clamp(5rem, 16vw, 10rem)', lineHeight: 1, color: '#0a0a0a', letterSpacing: '-0.03em', marginBottom: '0.5rem' }}>
-              {teamAvg.toFixed(1)}
+              {fmtTons(teamAvg)}
             </div>
             <p style={{ fontSize: '1rem', color: '#aaa', marginBottom: '2.5rem' }}>t CO₂/año</p>
             <DotsLoader />
@@ -188,7 +189,7 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
           </p>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <span style={{ fontWeight: 900, fontSize: 'clamp(3.5rem, 10vw, 5.5rem)', lineHeight: 1 }}>
-              {teamAvg.toFixed(1)}
+              {fmtTons(teamAvg)}
             </span>
             <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>t CO₂/año</span>
           </div>
@@ -224,7 +225,7 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
                 </Pie>
               </PieChart>
               <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                <span style={{ fontWeight: 900, fontSize: '1.6rem', lineHeight: 1, color: '#0a0a0a' }}>{teamAvg.toFixed(1)}</span>
+                <span style={{ fontWeight: 900, fontSize: '1.6rem', lineHeight: 1, color: '#0a0a0a' }}>{fmtTons(teamAvg)}</span>
                 <span style={{ fontSize: '0.62rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 2 }}>t CO₂</span>
               </div>
             </div>
@@ -238,7 +239,7 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
                   <div key={a.key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <div style={{ width: 10, height: 10, background: a.color, borderRadius: 2, flexShrink: 0 }} />
                     <span style={{ fontSize: '0.75rem', color: '#555', flex: 1 }}>{a.label}</span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0a0a0a', minWidth: 36, textAlign: 'right' }}>{val.toFixed(1)} t</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0a0a0a', minWidth: 36, textAlign: 'right' }}>{fmtTons(val)} t</span>
                     <span style={{ fontSize: '0.68rem', color: '#bbb', minWidth: 32, textAlign: 'right' }}>{pctArea}%</span>
                   </div>
                 )
@@ -258,7 +259,7 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
               <div key={label}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
                   <span style={{ fontSize: '0.78rem', color: bold ? '#0a0a0a' : '#888', fontWeight: bold ? 700 : 500 }}>{label}</span>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#0a0a0a' }}>{value.toFixed(1)} t</span>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#0a0a0a' }}>{fmtTons(value)} t</span>
                 </div>
                 <div style={{ height: 40, background: '#f5f5f5', borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
                   <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: pct(value), background: color, borderRadius: 6, transition: 'width 0.7s ease' }} />
@@ -336,7 +337,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
     <div style={{ marginBottom: showLegend ? 12 : 6 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
         <span style={{ fontSize: '0.85rem', color: '#888' }}>{label}</span>
-        <span style={{ fontSize: '0.85rem', fontWeight: 700, color }}>{total.toFixed(1)} t</span>
+        <span style={{ fontSize: '0.85rem', fontWeight: 700, color }}>{fmtTons(total)} t</span>
       </div>
       <div style={{ height: 28, background: '#f5f5f5', borderRadius: 4, overflow: 'hidden', display: 'flex', marginBottom: showLegend ? 8 : 6 }}>
         {AREA_ORDER.map(area => {
@@ -353,7 +354,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
               <div key={a.key} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                 <div style={{ width: 10, height: 10, borderRadius: 2, background: a.color, flexShrink: 0 }} />
                 <span style={{ fontSize: '0.82rem', color: '#555' }}>{a.label}</span>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#333' }}>{(areaAvg[a.key] || 0).toFixed(1)}t</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#333' }}>{fmtTons(areaAvg[a.key] || 0)}t</span>
                 <span style={{ fontSize: '0.82rem', color: '#aaa' }}>{areaPct}%</span>
               </div>
             )
@@ -377,7 +378,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
             {/* Antes */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
               <span style={{ fontWeight: 900, fontSize: 'clamp(2.8rem, 8vw, 5rem)', lineHeight: 1 }}>
-                {teamAvg.toFixed(1)}
+                {fmtTons(teamAvg)}
               </span>
               <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>t CO₂/año</span>
               <div style={{ background: 'rgba(255,255,255,0.18)', padding: '0.25rem 0.75rem', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
@@ -387,14 +388,14 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
             {/* Centro — reducción + flecha */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
               <span style={{ fontSize: 'clamp(0.85rem, 2vw, 1rem)', fontWeight: 700, color: '#4ade80' }}>
-                −{(totalReduction / 1000).toFixed(3)} t
+                −{fmtTons(totalReduction / 1000)} t
               </span>
               <span style={{ fontSize: '1.5rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1 }}>→</span>
             </div>
             {/* Después */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
               <span style={{ fontWeight: 900, fontSize: 'clamp(2.8rem, 8vw, 5rem)', lineHeight: 1, color: '#4ade80' }}>
-                {newCarbonTons.toFixed(1)}
+                {fmtTons(newCarbonTons)}
               </span>
               <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>t CO₂/año</span>
               <div style={{ background: 'rgba(255,255,255,0.18)', padding: '0.25rem 0.75rem', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
@@ -413,7 +414,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
           </p>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <span style={{ fontWeight: 900, fontSize: 'clamp(3.5rem, 10vw, 5.5rem)', lineHeight: 1 }}>
-              {teamAvg.toFixed(1)}
+              {fmtTons(teamAvg)}
             </span>
             <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>t CO₂/año</span>
           </div>
@@ -450,7 +451,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
                 <div style={{ padding: '0.6rem 0.75rem' }}>
                   <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, marginBottom: '0.3rem' }}>{action.label}</div>
                   <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#16a34a' }}>
-                    −{(action.co2Reduction / 1000).toFixed(3)} t
+                    −{fmtTons(action.co2Reduction / 1000)} t
                   </div>
                 </div>
               </div>
@@ -615,7 +616,7 @@ export default function TeamScreen() {
             </p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
               <span style={{ fontWeight: 900, fontSize: 'clamp(3.5rem, 10vw, 5.5rem)', lineHeight: 1 }}>
-                {tAvg > 0 ? tAvg.toFixed(1) : '–'}
+                {tAvg > 0 ? fmtTons(tAvg) : '–'}
               </span>
               <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>t CO₂/año</span>
             </div>

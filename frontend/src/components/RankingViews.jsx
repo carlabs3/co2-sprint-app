@@ -5,6 +5,7 @@ import {
 } from 'recharts'
 import { AREA_QUESTIONS } from '../utils/answerLabels.js'
 import { MAP, calcAlcohol } from '../utils/calculator.js'
+import { fmtTons } from '../utils/format.js'
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -488,11 +489,11 @@ export function DistributionView({ ranking }) {
             )}
             {values.length > 0 && minBucket !== meanBucket && (
               <ReferenceLine x={minBucket} stroke="#3b6d11" strokeWidth={1} strokeDasharray="3 3"
-                label={{ value: `mín ${minVal.toFixed(1)}t`, fill: '#3b6d11', fontSize: 13, position: 'top' }} />
+                label={{ value: `mín ${fmtTons(minVal)}t`, fill: '#3b6d11', fontSize: 13, position: 'top' }} />
             )}
             {values.length > 0 && maxBucket !== meanBucket && maxBucket !== minBucket && (
               <ReferenceLine x={maxBucket} stroke="#cc4444" strokeWidth={1} strokeDasharray="3 3"
-                label={{ value: `máx ${maxVal.toFixed(1)}t`, fill: '#cc4444', fontSize: 13, position: 'top' }} />
+                label={{ value: `máx ${fmtTons(maxVal)}t`, fill: '#cc4444', fontSize: 13, position: 'top' }} />
             )}
           </BarChart>
         </ResponsiveContainer>
@@ -524,7 +525,7 @@ export function DistributionView({ ranking }) {
             {[
               {
                 label: 'Huella media',
-                value: values.length ? `${meanVal.toFixed(1)} t` : '–',
+                value: values.length ? `${fmtTons(meanVal)} t` : '–',
                 bg: activeTab === 'total' ? '#1a1a1a' : tab.color,
                 color: '#ffffff',
                 border: activeTab === 'total' ? '#1a1a1a' : tab.color,
@@ -532,13 +533,13 @@ export function DistributionView({ ranking }) {
               },
               {
                 label: 'Huella mínima',
-                value: values.length ? `${minVal.toFixed(1)} t` : '–',
+                value: values.length ? `${fmtTons(minVal)} t` : '–',
                 bg: '#ffffff', color: '#2d5a27', border: '#3b6d11',
                 labelColor: '#3b6d11',
               },
               {
                 label: 'Huella máxima',
-                value: values.length ? `${maxVal.toFixed(1)} t` : '–',
+                value: values.length ? `${fmtTons(maxVal)} t` : '–',
                 bg: '#ffffff', color: '#cc4444', border: '#cc4444',
                 labelColor: '#cc4444',
               },
@@ -552,7 +553,7 @@ export function DistributionView({ ranking }) {
               },
               {
                 label: 'Total CO₂ emitido',
-                value: values.length ? `${values.reduce((s, v) => s + v, 0).toFixed(1)} t` : '–',
+                value: values.length ? `${fmtTons(values.reduce((s, v) => s + v, 0))} t` : '–',
                 bg: '#ffffff', color: '#444', border: '#e0e0d8',
                 labelColor: '#aaa',
               },
@@ -585,7 +586,7 @@ export function DistributionView({ ranking }) {
                 {Object.entries(AREA_COLORS).map(([key, color]) => {
                   const w = areaAvg[key] / areaTotal * 100
                   return w > 0 ? (
-                    <div key={key} title={`${AREA_LABELS[key]}: ${areaAvg[key].toFixed(2)} t`}
+                    <div key={key} title={`${AREA_LABELS[key]}: ${fmtTons(areaAvg[key])} t`}
                       style={{ width: `${w}%`, background: color, transition: 'width 0.5s ease' }} />
                   ) : null
                 })}
@@ -709,7 +710,7 @@ export function GroupsView({ groups }) {
               }}>
                 {g.category === 'bajo' ? '🌿' : g.category === 'medio' ? '🌱' : '🔥'} Huella {CATEGORY_LABEL_F[g.category]}
               </span>
-              <span style={{ fontWeight: 900, fontSize: '1.5rem', color: '#1a1a1a' }}>{Number(g.avg).toFixed(1)}t</span>
+              <span style={{ fontWeight: 900, fontSize: '1.5rem', color: '#1a1a1a' }}>{fmtTons(g.avg)}t</span>
               <span style={{ fontSize: '0.85rem', color: '#bbb', minWidth: 48 }}>{g.count} pers.</span>
             </div>
 

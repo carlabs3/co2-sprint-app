@@ -8,6 +8,7 @@ import {
   DistributionView, GroupsView,
   computeGroups,
 } from '../../components/RankingViews.jsx'
+import { fmtTons } from '../../utils/format.js'
 
 function DotsLoader({ color = '#0a0a0a' }) {
   return (
@@ -319,7 +320,7 @@ export default function Step2Rankings() {
                     <p style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 0.5rem' }}>Huella actual del equipo</p>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: '0.75rem' }}>
                       <span style={{ fontWeight: 900, fontSize: '2rem', color: '#0a0a0a', lineHeight: 1 }}>
-                        {originalAvg != null ? `${originalAvg.toFixed(1)} t` : '–'}
+                        {originalAvg != null ? `${fmtTons(originalAvg)} t` : '–'}
                       </span>
                       <span style={{ fontSize: '0.78rem', color: '#aaa' }}>CO₂/año · media</span>
                     </div>
@@ -573,7 +574,7 @@ export default function Step2Rankings() {
         <div style={{ marginBottom: 8 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
             <span style={{ fontSize: '0.65rem', color: '#aaa' }}>{label}</span>
-            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#000' }}>{total.toFixed(1)} t</span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#000' }}>{fmtTons(total)} t</span>
           </div>
           <div style={{ height: 12, background: '#f0f0f0', borderRadius: 2, overflow: 'hidden', display: 'flex', marginBottom: 5 }}>
             {AREA_ORDER.map(area => {
@@ -589,7 +590,7 @@ export default function Step2Rankings() {
                 <div key={area} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '0.72rem' }}>
                   <div style={{ width: 8, height: 8, borderRadius: 2, background: A_COLORS[area], flexShrink: 0 }} />
                   <span style={{ color: '#666' }}>{AREA_LABELS_S3[area]}</span>
-                  <span style={{ fontWeight: 700, color: '#333' }}>{(areaAvg[area] || 0).toFixed(1)}t</span>
+                  <span style={{ fontWeight: 700, color: '#333' }}>{fmtTons(areaAvg[area] || 0)}t</span>
                   <span style={{ color: '#bbb' }}>{areaPct}%</span>
                 </div>
               )
@@ -639,10 +640,10 @@ export default function Step2Rankings() {
                     )}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1rem' }}>
-                    <span style={{ fontWeight: 900, fontSize: '1.6rem', color: '#0a0a0a' }}>{(team.originalTons || 0).toFixed(1)}</span>
+                    <span style={{ fontWeight: 900, fontSize: '1.6rem', color: '#0a0a0a' }}>{fmtTons(team.originalTons || 0)}</span>
                     <span style={{ fontSize: '0.75rem', color: '#aaa' }}>t</span>
                     <span style={{ fontSize: '1.2rem', color: '#ccc' }}>→</span>
-                    <span style={{ fontWeight: 900, fontSize: '1.6rem', color: '#16a34a' }}>{(team.newTons || 0).toFixed(1)}</span>
+                    <span style={{ fontWeight: 900, fontSize: '1.6rem', color: '#16a34a' }}>{fmtTons(team.newTons || 0)}</span>
                     <span style={{ fontSize: '0.75rem', color: '#aaa' }}>t</span>
                   </div>
                   <StackedBar areaAvg={areaAvg}   total={team.originalTons || 0} maxVal={maxOriginal} label="Antes" />
@@ -650,7 +651,7 @@ export default function Step2Rankings() {
                   {team.totalReduction > 0 && (
                     <div style={{ textAlign: 'right', marginTop: 8 }}>
                       <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#16a34a' }}>
-                        −{(team.totalReduction / 1000).toFixed(3)} t
+                        −{fmtTons(team.totalReduction / 1000)} t
                       </span>
                     </div>
                   )}
@@ -707,7 +708,7 @@ export default function Step2Rankings() {
                     <div style={{ padding: '0.75rem' }}>
                       <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{a.label}</div>
                       <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#16a34a', marginTop: 6 }}>
-                        −{(a.co2Reduction / 1000).toFixed(3)} t CO₂
+                        −{fmtTons(a.co2Reduction / 1000)} t CO₂
                       </div>
                       <div style={{ fontSize: '0.68rem', color: (actionTeams[a.id]?.length > 0) ? '#16a34a' : '#bbb', lineHeight: 1.4 }}>
                         {actionTeams[a.id]?.length > 0
