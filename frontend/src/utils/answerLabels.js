@@ -41,7 +41,7 @@ export const AREA_QUESTIONS = [
       {
         id: 'train',
         text: '¿Cuánto usas el tren?',
-        info: 'Incluye viajes de trabajo, vacaciones y escapadas.',
+        info: 'Incluye vacaciones y escapadas.',
         type: 'single',
         options: [
           { value: '3a', label: 'Poco (menos de 1.000 km/año)' },
@@ -78,7 +78,7 @@ export const AREA_QUESTIONS = [
       {
         id: 'telework',
         text: '¿Puedes teletrabajar? ¿Con qué frecuencia lo haces?',
-        info: 'Con un desplazamiento medio de 30 km en coche, teletrabajar 5 días/semana puede ahorrar hasta ~800 kgCO₂e/año.',
+        info: 'Trabajar desde casa reduce los desplazamientos y, con ello, las emisiones asociadas al transporte',
         type: 'single',
         isSensibilization: true,
         options: [
@@ -190,7 +190,7 @@ export const AREA_QUESTIONS = [
       {
         id: 'breakfastDays',
         text: '¿Qué sueles desayunar durante la semana?',
-        info: 'Distribuye tus 7 días entre los tipos de desayuno. Si también almuerzas, activa la opción × 2.',
+        info: 'Distribuye tus 7 días entre los tipos de desayuno. Si también almuerzas, activa la opción.',
         type: 'weekDistribution',
         maxDays: 7,
         allowDouble: true,
@@ -198,7 +198,7 @@ export const AREA_QUESTIONS = [
           { value: '6a', label: 'Bollería o tostadas con mermelada' },
           { value: '6b', label: 'Leche o yogur con cereales/granola' },
           { value: '6c', label: 'Tostadas, jamón y tomate' },
-          { value: '6d', label: 'Solo fruta' },
+          { value: '6d', label: 'Fruta' },
           { value: '6e', label: 'Mix variado (huevo + fruta + tostadas)' },
           { value: '6f', label: 'No desayuno' },
         ],
@@ -422,7 +422,7 @@ export const AREA_QUESTIONS = [
     questions: [
       {
         id: 'videoCalls',
-        text: '¿Cuántas horas a la semana haces videollamadas? (Zoom, Teams, Meet...)',
+        text: '¿Con qué frecuencia haces videollamadas? (Zoom, Teams, Meet...)',
         type: 'single',
         options: [
           { value: 'vc_none',      label: 'Nunca o casi nunca (0–0,5 h/semana)' },
@@ -433,7 +433,7 @@ export const AREA_QUESTIONS = [
       },
       {
         id: 'streaming',
-        text: '¿Cuántas horas a la semana ves streaming? (Netflix, YouTube, HBO...)',
+        text: '¿Con qué frecuencia ves streaming? (Netflix, YouTube, HBO...)',
         type: 'single',
         options: [
           { value: 'st_none',   label: 'No veo nada' },
@@ -444,7 +444,7 @@ export const AREA_QUESTIONS = [
       },
       {
         id: 'socialMedia',
-        text: '¿Cuántas horas a la semana usas redes sociales? (Instagram, TikTok, X...)',
+        text: '¿Con qué frecuencia usas las redes sociales? (Instagram, TikTok, X...)',
         type: 'single',
         options: [
           { value: 'sm_none',   label: 'No tengo redes sociales' },
