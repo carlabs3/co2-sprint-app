@@ -155,7 +155,11 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
 
   // Donut data
   const areaAvgMap = {}
-  AREA_META.forEach(a => { areaAvgMap[a.key] = mean(teamResults.map(r => r.areas?.[a.key] || 0)) })
+  AREA_META.forEach(a => {
+    areaAvgMap[a.key] = a.key === 'publicServices'
+      ? 1.5
+      : mean(teamResults.map(r => r.areas?.[a.key] || 0))
+  })
   const pieData = AREA_META
     .map(a => ({ name: a.label, value: areaAvgMap[a.key], color: a.color }))
     .filter(d => d.value > 0.001)
@@ -305,9 +309,11 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
 
   const areaAvgBefore = {}
   AREA_ORDER.forEach(area => {
-    areaAvgBefore[area] = teamResults.length
-      ? teamResults.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / teamResults.length
-      : 0
+    areaAvgBefore[area] = area === 'publicServices'
+      ? 1.5
+      : teamResults.length
+        ? teamResults.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / teamResults.length
+        : 0
   })
 
   const areaRed = { transport: 0, energy: 0, food: 0, consumption: 0, waste: 0, publicServices: 0 }
