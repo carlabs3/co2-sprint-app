@@ -484,7 +484,7 @@ export function DistributionView({ ranking }) {
             />
             {values.length > 0 && (
               <ReferenceLine x={meanBucket} stroke={tab.color} strokeWidth={2.5} strokeDasharray="5 3"
-                label={{ value: `${meanVal.toFixed(1)}t`, fill: tab.color, fontSize: 14, fontWeight: 700, position: 'top' }} />
+                label={{ value: `media`, fill: tab.color, fontSize: 14, fontWeight: 700, position: 'top' }} />
             )}
             {values.length > 0 && minBucket !== meanBucket && (
               <ReferenceLine x={minBucket} stroke="#3b6d11" strokeWidth={1} strokeDasharray="3 3"
