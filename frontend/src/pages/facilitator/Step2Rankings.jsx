@@ -298,9 +298,11 @@ export default function Step2Rankings() {
             const groupMembers = ranking.filter(r => r.group === group)
             const areaAvg = {}
             ;['transport','energy','food','consumption','waste','publicServices'].forEach(area => {
-              areaAvg[area] = groupMembers.length
-                ? groupMembers.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / groupMembers.length
-                : 0
+              areaAvg[area] = area === 'publicServices'
+                ? 1.5
+                : groupMembers.length
+                  ? groupMembers.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / groupMembers.length
+                  : 0
             })
             const areaTotal = Object.values(areaAvg).reduce((s, v) => s + v, 0)
             const AREA_COLORS_LOCAL = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6', publicServices: '#94a3b8' }
@@ -541,7 +543,11 @@ export default function Step2Rankings() {
       const members = ranking.filter(r => r.group === group)
       if (!members.length) return {}
       const avg = {}
-      AREA_ORDER.forEach(area => { avg[area] = members.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / members.length })
+      AREA_ORDER.forEach(area => {
+        avg[area] = area === 'publicServices'
+          ? 1.5
+          : members.reduce((s, r) => s + (r.areas?.[area] || 0), 0) / members.length
+      })
       return avg
     }
 
