@@ -152,7 +152,7 @@ export function registerSocketHandlers(io) {
       io.to(sessionCode).emit('results:revealed')
     })
 
-    socket.on('footprint:submit', async ({ sessionCode, group, carbonTons, areas, answers }) => {
+    socket.on('footprint:submit', async ({ sessionCode, group, age, gender, carbonTons, areas, answers }) => {
       try {
         const participant = await Participant.findOne({ socketId: socket.id }) ||
           await Participant.findOne({ sessionCode, group })
@@ -185,11 +185,13 @@ export function registerSocketHandlers(io) {
           }
           await FootprintResult.create({
             sessionCode, participantId: participant._id, group,
+            age: age || '', gender: gender || '',
             carbonTons, areas: mappedAreas, category, answers: answers || {},
           })
         } else {
           await FootprintResult.create({
             sessionCode, participantId: null, group,
+            age: age || '', gender: gender || '',
             carbonTons, areas: mappedAreas, category, answers: answers || {},
           })
         }

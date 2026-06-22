@@ -438,7 +438,7 @@ function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
 export default function Step2Calculator() {
   const { code } = useParams()
   const navigate = useNavigate()
-  const { participantGroup, participantName } = useSession()
+  const { participantGroup, participantName, participantAge, participantGender } = useSession()
 
   const [showIntro, setShowIntro]         = useState(true)
   const [areaIndex, setAreaIndex]         = useState(0)
@@ -546,6 +546,8 @@ export default function Step2Calculator() {
         sessionCode: code,
         group: participantGroup,
         name: participantName,
+        age: participantAge,
+        gender: participantGender,
         carbonTons: calcResult.carbonTons,
         areas: calcResult.areas,
         answers: currentAnswers,
