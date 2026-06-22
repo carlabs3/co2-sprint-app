@@ -152,7 +152,7 @@ export function registerSocketHandlers(io) {
       io.to(sessionCode).emit('results:revealed')
     })
 
-    socket.on('footprint:submit', async ({ sessionCode, group, age, gender, carbonTons, areas, answers }) => {
+    socket.on('footprint:submit', async ({ submissionId, sessionCode, group, age, gender, carbonTons, areas, answers }) => {
       try {
         const participant = await Participant.findOne({ socketId: socket.id }) ||
           await Participant.findOne({ sessionCode, group })
@@ -166,34 +166,22 @@ export function registerSocketHandlers(io) {
           Object.entries(areas || {}).map(([k, v]) => [AREA_KEY_MAP[k] ?? k, v])
         )
 
+        const fallbackId = submissionId || `${sessionCode}_${group}_${carbonTons}`
+
         if (participant?._id) {
-          const existing = await FootprintResult.findOne({ sessionCode, participantId: participant._id })
-          if (existing) {
-            // Already saved — confirm to client and broadcast current ranking (don't create duplicate)
-            socket.emit('footprint:saved')
-            const allResults = await FootprintResult.find({ sessionCode }).sort({ carbonTons: 1 })
-            const individual = allResults.map(r => ({
-              name:     participantNames.get(r.participantId?.toString()) || 'Anónimo',
-              group:    r.group,
-              tons:     r.carbonTons,
-              category: r.category,
-              areas:    r.areas || {},
-              answers:  r.answers || {},
-            }))
-            io.to(sessionCode).emit('ranking:update', { individual })
-            return
-          }
-          await FootprintResult.create({
-            sessionCode, participantId: participant._id, group,
-            age: age || '', gender: gender || '',
-            carbonTons, areas: mappedAreas, category, answers: answers || {},
-          })
+          await FootprintResult.findOneAndUpdate(
+            { $or: [{ submissionId: fallbackId }, { sessionCode, participantId: participant._id }] },
+            { submissionId: fallbackId, sessionCode, participantId: participant._id, group,
+              age: age || '', gender: gender || '', carbonTons, areas: mappedAreas, category, answers: answers || {} },
+            { upsert: true }
+          )
         } else {
-          await FootprintResult.create({
-            sessionCode, participantId: null, group,
-            age: age || '', gender: gender || '',
-            carbonTons, areas: mappedAreas, category, answers: answers || {},
-          })
+          await FootprintResult.findOneAndUpdate(
+            { submissionId: fallbackId },
+            { submissionId: fallbackId, sessionCode, participantId: null, group,
+              age: age || '', gender: gender || '', carbonTons, areas: mappedAreas, category, answers: answers || {} },
+            { upsert: true }
+          )
         }
 
         // Confirm to the participant that their result was saved

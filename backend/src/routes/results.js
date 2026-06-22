@@ -107,6 +107,35 @@ const AREA_META = [
   { id: 'publicServices', label: 'Servicios públicos', emoji: '🏛️', color: '#94a3b8' },
 ]
 
+// ── HTTP submit fallback ──────────────────────────────────────────────────────
+
+router.post('/submit', async (req, res) => {
+  try {
+    const { submissionId, sessionCode, group, age, gender, carbonTons, areas, answers, category } = req.body
+    if (!sessionCode || !group || carbonTons == null) {
+      return res.status(400).json({ error: 'Faltan datos' })
+    }
+    const result = await FootprintResult.findOneAndUpdate(
+      { submissionId: submissionId || `${sessionCode}_${group}_${carbonTons}` },
+      { submissionId, sessionCode, group, age: age || '', gender: gender || '', carbonTons, areas, answers, category },
+      { upsert: true, new: true }
+    )
+    const allResults = await FootprintResult.find({ sessionCode })
+      .select('group carbonTons category areas answers -_id')
+      .sort({ carbonTons: 1 })
+    req.app.get('io')?.to(sessionCode).emit('ranking:update', {
+      individual: allResults.map(r => ({
+        group: r.group, tons: r.carbonTons, category: r.category,
+        areas: r.areas, answers: r.answers,
+      }))
+    })
+    res.json({ ok: true, id: result._id })
+  } catch (err) {
+    console.error('Submit error:', err.message)
+    res.status(500).json({ error: 'Error al guardar resultado' })
+  }
+})
+
 // ── Email route ───────────────────────────────────────────────────────────────
 
 router.post('/send-email', async (req, res) => {

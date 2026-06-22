@@ -454,6 +454,21 @@ export default function Step2Calculator() {
     return () => window.removeEventListener('resize', handler)
   }, [])
 
+  // Retry pending submission on mount (capa 3 — localStorage)
+  useEffect(() => {
+    const pendingKey = `co2sprint_pending_${code}`
+    const pending = localStorage.getItem(pendingKey)
+    if (!pending) return
+    try {
+      const payload = JSON.parse(pending)
+      api.post('/api/results/submit', payload)
+        .then(() => localStorage.removeItem(pendingKey))
+        .catch(() => {})
+    } catch {
+      localStorage.removeItem(pendingKey)
+    }
+  }, [code]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Restore progress on mount
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -541,8 +556,9 @@ export default function Step2Calculator() {
     if (isLast) {
       const calcResult = calculator(currentAnswers)
       const state = { ...calcResult, answers: currentAnswers }
-      // Submit to server in background (saves for facilitator ranking)
-      socket.emit('footprint:submit', {
+      const submissionId = `${code}_${participantGroup}_${Date.now()}`
+      const payload = {
+        submissionId,
         sessionCode: code,
         group: participantGroup,
         name: participantName,
@@ -552,7 +568,20 @@ export default function Step2Calculator() {
         areas: calcResult.areas,
         answers: currentAnswers,
         category: calcResult.category,
-      })
+      }
+      // Capa 1: socket (tiempo real)
+      socket.emit('footprint:submit', payload)
+      // Capa 2: HTTP de respaldo + capa 3: localStorage pending
+      ;(async () => {
+        const pendingKey = `co2sprint_pending_${code}`
+        localStorage.setItem(pendingKey, JSON.stringify(payload))
+        try {
+          await api.post('/api/results/submit', payload)
+          localStorage.removeItem(pendingKey)
+        } catch {
+          // HTTP falló — pending en localStorage se reintentará al recargar
+        }
+      })()
       // Navigate immediately — no waiting screen needed
       navigate(`/session/${code}/results`, { state })
       return

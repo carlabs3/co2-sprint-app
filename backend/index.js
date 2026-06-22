@@ -38,6 +38,7 @@ const io = new Server(httpServer, {
   },
 })
 
+app.set('io', io)
 app.use(cors(corsOptions))
 app.use(express.json())
 
