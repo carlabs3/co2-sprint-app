@@ -53,6 +53,7 @@ export default function Step2Rankings() {
   const [teamSelections, setTeamSelections]         = useState({})
   const [filter3Area,    setFilter3Area]            = useState('transport')
   const [sessionStatus,  setSessionStatus]           = useState(null)
+  const [sidebarCollapsed, setSidebarCollapsed]      = useState(false)
 
   const joinUrl = `${window.location.origin}/?code=${code}`
 
@@ -738,7 +739,17 @@ export default function Step2Rankings() {
 
   // ── Sidebar ───────────────────────────────────────────────────────────────────
   const sidebar = (
-    <div style={{ width: '280px', flexShrink: 0, borderRight: '1px solid #e5e5e5', padding: '2rem 1.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', background: '#ffffff' }}>
+    <div style={{ width: sidebarCollapsed ? '48px' : '280px', flexShrink: 0, borderRight: '1px solid #e5e5e5', padding: sidebarCollapsed ? '12px 8px' : '2rem 1.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', background: '#ffffff', overflow: 'hidden', transition: 'width 0.2s ease' }}>
+      {/* Toggle button */}
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
+        <button
+          onClick={() => setSidebarCollapsed(prev => !prev)}
+          style={{ width: 28, height: 28, borderRadius: '999px', border: '1px solid #e5e5e5', background: 'transparent', cursor: 'pointer', color: '#888', fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+        >
+          {sidebarCollapsed ? '›' : '‹'}
+        </button>
+      </div>
+      <div style={{ display: sidebarCollapsed ? 'none' : 'contents' }}>
       {/* QR */}
       <div style={{ padding: '12px', background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '12px' }}>
         <QRCodeSVG value={joinUrl} size={160} fgColor="#000000" bgColor="#ffffff" level="M" />
@@ -860,6 +871,7 @@ export default function Step2Rankings() {
           Cerrar sesión
         </button>
       )}
+      </div>
     </div>
   )
 
