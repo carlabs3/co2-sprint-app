@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import { PieChart, Pie, Cell } from 'recharts'
@@ -369,8 +369,37 @@ export default function Step2Results() {
   const [sessionResults, setSessionResults] = useState(null)
   const [emailInput,     setEmailInput]     = useState('')
   const [emailStatus,    setEmailStatus]    = useState('idle')
+  const [pendingBanner,  setPendingBanner]  = useState(false)
+
+  const retryPending = useCallback(() => {
+    const pendingKey = `co2sprint_pending_${code}`
+    const pending = localStorage.getItem(pendingKey)
+    if (!pending) return
+    try {
+      const payload = JSON.parse(pending)
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/results/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      }).then(r => {
+        if (r.ok) {
+          localStorage.removeItem(pendingKey)
+          setPendingBanner(false)
+        } else {
+          setPendingBanner(true)
+        }
+      }).catch(() => setPendingBanner(true))
+    } catch {
+      localStorage.removeItem(pendingKey)
+    }
+  }, [code])
 
   useEffect(() => {
+    // Retry any pending submission from localStorage (capa 3)
+    const pendingKey = `co2sprint_pending_${code}`
+    if (localStorage.getItem(pendingKey)) retryPending()
+
     api.get(`/api/sessions/${code}/info`)
       .then(res => {
         if (res.data.resultsRevealed) setRevealed(true)
@@ -394,18 +423,24 @@ export default function Step2Results() {
         })))
       }
     }
+    function onFootprintSaved() {
+      localStorage.removeItem(`co2sprint_pending_${code}`)
+      setPendingBanner(false)
+    }
 
     socket.on('results:revealed', onResultsRevealed)
     socket.on('step:change', onStepChange)
     socket.on('session:closed', onSessionClosed)
     socket.on('ranking:update', onRankingUpdate)
+    socket.on('footprint:saved', onFootprintSaved)
     return () => {
       socket.off('results:revealed', onResultsRevealed)
       socket.off('step:change', onStepChange)
       socket.off('session:closed', onSessionClosed)
       socket.off('ranking:update', onRankingUpdate)
+      socket.off('footprint:saved', onFootprintSaved)
     }
-  }, [code, navigate])
+  }, [code, navigate, retryPending])
 
   useEffect(() => {
     if (!revealed) return
@@ -500,6 +535,23 @@ export default function Step2Results() {
         }
       `}</style>
       <SessionClosedBanner />
+
+      {pendingBanner && (
+        <div style={{
+          background: '#fff8e0', borderBottom: '1px solid #f0d060',
+          padding: '10px 16px', display: 'flex', alignItems: 'center',
+          gap: 12, fontSize: 13, color: '#7a5f00',
+        }}>
+          <span style={{ flex: 1 }}>Tu huella aún no se ha podido enviar al servidor.</span>
+          <button onClick={retryPending} style={{
+            background: '#0a0a0a', color: '#fff', border: 'none',
+            borderRadius: 999, padding: '6px 14px', fontSize: 12,
+            fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
+          }}>
+            Reintentar
+          </button>
+        </div>
+      )}
 
       {/* ═══ HEADER ════════════════════════════════════════════ */}
       <div style={{ background: '#0a0a0a', color: '#fff' }}>

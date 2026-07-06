@@ -461,9 +461,12 @@ export default function Step2Calculator() {
     if (!pending) return
     try {
       const payload = JSON.parse(pending)
-      api.post('/api/results/submit', payload)
-        .then(() => localStorage.removeItem(pendingKey))
-        .catch(() => {})
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/results/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      }).then(r => { if (r.ok) localStorage.removeItem(pendingKey) }).catch(() => {})
     } catch {
       localStorage.removeItem(pendingKey)
     }
@@ -571,16 +574,17 @@ export default function Step2Calculator() {
       }
       // Capa 1: socket (tiempo real)
       socket.emit('footprint:submit', payload)
-      // Capa 2: HTTP de respaldo + capa 3: localStorage pending
-      ;(async () => {
+      // Capa 2: HTTP de respaldo con keepalive (sobrevive al bloqueo de pantalla del móvil)
+      // Capa 3: localStorage pending — se reintenta en Step2Results si fetch falla
+      ;(() => {
         const pendingKey = `co2sprint_pending_${code}`
         localStorage.setItem(pendingKey, JSON.stringify(payload))
-        try {
-          await api.post('/api/results/submit', payload)
-          localStorage.removeItem(pendingKey)
-        } catch {
-          // HTTP falló — pending en localStorage se reintentará al recargar
-        }
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/results/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true,
+        }).then(r => { if (r.ok) localStorage.removeItem(pendingKey) }).catch(() => {})
       })()
       // Navigate immediately — no waiting screen needed
       navigate(`/session/${code}/results`, { state })

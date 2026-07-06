@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose'
 
 const footprintResultSchema = new Schema({
   sessionCode:   { type: String, required: true },
-  submissionId:  { type: String, index: true, sparse: true },
+  submissionId:  { type: String, unique: true, sparse: true },
   participantId: { type: Schema.Types.ObjectId, ref: 'Participant' },
   group:         { type: String, required: true },
   age:           { type: String, default: '' },

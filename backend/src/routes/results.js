@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { Resend } from 'resend'
 import { authMiddleware } from '../middleware/authMiddleware.js'
 import FootprintResult from '../models/FootprintResult.js'
+import { getCategory } from '../utils/category.js'
 
 const router = Router()
 
@@ -111,15 +112,24 @@ const AREA_META = [
 
 router.post('/submit', async (req, res) => {
   try {
-    const { submissionId, sessionCode, group, age, gender, carbonTons, areas, answers, category } = req.body
+    const { submissionId, sessionCode, group, age, gender, carbonTons, areas, answers } = req.body
     if (!sessionCode || !group || carbonTons == null) {
       return res.status(400).json({ error: 'Faltan datos' })
     }
-    const result = await FootprintResult.findOneAndUpdate(
-      { submissionId: submissionId || `${sessionCode}_${group}_${carbonTons}` },
-      { submissionId, sessionCode, group, age: age || '', gender: gender || '', carbonTons, areas, answers, category },
-      { upsert: true, new: true }
-    )
+    const category = getCategory(carbonTons)
+    const filter = { submissionId: submissionId || `${sessionCode}_${group}_${carbonTons}` }
+    const updateDoc = { submissionId, sessionCode, group, age: age || '', gender: gender || '', carbonTons, areas, answers, category }
+    let result
+    try {
+      result = await FootprintResult.findOneAndUpdate(filter, updateDoc, { upsert: true, new: true })
+    } catch (err) {
+      if (err.code === 11000) {
+        // Race with socket submission — document already exists, just update
+        result = await FootprintResult.findOneAndUpdate(filter, updateDoc, { new: true })
+      } else {
+        throw err
+      }
+    }
     const allResults = await FootprintResult.find({ sessionCode })
       .select('group carbonTons category areas answers -_id')
       .sort({ carbonTons: 1 })

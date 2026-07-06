@@ -3,13 +3,7 @@ import FootprintResult from '../models/FootprintResult.js'
 import Session from '../models/Session.js'
 import TeamActions from '../models/TeamActions.js'
 import { ACTIONS } from '../utils/actions.js'
-
-function getCategory(carbonTons) {
-  if (carbonTons < 2) return 'bajo'
-  if (carbonTons < 4) return 'medio'
-  if (carbonTons < 6) return 'alto'
-  return 'muy alto'
-}
+import { getCategory } from '../utils/category.js'
 
 const AREA_KEY_MAP = {
   transporte:   'transport',
@@ -154,8 +148,8 @@ export function registerSocketHandlers(io) {
 
     socket.on('footprint:submit', async ({ submissionId, sessionCode, group, age, gender, carbonTons, areas, answers }) => {
       try {
-        const participant = await Participant.findOne({ socketId: socket.id }) ||
-          await Participant.findOne({ sessionCode, group })
+        // Only look up by socket.id — never fall back to group to avoid overwriting another participant's data
+        const participant = await Participant.findOne({ socketId: socket.id })
 
         if (participant?._id && socket.data.name) {
           participantNames.set(participant._id.toString(), socket.data.name)
@@ -167,24 +161,28 @@ export function registerSocketHandlers(io) {
         )
 
         const fallbackId = submissionId || `${sessionCode}_${group}_${carbonTons}`
-
-        if (participant?._id) {
-          await FootprintResult.findOneAndUpdate(
-            { $or: [{ submissionId: fallbackId }, { sessionCode, participantId: participant._id }] },
-            { submissionId: fallbackId, sessionCode, participantId: participant._id, group,
-              age: age || '', gender: gender || '', carbonTons, areas: mappedAreas, category, answers: answers || {} },
-            { upsert: true }
-          )
-        } else {
-          await FootprintResult.findOneAndUpdate(
-            { submissionId: fallbackId },
-            { submissionId: fallbackId, sessionCode, participantId: null, group,
-              age: age || '', gender: gender || '', carbonTons, areas: mappedAreas, category, answers: answers || {} },
-            { upsert: true }
-          )
+        const updateDoc = {
+          submissionId: fallbackId, sessionCode, group,
+          age: age || '', gender: gender || '', carbonTons,
+          areas: mappedAreas, category, answers: answers || {},
+          participantId: participant?._id ?? null,
         }
 
-        // Confirm to the participant that their result was saved
+        try {
+          await FootprintResult.findOneAndUpdate(
+            { submissionId: fallbackId },
+            updateDoc,
+            { upsert: true }
+          )
+        } catch (err) {
+          if (err.code === 11000) {
+            // Race between socket and HTTP fallback — document already inserted, just update
+            await FootprintResult.findOneAndUpdate({ submissionId: fallbackId }, updateDoc)
+          } else {
+            throw err
+          }
+        }
+
         socket.emit('footprint:saved')
 
         const results = await FootprintResult.find({ sessionCode }).sort({ carbonTons: 1 })
@@ -199,10 +197,6 @@ export function registerSocketHandlers(io) {
         }))
 
         io.to(sessionCode).emit('ranking:update', { individual })
-
-        // Auto-reveal: mark session as revealed and emit to all
-        await Session.findOneAndUpdate({ code: sessionCode }, { resultsRevealed: true })
-        io.to(sessionCode).emit('results:revealed')
       } catch {
         socket.emit('error', { message: 'Error al guardar huella' })
       }

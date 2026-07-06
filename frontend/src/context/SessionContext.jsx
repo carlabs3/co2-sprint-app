@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { socket } from '../utils/socket.js'
 import api from '../utils/api.js'
 
@@ -13,10 +13,22 @@ export function SessionProvider({ children }) {
   const [currentStep,       setCurrentStep]       = useState(1)
   const [sessionClosed,     setSessionClosed]     = useState(false)
 
+  // Keeps participant data alive so the reconnect handler can re-emit session:join
+  // after a mobile screen lock / network change assigns a new socket.id
+  const participantDataRef = useRef(null)
+
   useEffect(() => {
     socket.connect()
     socket.on('step:change', ({ step }) => setCurrentStep(step))
     socket.on('session:closed', () => setSessionClosed(true))
+
+    // Re-join room and update socketId in backend after any reconnect
+    function onConnect() {
+      if (participantDataRef.current) {
+        socket.emit('session:join', participantDataRef.current)
+      }
+    }
+    socket.on('connect', onConnect)
 
     // Try to restore participant session from localStorage
     const keys = Object.keys(localStorage).filter(k => k.startsWith('co2sprint_participant_'))
@@ -27,6 +39,7 @@ export function SessionProvider({ children }) {
         api.get(`/api/sessions/${saved.code}/info`)
           .then(res => {
             if (res.data.status === 'active') {
+              participantDataRef.current = { code: saved.code, name: saved.name, group: saved.group, age: saved.age, gender: saved.gender }
               setSessionCode(saved.code)
               setParticipantName(saved.name || '')
               setParticipantGroup(saved.group || '')
@@ -52,11 +65,13 @@ export function SessionProvider({ children }) {
     return () => {
       socket.off('step:change')
       socket.off('session:closed')
+      socket.off('connect', onConnect)
       socket.disconnect()
     }
   }, [])
 
   function joinSession(code, name, group, age, gender) {
+    participantDataRef.current = { code, name, group, age: age || '', gender: gender || '' }
     setSessionCode(code)
     setParticipantName(name)
     setParticipantGroup(group)
