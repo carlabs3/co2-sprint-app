@@ -164,4 +164,30 @@ Desde `backend/` (lee la conexión de `MONGODB_URI`, nunca credenciales en el c�
 
 ---
 
-## 8. (Reservado) Traducciones dudosas — se rellena en Fase 6.
+## 8. Traducciones al inglés dudosas (Fase 6) — revisar por una persona
+
+El `en.json` está completo (642 claves, mismas que `es.json`). Estas son las
+traducciones sobre las que conviene una revisión humana:
+
+**Decisiones de criterio aplicadas (confirmar que son correctas):**
+- **"CO₂" → "CO₂e" en todo el inglés** (según instrucción). En español se mantiene "CO₂". Afecta a `common.*`, `rankings.kgAvg`/`stats.total`, `home.*`, descripciones de acciones y el email.
+- **Datos específicos de España**: `step2Results.spain.source` mantiene el nombre propio del organismo en español — "Source: Ministerio para la Transición Ecológica, 2023". Las comparativas siguen siendo "vs Spain" / "Spain average" porque los datos son de España.
+- **Nombres de marca sin traducir**: Uber, Cabify, Netflix, Spotify, YouTube, Coca-Cola, Fanta, Airbnb, ChatGPT, Claude, Copilot, Zoom, Teams, Meet. "Drop." sin traducir.
+
+**Términos de clima/energía a validar con la persona de contenido:**
+- `questions.heating.options.26f` "Bomba de calor / aerotermia" → "Heat pump / aerothermal". ¿"aerothermal" o dejar solo "heat pump"?
+- `questions.heating.options.26d` "Gasóleo / gasoil" → "Heating oil / diesel".
+- `questions.renewable` "mix eléctrico convencional" → "standard electricity mix".
+- `actions.a07` "Lunes sin carne" → "Meat-free Monday" (campaña conocida; confirmar que es el nombre que se quiere usar en EN).
+- `subcategories.publicServices.base` "Sanidad, educación, infraestructuras..." → "Healthcare, education, infrastructure...".
+
+**Frases con matiz / tono de taller a revisar:**
+- `teamScreen.waiting.line1/2` y `waitingRoom.subtitle`: "Keep this screen open." (imperativo; en ES había distinción tú/vosotros que en EN desaparece).
+- `step2Calculator.weekDist.alsoBreakfast` "También almuerzo a media mañana" → "I also have a mid-morning snack" (¿"almuerzo"/"snack"?).
+- `questions.breakfastDays.options.6f` "No desayuno" → "I skip breakfast".
+- `step2Rankings.confirmTeam` usa genitivo sajón: "Confirm {{group}}'s actions →" — si el nombre de equipo acaba en "s", quedaría "Team As's"; revisar si molesta.
+- `rankings.persons` "pers." → "ppl" (abreviatura informal; confirmar).
+- Unidades de bebida: `questions.hotDrinksCount.options.7b` "Leche con cacao" → "Hot chocolate"; `7d_veg` "leche vegetal (avena)" → "plant milk (oat)"; "Café solo" → "Black coffee".
+- `questions.alcohol.sub.beer` "Caña o botellín (330 ml)" → "Half-pint or bottle (330 ml)".
+
+Ninguna de estas afecta a IDs, valores ni cálculo — son solo revisiones de redacción EN.
