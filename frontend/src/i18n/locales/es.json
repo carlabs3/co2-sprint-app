@@ -52,7 +52,8 @@
   },
   "common": {
     "tCo2PerYear": "t CO₂/año",
-    "tCo2": "t CO₂"
+    "tCo2": "t CO₂",
+    "anonymous": "Anónimo"
   },
   "demographics": {
     "age": {
@@ -194,7 +195,7 @@
       "noResults": "Sin resultados para este equipo."
     },
     "heroAvgFootprint": "Huella media · {{group}}",
-    "members_one": "{{count}} miembro han completado",
+    "members_one": "{{count}} miembro ha completado",
     "members_other": "{{count}} miembros han completado",
     "breakdownTeamAvg": "Desglose por áreas — media del equipo",
     "comparisonTitle": "Comparativa",
