@@ -23,24 +23,6 @@ const CATEGORY_CONFIG = {
   'muy alto': { label: 'Huella muy elevada 🔥', color: '#f472b6', bg: '#fce8e8' },
 }
 
-const AREA_LABELS = {
-  transport:      'Transporte',
-  energy:         'Vivienda',
-  food:           'Alimentación',
-  consumption:    'Compras y hábitos',
-  waste:          'Vida digital',
-  publicServices: 'Servicios públicos',
-}
-
-const AREA_COLORS = {
-  transport:      '#38bdf8',
-  energy:         '#f59e0b',
-  food:           '#4ade80',
-  consumption:    '#a855f7',
-  waste:          '#f472b6',
-  publicServices: '#94a3b8',
-}
-
 function getCategory(tons) {
   if (tons < 4)  return 'bajo'
   if (tons < 7)  return 'medio'
