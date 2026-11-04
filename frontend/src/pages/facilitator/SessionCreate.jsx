@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import api from '../../utils/api.js'
 
 const s = {
@@ -56,20 +57,21 @@ export default function SessionCreate() {
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   function addGroup(e) {
     e?.preventDefault()
     const name = newGroup.trim()
     if (!name) return
-    if (groups.includes(name)) { setError('Ese grupo ya existe'); return }
-    if (groups.length >= MAX_GROUPS) { setError(`Máximo ${MAX_GROUPS} grupos`); return }
+    if (groups.includes(name)) { setError(t('sessionCreate.errors.exists')); return }
+    if (groups.length >= MAX_GROUPS) { setError(t('sessionCreate.errors.max', { max: MAX_GROUPS })); return }
     setGroups(prev => [...prev, name])
     setNewGroup('')
     setError('')
   }
 
   function removeGroup(name) {
-    if (groups.length <= MIN_GROUPS) { setError(`Mínimo ${MIN_GROUPS} grupos`); return }
+    if (groups.length <= MIN_GROUPS) { setError(t('sessionCreate.errors.min', { min: MIN_GROUPS })); return }
     setGroups(prev => prev.filter(g => g !== name))
     setError('')
   }
@@ -77,7 +79,7 @@ export default function SessionCreate() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (groups.length < MIN_GROUPS) {
-      setError(`Añade al menos ${MIN_GROUPS} grupos`)
+      setError(t('sessionCreate.errors.atLeast', { min: MIN_GROUPS }))
       return
     }
     setLoading(true)
@@ -86,7 +88,7 @@ export default function SessionCreate() {
       const { data } = await api.post('/api/sessions', { name: sessionName, groups })
       navigate(`/session/${data.code}/rankings`)
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al crear la sesión')
+      setError(err.response?.data?.error || t('sessionCreate.errors.create'))
       setLoading(false)
     }
   }
@@ -94,35 +96,35 @@ export default function SessionCreate() {
   return (
     <div style={s.page}>
       <div style={s.inner}>
-        <h1 style={s.title}>Nueva Sesión</h1>
+        <h1 style={s.title}>{t('sessionCreate.title')}</h1>
         <div style={s.card}>
           <form onSubmit={handleSubmit}>
 
             {/* Session name */}
             <div style={s.field}>
-              <label style={s.label} htmlFor="sessionName">Nombre de la sesión</label>
+              <label style={s.label} htmlFor="sessionName">{t('sessionCreate.nameLabel')}</label>
               <input
                 id="sessionName"
                 style={s.addInput}
                 type="text"
-                placeholder="ej. Taller Empresa X — Mayo 2026"
+                placeholder={t('sessionCreate.namePlaceholder')}
                 value={sessionName}
                 onChange={e => setSessionName(e.target.value)}
                 maxLength={80}
               />
-              <p style={s.hint}>Opcional — si lo dejas vacío se usará el código como nombre.</p>
+              <p style={s.hint}>{t('sessionCreate.nameHint')}</p>
             </div>
 
             {/* Groups */}
             <div style={s.field}>
-              <label style={s.label}>Equipos</label>
+              <label style={s.label}>{t('sessionCreate.teamsLabel')}</label>
 
               {/* Add new group */}
               <div style={s.addRow}>
                 <input
                   style={s.addInput}
                   type="text"
-                  placeholder="Nombre del equipo..."
+                  placeholder={t('sessionCreate.teamPlaceholder')}
                   value={newGroup}
                   onChange={e => { setNewGroup(e.target.value); setError('') }}
                   onKeyDown={e => e.key === 'Enter' && addGroup(e)}
@@ -134,7 +136,7 @@ export default function SessionCreate() {
                   onClick={addGroup}
                   disabled={groups.length >= MAX_GROUPS}
                 >
-                  + Añadir
+                  {t('sessionCreate.add')}
                 </button>
               </div>
 
@@ -147,7 +149,7 @@ export default function SessionCreate() {
                       type="button"
                       style={s.chipX}
                       onClick={() => removeGroup(g)}
-                      title="Eliminar"
+                      title={t('sessionCreate.removeTitle')}
                     >
                       ×
                     </button>
@@ -156,14 +158,14 @@ export default function SessionCreate() {
               </div>
 
               <p style={s.hint}>
-                {groups.length} equipo{groups.length !== 1 ? 's' : ''} · mín. {MIN_GROUPS}, máx. {MAX_GROUPS}
+                {t('sessionCreate.groupsCount', { count: groups.length, min: MIN_GROUPS, max: MAX_GROUPS })}
               </p>
             </div>
 
             {error && <p style={s.error}>{error}</p>}
 
             <button style={s.btn} type="submit" disabled={loading}>
-              {loading ? 'Creando...' : 'Crear Sesión →'}
+              {loading ? t('sessionCreate.submitting') : t('sessionCreate.submit')}
             </button>
           </form>
         </div>

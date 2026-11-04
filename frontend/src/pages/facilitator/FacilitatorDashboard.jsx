@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import api from '../../utils/api.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { socket } from '../../utils/socket.js'
@@ -7,13 +8,6 @@ import { socket } from '../../utils/socket.js'
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })
 }
-
-const AREA_LABELS = {
-  transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación',
-  consumption: 'Compras y hábitos', waste: 'Vida digital',
-}
-
-const STATUS_LABEL = { draft: 'Borrador', waiting: 'En espera', active: 'Activa', actions: 'Fase acciones', closed: 'Cerrada' }
 const STATUS_STYLE = {
   draft:   { background: '#f5f5f5', color: '#999', border: '1px solid #e5e5e5' },
   waiting: { background: 'rgba(74,222,128,0.1)', color: '#16a34a', border: '1px solid rgba(74,222,128,0.3)' },
@@ -75,6 +69,7 @@ const s = {
 export default function FacilitatorDashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [sessions, setSessions]     = useState([])
   const [loading, setLoading]       = useState(true)
   const [activeBanner, setActiveBanner] = useState(null)
@@ -115,12 +110,12 @@ export default function FacilitatorDashboard() {
   }, [sessions.length])
 
   async function handleDelete(code) {
-    if (!confirm('¿Eliminar esta sesión? Se borrarán todos los datos permanentemente. Esta acción no se puede deshacer.')) return
+    if (!confirm(t('dashboard.confirmDelete'))) return
     try {
       await api.delete(`/api/sessions/${code}`)
       setSessions(prev => prev.filter(s => s.code !== code))
     } catch {
-      alert('Error al eliminar la sesión')
+      alert(t('dashboard.errorDelete'))
     }
   }
 
@@ -129,7 +124,7 @@ export default function FacilitatorDashboard() {
       await api.patch(`/api/sessions/${code}/activate`)
       setSessions(prev => prev.map(s => s.code === code ? { ...s, status: 'active' } : s))
     } catch {
-      alert('Error al activar la sesión')
+      alert(t('dashboard.errorActivate'))
     }
   }
 
@@ -138,11 +133,11 @@ export default function FacilitatorDashboard() {
       <div style={s.inner}>
         <div style={s.header}>
           <div>
-            <h1 style={s.title}>Mis Sesiones</h1>
+            <h1 style={s.title}>{t('dashboard.title')}</h1>
             <p style={s.subtitle}>{user?.email}</p>
           </div>
           <Link to="/session/create">
-            <button style={s.btnNew}>+ Nueva Sesión</button>
+            <button style={s.btnNew}>{t('dashboard.newSession')}</button>
           </Link>
         </div>
 
@@ -151,30 +146,30 @@ export default function FacilitatorDashboard() {
           <div style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '12px 16px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
             <div>
               <p style={{ fontSize: '13px', fontWeight: 600, color: '#0a0a0a', margin: 0 }}>
-                🟢 Sesión activa: {activeBanner.code}
+                {t('dashboard.activeSession', { code: activeBanner.code })}
               </p>
               <p style={{ fontSize: '11px', color: '#666', margin: '2px 0 0' }}>
-                {activeBanner.name || 'Sin nombre'} · Creada {formatDate(activeBanner.createdAt)}
+                {activeBanner.name || t('dashboard.noName')} · {t('dashboard.createdAt', { date: formatDate(activeBanner.createdAt) })}
               </p>
             </div>
             <button
               onClick={() => navigate(`/session/${activeBanner.code}/rankings`)}
               style={{ background: '#0a0a0a', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '999px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.06em' }}
             >
-              RETOMAR SESIÓN →
+              {t('dashboard.resume')}
             </button>
           </div>
         )}
 
         {loading ? (
-          <div style={{ color: '#aaa', textAlign: 'center', padding: '3rem' }}>Cargando...</div>
+          <div style={{ color: '#aaa', textAlign: 'center', padding: '3rem' }}>{t('common.loading')}</div>
         ) : sessions.length === 0 ? (
           <div style={s.empty}>
             <p style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Aún no has creado ninguna sesión
+              {t('dashboard.empty')}
             </p>
             <Link to="/session/create">
-              <button style={s.emptyBtn}>CREAR MI PRIMERA SESIÓN</button>
+              <button style={s.emptyBtn}>{t('dashboard.createFirst')}</button>
             </Link>
           </div>
         ) : (
@@ -198,7 +193,7 @@ export default function FacilitatorDashboard() {
                 )}
 
                 <div style={s.badge(session.status)}>
-                  {STATUS_LABEL[session.status] || session.status}
+                  {t(`dashboard.status.${session.status}`)}
                 </div>
 
                 {/* Summary block for sessions with revealed results */}
@@ -214,16 +209,15 @@ export default function FacilitatorDashboard() {
                           {sm.averageCarbonTons?.toFixed(1)}
                         </span>
                         <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                          t CO₂/año media
+                          {t('dashboard.avgSuffix')}
                         </span>
                       </div>
                       <div style={{ fontSize: '0.72rem', color: '#666', marginBottom: topArea ? '0.4rem' : 0 }}>
-                        {sm.totalParticipants} participante{sm.totalParticipants !== 1 ? 's' : ''}
-                        {' · '}min {sm.minCarbonTons?.toFixed(1)} t · máx {sm.maxCarbonTons?.toFixed(1)} t
+                        {t('dashboard.summaryLine', { count: sm.totalParticipants, min: sm.minCarbonTons?.toFixed(1), max: sm.maxCarbonTons?.toFixed(1) })}
                       </div>
                       {topArea && (
                         <div style={{ fontSize: '0.68rem', color: '#888' }}>
-                          Área mayor: <strong style={{ color: '#000' }}>{AREA_LABELS[topArea[0]] || topArea[0]}</strong> ({topArea[1].toFixed(1)} t)
+                          {t('dashboard.topArea')} <strong style={{ color: '#000' }}>{t(`areas.${topArea[0]}`)}</strong> ({topArea[1].toFixed(1)} t)
                         </div>
                       )}
                     </div>
@@ -234,7 +228,7 @@ export default function FacilitatorDashboard() {
                 {session.status !== 'closed' && session.groups?.length > 0 && (
                   <div style={{ marginBottom: '1rem' }}>
                     <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#bbb', marginBottom: '0.5rem' }}>
-                      Pantallas de equipo
+                      {t('dashboard.teamScreens')}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       {session.groups.map(group => {
@@ -249,7 +243,7 @@ export default function FacilitatorDashboard() {
                               onClick={() => navigator.clipboard.writeText(url)}
                               style={{ fontSize: '0.65rem', color: '#0a0a0a', background: 'transparent', border: '1px solid #e5e5e5', borderRadius: '6px', padding: '2px 7px', cursor: 'pointer', flexShrink: 0 }}
                             >
-                              Copiar
+                              {t('dashboard.copy')}
                             </button>
                           </div>
                         )
@@ -264,7 +258,7 @@ export default function FacilitatorDashboard() {
                       style={{ ...s.btnOpen, flex: 1 }}
                       onClick={() => handleActivate(session.code)}
                     >
-                      Activar sesión →
+                      {t('dashboard.activate')}
                     </button>
                   ) : (
                     <Link
@@ -272,12 +266,12 @@ export default function FacilitatorDashboard() {
                       style={{ flex: 1 }}
                     >
                       <button style={{ ...s.btnOpen, width: '100%' }}>
-                        {session.status === 'closed' ? 'Ver resultados' : 'Abrir sesión'}
+                        {session.status === 'closed' ? t('dashboard.viewResults') : t('dashboard.openSession')}
                       </button>
                     </Link>
                   )}
                   <button style={s.btnDelete} onClick={() => handleDelete(session.code)}>
-                    Eliminar
+                    {t('dashboard.delete')}
                   </button>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import api from '../../utils/api.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 
@@ -89,6 +90,7 @@ export default function FacilitatorLogin() {
   const [loading, setLoading]   = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -99,7 +101,7 @@ export default function FacilitatorLogin() {
       login(data.token, email)
       navigate('/dashboard')
     } catch (err) {
-      setError(err.response?.data?.error || 'Email o contraseña incorrectos')
+      setError(err.response?.data?.error || t('facilitatorLogin.error'))
     } finally {
       setLoading(false)
     }
@@ -108,24 +110,24 @@ export default function FacilitatorLogin() {
   return (
     <div style={s.page}>
       <div style={s.card}>
-        <h1 style={s.title}>Acceso</h1>
-        <p style={s.subtitle}>Panel de Facilitador</p>
+        <h1 style={s.title}>{t('facilitatorLogin.title')}</h1>
+        <p style={s.subtitle}>{t('facilitatorLogin.subtitle')}</p>
         {error && <div style={s.error}>{error}</div>}
         <form onSubmit={handleSubmit}>
           <fieldset style={s.fieldset}>
-            <label style={s.label} htmlFor="email">Email</label>
+            <label style={s.label} htmlFor="email">{t('facilitatorLogin.emailLabel')}</label>
             <input
               id="email"
               style={s.input}
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder="facilitador@ejemplo.com"
+              placeholder={t('facilitatorLogin.emailPlaceholder')}
               required
             />
           </fieldset>
           <fieldset style={s.fieldset}>
-            <label style={s.label} htmlFor="password">Contraseña</label>
+            <label style={s.label} htmlFor="password">{t('facilitatorLogin.passwordLabel')}</label>
             <input
               id="password"
               style={s.input}
@@ -137,7 +139,7 @@ export default function FacilitatorLogin() {
             />
           </fieldset>
           <button style={s.btn} type="submit" disabled={loading}>
-            {loading ? 'Entrando...' : 'Entrar'}
+            {loading ? t('facilitatorLogin.submitting') : t('facilitatorLogin.submit')}
           </button>
         </form>
       </div>

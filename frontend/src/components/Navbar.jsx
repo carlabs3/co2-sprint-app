@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext.jsx'
 
 const styles = {
@@ -56,6 +57,7 @@ const styles = {
 export default function Navbar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   function handleLogout() {
     logout()
@@ -70,11 +72,11 @@ export default function Navbar() {
       <div style={styles.links}>
         {user ? (
           <>
-            <Link to="/dashboard" style={styles.link}>Sesiones</Link>
+            <Link to="/dashboard" style={styles.link}>{t('navbar.sessions')}</Link>
             <Link to="/session/create">
-              <button style={styles.btnPill}>Nueva sesión</button>
+              <button style={styles.btnPill}>{t('navbar.newSession')}</button>
             </Link>
-            <button style={styles.btnSalir} onClick={handleLogout}>Salir</button>
+            <button style={styles.btnSalir} onClick={handleLogout}>{t('navbar.logout')}</button>
           </>
         ) : null}
       </div>

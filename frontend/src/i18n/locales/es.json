@@ -53,7 +53,8 @@
   "common": {
     "tCo2PerYear": "t CO₂/año",
     "tCo2": "t CO₂",
-    "anonymous": "Anónimo"
+    "anonymous": "Anónimo",
+    "loading": "Cargando..."
   },
   "demographics": {
     "age": {
@@ -232,5 +233,123 @@
   "sessionClosedBanner": {
     "message": "El facilitador ha cerrado esta sesión. Tus resultados han sido guardados.",
     "viewPartial": "Ver mis resultados parciales"
+  },
+  "navbar": {
+    "sessions": "Sesiones",
+    "newSession": "Nueva sesión",
+    "logout": "Salir"
+  },
+  "facilitatorLogin": {
+    "title": "Acceso",
+    "subtitle": "Panel de Facilitador",
+    "emailLabel": "Email",
+    "emailPlaceholder": "facilitador@ejemplo.com",
+    "passwordLabel": "Contraseña",
+    "submit": "Entrar",
+    "submitting": "Entrando...",
+    "error": "Email o contraseña incorrectos"
+  },
+  "sessionCreate": {
+    "title": "Nueva Sesión",
+    "nameLabel": "Nombre de la sesión",
+    "namePlaceholder": "ej. Taller Empresa X — Mayo 2026",
+    "nameHint": "Opcional — si lo dejas vacío se usará el código como nombre.",
+    "teamsLabel": "Equipos",
+    "teamPlaceholder": "Nombre del equipo...",
+    "add": "+ Añadir",
+    "removeTitle": "Eliminar",
+    "groupsCount_one": "{{count}} equipo · mín. {{min}}, máx. {{max}}",
+    "groupsCount_other": "{{count}} equipos · mín. {{min}}, máx. {{max}}",
+    "submit": "Crear Sesión →",
+    "submitting": "Creando...",
+    "errors": {
+      "exists": "Ese grupo ya existe",
+      "max": "Máximo {{max}} grupos",
+      "min": "Mínimo {{min}} grupos",
+      "atLeast": "Añade al menos {{min}} grupos",
+      "create": "Error al crear la sesión"
+    }
+  },
+  "dashboard": {
+    "title": "Mis Sesiones",
+    "newSession": "+ Nueva Sesión",
+    "activeSession": "🟢 Sesión activa: {{code}}",
+    "noName": "Sin nombre",
+    "createdAt": "Creada {{date}}",
+    "resume": "RETOMAR SESIÓN →",
+    "empty": "Aún no has creado ninguna sesión",
+    "createFirst": "CREAR MI PRIMERA SESIÓN",
+    "teamScreens": "Pantallas de equipo",
+    "copy": "Copiar",
+    "activate": "Activar sesión →",
+    "viewResults": "Ver resultados",
+    "openSession": "Abrir sesión",
+    "delete": "Eliminar",
+    "avgSuffix": "t CO₂/año media",
+    "summaryLine_one": "{{count}} participante · min {{min}} t · máx {{max}} t",
+    "summaryLine_other": "{{count}} participantes · min {{min}} t · máx {{max}} t",
+    "topArea": "Área mayor:",
+    "confirmDelete": "¿Eliminar esta sesión? Se borrarán todos los datos permanentemente. Esta acción no se puede deshacer.",
+    "errorDelete": "Error al eliminar la sesión",
+    "errorActivate": "Error al activar la sesión",
+    "status": {
+      "draft": "Borrador",
+      "waiting": "En espera",
+      "active": "Activa",
+      "actions": "Fase acciones",
+      "closed": "Cerrada"
+    }
+  },
+  "sessionStats": {
+    "loadError": "No se pudieron cargar los datos de la sesión",
+    "backToPanel": "← Volver al panel",
+    "panel": "← Panel",
+    "sessionClosed": "Sesión cerrada",
+    "participants_one": "{{count}} participante",
+    "participants_other": "{{count}} participantes",
+    "viewIndividual": "Individual",
+    "viewGroups": "Equipos",
+    "stats": {
+      "mean": "Media",
+      "median": "Mediana",
+      "min": "Mínimo",
+      "max": "Máximo",
+      "participants": "Participantes"
+    }
+  },
+  "home": {
+    "heroTag": "· TALLER DE HUELLA DE CARBONO",
+    "title1": "tu estilo de vida",
+    "title2": "tiene un",
+    "titleAccent": "coste.",
+    "heroSub": "Transporte, alimentación, energía en casa… todo suma. En 5 minutos sabrás exactamente cuánto CO₂ genera tu vida — y cómo te comparas con tu equipo.",
+    "activeBadge": "Sesión activa",
+    "joinTitle": "Únete al taller",
+    "joinDesc": "Introduce el código que te ha dado tu facilitador para calcular tu huella.",
+    "codeLabel": "Código de sesión",
+    "joinBtn": "UNIRME AL TALLER →",
+    "errors": {
+      "empty": "Introduce el código de sesión",
+      "format": "El código debe tener el formato DROP-0000"
+    },
+    "pills": {
+      "noRegister": "Sin registro ni instalación",
+      "fiveMin": "5 minutos para completarlo",
+      "realtime": "Resultados en tiempo real"
+    },
+    "stats": {
+      "spainAvg": "Media de CO₂ por persona al año en España",
+      "double": "El doble de lo que el planeta puede absorber",
+      "minutes": "Minutos para calcular tu huella y empezar a cambiar"
+    },
+    "howTitle": "¿Cómo funciona el taller?",
+    "steps": {
+      "s1Title": "Entra con tu código",
+      "s1Text": "El facilitador comparte un código. Entra desde tu móvil sin registro ni instalación.",
+      "s2Title": "Calcula tu huella",
+      "s2Text": "Responde preguntas sobre transporte, energía, alimentación y más.",
+      "s3Title": "Ve los resultados",
+      "s3Text": "Compara con tu equipo y la media de España en tiempo real."
+    }
   }
 }
