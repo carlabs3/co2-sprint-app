@@ -10,6 +10,7 @@ import {
   computeGroups,
 } from '../../components/RankingViews.jsx'
 import { fmtTons } from '../../utils/format.js'
+import { applySessionLang } from '../../utils/sessionLang.js'
 
 function DotsLoader({ color = '#0a0a0a' }) {
   return (
@@ -88,6 +89,7 @@ export default function Step2Rankings() {
     api.get(`/api/sessions/${code}`)
       .then(res => {
         const s = res.data
+        applySessionLang(s.lang)
         setSessionStatus(s.status)
         setSessionGroups(s.groups || [])
         if (s.resultsRevealed || s.status === 'closed') { setRevealed(true); setShowRanking(true) }

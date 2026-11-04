@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useSession } from '../../context/SessionContext.jsx'
 import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
+import { applySessionLang } from '../../utils/sessionLang.js'
 
 function DotsLoader() {
   return (
@@ -51,6 +52,7 @@ export default function WaitingRoom() {
       try {
         const res = await api.get(`/api/sessions/${code}/info`)
         const { currentStep, resultsRevealed, status } = res.data
+        applySessionLang(res.data.lang)
         if (resultsRevealed) {
           navigate(`/session/${code}/results`, { replace: true })
         } else if (currentStep >= 2) {

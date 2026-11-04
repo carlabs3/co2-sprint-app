@@ -51,13 +51,28 @@ const MIN_GROUPS = 2
 const MAX_GROUPS = 8
 
 export default function SessionCreate() {
+  const { t } = useTranslation()
+  // Equipos por defecto en el idioma de la sesión: "Equipo A/B/C" · "Team A/B/C"
+  const defaultTeams = (lng) => ['A', 'B', 'C'].map(l => `${t('sessionCreate.teamPrefix', { lng })} ${l}`)
+
   const [sessionName, setSessionName] = useState('')
-  const [groups, setGroups]     = useState(['Equipo A', 'Equipo B', 'Equipo C'])
+  const [lang, setLang]         = useState('es')
+  const [groups, setGroups]     = useState(() => defaultTeams('es'))
   const [newGroup, setNewGroup] = useState('')
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
   const navigate = useNavigate()
-  const { t } = useTranslation()
+
+  function handleLangChange(newLang) {
+    if (newLang === lang) return
+    // Solo regenera los nombres si siguen siendo los por defecto (sin editar).
+    const current = JSON.stringify(groups)
+    if (current === JSON.stringify(defaultTeams(lang))) {
+      setGroups(defaultTeams(newLang))
+    }
+    setLang(newLang)
+    setError('')
+  }
 
   function addGroup(e) {
     e?.preventDefault()
@@ -85,7 +100,7 @@ export default function SessionCreate() {
     setLoading(true)
     setError('')
     try {
-      const { data } = await api.post('/api/sessions', { name: sessionName, groups })
+      const { data } = await api.post('/api/sessions', { name: sessionName, groups, lang })
       navigate(`/session/${data.code}/rankings`)
     } catch (err) {
       setError(err.response?.data?.error || t('sessionCreate.errors.create'))
@@ -99,6 +114,28 @@ export default function SessionCreate() {
         <h1 style={s.title}>{t('sessionCreate.title')}</h1>
         <div style={s.card}>
           <form onSubmit={handleSubmit}>
+
+            {/* Idioma de la sesión */}
+            <div style={s.field}>
+              <label style={s.label}>{t('sessionCreate.langLabel')}</label>
+              <div style={s.addRow}>
+                {['es', 'en'].map(l => (
+                  <button
+                    key={l}
+                    type="button"
+                    onClick={() => handleLangChange(l)}
+                    style={{
+                      ...s.addBtn,
+                      background: lang === l ? '#0a0a0a' : '#f5f5f5',
+                      color: lang === l ? '#fff' : '#0a0a0a',
+                      borderColor: lang === l ? '#0a0a0a' : '#e5e5e5',
+                    }}
+                  >
+                    {l.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Session name */}
             <div style={s.field}>

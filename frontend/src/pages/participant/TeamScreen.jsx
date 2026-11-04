@@ -7,6 +7,7 @@ import api from '../../utils/api.js'
 import { ACTIONS, AREA_ICON_URL } from '../../utils/actions.js'
 import WaitingForFacilitator from '../../components/WaitingForFacilitator.jsx'
 import { fmtTons } from '../../utils/format.js'
+import { applySessionLang } from '../../utils/sessionLang.js'
 
 // Normalize group name for comparison: "Equipo A" === "equipo-a"
 function normalizeGroup(g) {
@@ -572,6 +573,7 @@ export default function TeamScreen() {
 
     api.get(`/api/sessions/${code}/info`)
       .then(res => {
+        applySessionLang(res.data.lang)
         if (res.data.step3Revealed || res.data.currentStep >= 3) setPhase('step3')
         else if (res.data.resultsRevealed) setPhase('results')
         else if (res.data.status === 'active') setPhase('calculating')

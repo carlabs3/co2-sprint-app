@@ -15,12 +15,13 @@ export default function sessionsRouter(io) {
   // Public: info needed by join/waiting screens (groups, name, status, resultsRevealed)
   router.get('/:code/info', async (req, res) => {
     try {
-      const session = await Session.findOne({ code: req.params.code }, 'code name groups status currentStep resultsRevealed step3Revealed winnersRevealed')
+      const session = await Session.findOne({ code: req.params.code }, 'code name lang groups status currentStep resultsRevealed step3Revealed winnersRevealed')
       // Note: 'draft' and 'closed' statuses are intentionally included
       if (!session) return res.status(404).json({ error: 'Sesión no encontrada' })
       res.json({
         code:            session.code,
         name:            session.name,
+        lang:            session.lang || 'es', // sesiones antiguas sin campo → 'es'
         groups:          session.groups,
         status:          session.status,
         currentStep:     session.currentStep,
@@ -99,12 +100,13 @@ export default function sessionsRouter(io) {
 
   router.post('/', async (req, res) => {
     try {
-      const { groups, name } = req.body
+      const { groups, name, lang } = req.body
       const code = await generateCode()
       const session = await Session.create({
         code,
         facilitatorId: req.user.id,
         name: name || '',
+        lang: lang === 'en' ? 'en' : 'es',
         groups: groups || [],
       })
       res.status(201).json(session)

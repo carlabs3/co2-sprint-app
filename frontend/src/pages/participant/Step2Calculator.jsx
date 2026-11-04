@@ -7,6 +7,7 @@ import { useSession } from '../../context/SessionContext.jsx'
 import SessionClosedBanner from '../../components/SessionClosedBanner.jsx'
 import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
 import { calculator } from '../../utils/calculator.js'
+import { applySessionLang } from '../../utils/sessionLang.js'
 
 const AREA_VISUAL = {
   transport:   { color: '#38bdf8', bg: '#e8f2fd', iconBg: '#d0e8f8' },
@@ -462,6 +463,11 @@ export default function Step2Calculator() {
     window.addEventListener('resize', handler)
     return () => window.removeEventListener('resize', handler)
   }, [])
+
+  // Aplica el idioma de la sesión (cubre recarga directa en /calculator)
+  useEffect(() => {
+    api.get(`/api/sessions/${code}/info`).then(res => applySessionLang(res.data.lang)).catch(() => {})
+  }, [code])
 
   // Retry pending submission on mount (capa 3 — localStorage)
   useEffect(() => {

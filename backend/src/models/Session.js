@@ -4,6 +4,7 @@ const sessionSchema = new Schema({
   code: { type: String, required: true, unique: true },
   facilitatorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   name: { type: String, default: '' },
+  lang: { type: String, enum: ['es', 'en'], default: 'es' }, // sesiones antiguas sin campo → 'es'
   groups: [String],
   status: { type: String, enum: ['draft', 'waiting', 'active', 'actions', 'closed'], default: 'draft' },
   currentStep: { type: Number, default: 2 },

@@ -8,6 +8,7 @@ import SessionClosedBanner from '../../components/SessionClosedBanner.jsx'
 import WaitingForFacilitator from '../../components/WaitingForFacilitator.jsx'
 import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
+import { applySessionLang } from '../../utils/sessionLang.js'
 import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
 import { MAP, calcAlcohol } from '../../utils/calculator.js'
 import { fmtTons } from '../../utils/format.js'
@@ -398,6 +399,7 @@ export default function Step2Results() {
 
     api.get(`/api/sessions/${code}/info`)
       .then(res => {
+        applySessionLang(res.data.lang)
         if (res.data.resultsRevealed) setRevealed(true)
         if (res.data.currentStep >= 3) setStep3Started(true)
       })

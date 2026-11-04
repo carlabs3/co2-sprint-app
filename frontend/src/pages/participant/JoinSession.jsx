@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useSession } from '../../context/SessionContext.jsx'
 import api from '../../utils/api.js'
+import { applySessionLang } from '../../utils/sessionLang.js'
 
 // value = ID neutro guardado en DB · labelKey = clave i18n del texto visible
 const AGE_RANGES = [
@@ -168,6 +169,7 @@ export default function JoinSession() {
     api.get(`/api/sessions/${code}/info`)
       .then(res => {
         const { status, groups: g } = res.data
+        applySessionLang(res.data.lang)
         if (status === 'draft') {
           setGroups([])
           setCodeError(t('joinSession.errors.notStarted'))

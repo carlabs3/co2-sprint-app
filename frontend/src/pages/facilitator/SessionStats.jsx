@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import api from '../../utils/api.js'
 import { DistributionView, GroupsView, computeGroups } from '../../components/RankingViews.jsx'
+import { applySessionLang } from '../../utils/sessionLang.js'
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -24,6 +25,7 @@ export default function SessionStats() {
       api.get(`/api/results/${code}/ranking`),
     ])
       .then(([sessionRes, rankingRes]) => {
+        applySessionLang(sessionRes.data.lang)
         setSession(sessionRes.data)
         const items = rankingRes.data.map(r => ({
           name: 'Anónimo',

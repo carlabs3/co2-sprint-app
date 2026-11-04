@@ -253,6 +253,8 @@
   },
   "sessionCreate": {
     "title": "Nueva Sesión",
+    "langLabel": "Idioma",
+    "teamPrefix": "Equipo",
     "nameLabel": "Nombre de la sesión",
     "namePlaceholder": "ej. Taller Empresa X — Mayo 2026",
     "nameHint": "Opcional — si lo dejas vacío se usará el código como nombre.",
