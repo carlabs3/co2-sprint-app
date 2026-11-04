@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { QRCodeSVG } from 'qrcode.react'
 import api from '../../utils/api.js'
 import { socket } from '../../utils/socket.js'
-import { ACTIONS, AREA_ICON_URL, AREA_LABEL } from '../../utils/actions.js'
+import { ACTIONS, AREA_ICON_URL } from '../../utils/actions.js'
 import {
   DistributionView, GroupsView,
   computeGroups,
@@ -373,7 +373,7 @@ export default function Step2Rankings() {
                                 onError={e => { e.currentTarget.style.display = 'none' }}
                               />
                               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.6rem 0.75rem' }}>
-                                <span style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</span>
+                                <span style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: '#0a0a0a', lineHeight: 1.3 }}>{t(a.title)}</span>
                                 <button onClick={() => handleToggleAction(group, id)} style={{ background: 'transparent', border: 'none', color: '#bbb', cursor: 'pointer', fontSize: '0.9rem', padding: '0 2px' }}>✕</button>
                               </div>
                             </div>
@@ -448,7 +448,7 @@ export default function Step2Rankings() {
                             onError={e => { e.currentTarget.style.display = 'none' }}
                           />
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.6rem 0.75rem' }}>
-                            <span style={{ flex: 1, fontSize: '0.82rem', fontWeight: isSel ? 600 : 400, color: '#0a0a0a', lineHeight: 1.3 }}>{a.label}</span>
+                            <span style={{ flex: 1, fontSize: '0.82rem', fontWeight: isSel ? 600 : 400, color: '#0a0a0a', lineHeight: 1.3 }}>{t(a.title)}</span>
                           </div>
                         </div>
                       )
@@ -705,7 +705,7 @@ export default function Step2Rankings() {
                       onError={e => { e.currentTarget.style.display = 'none' }}
                     />
                     <div style={{ padding: '0.75rem' }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{a.label}</div>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{t(a.title)}</div>
                       <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#16a34a', marginTop: 6 }}>
                         −{fmtTons(a.co2Reduction / 1000)} {t('common.tCo2')}
                       </div>

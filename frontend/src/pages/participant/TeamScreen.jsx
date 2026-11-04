@@ -456,7 +456,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
                   onError={e => { e.currentTarget.style.display = 'none' }}
                 />
                 <div style={{ padding: '0.6rem 0.75rem' }}>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, marginBottom: '0.3rem' }}>{action.label}</div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, marginBottom: '0.3rem' }}>{t(action.title)}</div>
                   <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#16a34a' }}>
                     −{fmtTons(action.co2Reduction / 1000)} t
                   </div>
@@ -481,7 +481,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
                   onError={e => { e.currentTarget.style.display = 'none' }}
                 />
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0.85rem 1rem' }}>
-                  <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, textAlign: 'left' }}>{action.label}</span>
+                  <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, textAlign: 'left' }}>{t(action.title)}</span>
                   <span style={{ fontSize: '0.85rem', color: '#ccc', flexShrink: 0 }}>···</span>
                 </div>
               </div>

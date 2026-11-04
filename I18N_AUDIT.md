@@ -52,13 +52,17 @@ Observaciones de duplicación a tener en cuenta en Fase 2:
 ### `frontend/src/utils/actions.js`
 - Exporta `ACTIONS`: 38 acciones `{ id, area, co2Reduction, label, description, image }`.
 - IDs: `t01…t07` (transport), `v01…v07` (energy), `6a…`/food…, `c01…`, `d01…d05`, etc. (38 en total).
-- `label` y `description` son texto ES → se mueven a `es.json` en Fase 3. `co2Reduction`, `area`, `image`, orden: **no se tocan.**
+- `label` y `description` son texto ES → **movidos a `es.json` en Fase 3** (`actions.<id>.title` / `actions.<id>.description`). En el código, `label` se renombró a `title` y ahora guarda la clave i18n. `co2Reduction`, `area`, `image`, orden: **no se tocaron.**
 - **Uso**: la pantalla de acciones de equipo (selección de acciones). El `id` y `co2Reduction` alimentan el cálculo de reducción.
 
 ### `backend/src/utils/actions.js`
-- Exporta `ACTIONS` con la misma forma `{ id, area, co2Reduction, label, description }` (sin `image`), 38 acciones.
-- **Uso**: backend (referencia/validación de acciones de equipo).
-- ⚠️ **Diferencias a verificar entre los dos `actions.js`** — se revisan en Fase 3 sin tocarlas. Posible diferencia detectada ya: `v02` tiene el mismo `co2Reduction: 25` en ambos (OK). Pendiente: diff completo de `co2Reduction`/`label` en Fase 3.
+- Exporta `ACTIONS` con la forma `{ id, area, co2Reduction, label, description }` (sin `image`), 38 acciones.
+- **Uso**: backend (referencia/validación de acciones de equipo). **NO se tocó** (Fase 3 solo afecta al frontend).
+- ✅ **Diff completo frontend vs backend (Fase 3)** — `co2Reduction` y `area` **idénticos en las 38**. Única diferencia de texto:
+  - **`t04.label`**:
+    - Frontend: `Voy en bicicleta en lugar del coche`
+    - Backend: `Voy en bicicleta en lugar de utilizar el coche para mis desplazamientos diarios`
+  - En `es.json` se tomó la versión del **frontend** (`actions.t04.title`). Si el backend llega a mostrar este texto al usuario (Fase 5), decidir cuál es el canónico. No se ha tocado ninguno.
 
 ---
 
