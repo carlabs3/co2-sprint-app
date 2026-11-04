@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next'
 import { useSession } from '../context/SessionContext.jsx'
 
 export default function SessionClosedBanner({ onViewPartial }) {
   const { sessionClosed } = useSession()
+  const { t } = useTranslation()
 
   if (!sessionClosed) return null
 
@@ -17,7 +19,7 @@ export default function SessionClosedBanner({ onViewPartial }) {
     }}>
       <span style={{ fontSize: '1rem', flexShrink: 0 }}>⚠️</span>
       <span style={{ fontSize: '0.82rem', color: '#666', flex: 1, lineHeight: 1.5 }}>
-        El facilitador ha cerrado esta sesión. Tus resultados han sido guardados.
+        {t('sessionClosedBanner.message')}
       </span>
       {onViewPartial && (
         <button
@@ -36,7 +38,7 @@ export default function SessionClosedBanner({ onViewPartial }) {
             whiteSpace: 'nowrap',
           }}
         >
-          Ver mis resultados parciales
+          {t('sessionClosedBanner.viewPartial')}
         </button>
       )}
     </div>

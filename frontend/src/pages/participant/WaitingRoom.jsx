@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useSession } from '../../context/SessionContext.jsx'
 import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
@@ -27,6 +28,7 @@ export default function WaitingRoom() {
   const { code } = useParams()
   const navigate = useNavigate()
   const { participantGroup } = useSession()
+  const { t } = useTranslation()
 
   useEffect(() => {
     function onStepChange({ step }) {
@@ -96,14 +98,14 @@ export default function WaitingRoom() {
           fontWeight: 900, fontSize: '1.35rem', textTransform: 'uppercase',
           marginBottom: '0.75rem', color: '#0a0a0a', letterSpacing: '0.02em',
         }}>
-          Esperando al facilitador...
+          {t('waitingRoom.title')}
         </h1>
 
         <p style={{
           fontSize: '0.88rem', color: '#666',
           maxWidth: 320, lineHeight: 1.65, marginBottom: '2rem', margin: '0 0 2rem',
         }}>
-          El taller comenzará en breve. Mantén esta pantalla abierta.
+          {t('waitingRoom.subtitle')}
         </p>
 
         {participantGroup && (
@@ -112,7 +114,7 @@ export default function WaitingRoom() {
             padding: '0.45rem 1.25rem', fontSize: '0.8rem', fontWeight: 700,
             color: '#0a0a0a', letterSpacing: '0.04em', marginBottom: '2.5rem',
           }}>
-            Estás en el {participantGroup}
+            {t('waitingRoom.inGroup', { group: participantGroup })}
           </div>
         )}
 

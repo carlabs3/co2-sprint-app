@@ -1,23 +1,24 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useSession } from '../../context/SessionContext.jsx'
 import api from '../../utils/api.js'
 
-// value = ID neutro guardado en DB · label = texto visible (pasará a i18next en Fase 2)
+// value = ID neutro guardado en DB · labelKey = clave i18n del texto visible
 const AGE_RANGES = [
-  { value: '< 20',        label: '< 20' },
-  { value: '20-29',       label: '20-29' },
-  { value: '30-39',       label: '30-39' },
-  { value: '40-49',       label: '40-49' },
-  { value: '50-59',       label: '50-59' },
-  { value: '60+',         label: '60+' },
-  { value: 'undisclosed', label: 'Prefiero no decirlo' },
+  { value: '< 20',        labelKey: 'demographics.age.lt20' },
+  { value: '20-29',       labelKey: 'demographics.age.a2029' },
+  { value: '30-39',       labelKey: 'demographics.age.a3039' },
+  { value: '40-49',       labelKey: 'demographics.age.a4049' },
+  { value: '50-59',       labelKey: 'demographics.age.a5059' },
+  { value: '60+',         labelKey: 'demographics.age.a60plus' },
+  { value: 'undisclosed', labelKey: 'demographics.age.undisclosed' },
 ]
 const GENDERS = [
-  { value: 'female',      label: 'Mujer' },
-  { value: 'male',        label: 'Hombre' },
-  { value: 'nonbinary',   label: 'No binario' },
-  { value: 'undisclosed', label: 'Prefiero no decirlo' },
+  { value: 'female',      labelKey: 'demographics.gender.female' },
+  { value: 'male',        labelKey: 'demographics.gender.male' },
+  { value: 'nonbinary',   labelKey: 'demographics.gender.nonbinary' },
+  { value: 'undisclosed', labelKey: 'demographics.gender.undisclosed' },
 ]
 
 const s = {
@@ -151,6 +152,7 @@ export default function JoinSession() {
 
   const { joinSession, clearSession } = useSession()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   useEffect(() => {
     clearSession()
@@ -168,16 +170,16 @@ export default function JoinSession() {
         const { status, groups: g } = res.data
         if (status === 'draft') {
           setGroups([])
-          setCodeError('El taller aún no ha comenzado. Espera al facilitador.')
+          setCodeError(t('joinSession.errors.notStarted'))
         } else if (status === 'closed') {
           setGroups([])
-          setCodeError('Este taller ha finalizado.')
+          setCodeError(t('joinSession.errors.finished'))
         } else {
           setGroups(g || [])
           setCodeError('')
         }
       })
-      .catch(() => { setGroups([]); setCodeError('Sesión no encontrada') })
+      .catch(() => { setGroups([]); setCodeError(t('joinSession.errors.notFound')) })
   }, [code])
 
   function formatCode(val) {
@@ -191,19 +193,19 @@ export default function JoinSession() {
     let valid = true
 
     if (!code || code.length < 9) {
-      setCodeError('Ingresa un código válido (ej: DROP-4872)')
+      setCodeError(t('joinSession.errors.invalidCode'))
       valid = false
     }
     if (!age) {
-      setAgeError('Selecciona tu rango de edad')
+      setAgeError(t('joinSession.errors.selectAge'))
       valid = false
     }
     if (!gender) {
-      setGenderError('Selecciona una opción')
+      setGenderError(t('joinSession.errors.selectGender'))
       valid = false
     }
     if (!group) {
-      setGroupError('Selecciona un grupo')
+      setGroupError(t('joinSession.errors.selectGroup'))
       valid = false
     }
     if (!valid) return
@@ -222,16 +224,16 @@ export default function JoinSession() {
         <div style={s.logo}>
           CO2 Sprint <span style={s.asterisk}>*</span>
         </div>
-        <p style={s.tagline}>Calculadora de huella de carbono</p>
+        <p style={s.tagline}>{t('joinSession.tagline')}</p>
         <p style={{ fontSize: '12px', color: '#666', marginBottom: '16px', lineHeight: 1.5 }}>
-          Esta calculadora mide tu huella de carbono individual — no la de tu familia ni tu hogar compartido.
+          {t('joinSession.intro')}
         </p>
 
         <form onSubmit={handleSubmit}>
 
           {/* Código */}
           <div style={s.field}>
-            <label style={s.label} htmlFor="code">Código de sesión</label>
+            <label style={s.label} htmlFor="code">{t('joinSession.codeLabel')}</label>
             <input
               id="code"
               style={{ ...s.input, ...(codeError ? s.fieldError : {}) }}
@@ -247,7 +249,7 @@ export default function JoinSession() {
           {/* Grupo */}
           {groups.length > 0 && (
             <div style={s.field}>
-              <label style={s.label}>Tu grupo</label>
+              <label style={s.label}>{t('joinSession.groupLabel')}</label>
               <div style={s.groupRow}>
                 {groups.map(g => (
                   <button
@@ -267,7 +269,7 @@ export default function JoinSession() {
           {/* Edad + Género */}
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.8rem' }}>
             <div style={{ flex: 1 }}>
-              <label style={s.label} htmlFor="age">Edad</label>
+              <label style={s.label} htmlFor="age">{t('joinSession.ageLabel')}</label>
               <select
                 id="age"
                 value={age}
@@ -275,12 +277,12 @@ export default function JoinSession() {
                 style={{ ...s.select, color: age ? '#0a0a0a' : '#aaa', ...(ageError ? s.fieldError : {}) }}
               >
                 <option value="">—</option>
-                {AGE_RANGES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                {AGE_RANGES.map(r => <option key={r.value} value={r.value}>{t(r.labelKey)}</option>)}
               </select>
               {ageError && <div style={s.error}>{ageError}</div>}
             </div>
             <div style={{ flex: 1 }}>
-              <label style={s.label} htmlFor="gender">Género</label>
+              <label style={s.label} htmlFor="gender">{t('joinSession.genderLabel')}</label>
               <select
                 id="gender"
                 value={gender}
@@ -288,19 +290,17 @@ export default function JoinSession() {
                 style={{ ...s.select, color: gender ? '#0a0a0a' : '#aaa', ...(genderError ? s.fieldError : {}) }}
               >
                 <option value="">—</option>
-                {GENDERS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
+                {GENDERS.map(g => <option key={g.value} value={g.value}>{t(g.labelKey)}</option>)}
               </select>
               {genderError && <div style={s.error}>{genderError}</div>}
             </div>
           </div>
 
           <p style={{ fontSize: '11px', color: '#999', lineHeight: 1.5, marginBottom: '16px', marginTop: 0 }}>
-            Los datos de edad, género y huella de carbono se recogen de forma anónima
-            para los resultados del taller. No se asocian a ningún nombre ni se comparten
-            con terceros.
+            {t('joinSession.privacyNote')}
           </p>
 
-          <button style={s.btn} type="submit">Unirme →</button>
+          <button style={s.btn} type="submit">{t('joinSession.submit')}</button>
         </form>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { PieChart, Pie, Cell } from 'recharts'
 import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
@@ -17,22 +18,24 @@ function groupMatches(recordGroup, urlGroup) {
   return normalizeGroup(recordGroup) === normalizeGroup(urlGroup)
 }
 
+// label = clave i18n
 const AREA_META = [
-  { key: 'transport',      label: 'Transporte',        color: '#38bdf8' },
-  { key: 'energy',         label: 'Vivienda',          color: '#f59e0b' },
-  { key: 'food',           label: 'Alimentación',      color: '#4ade80' },
-  { key: 'consumption',    label: 'Compras y hábitos', color: '#a855f7' },
-  { key: 'waste',          label: 'Vida digital',      color: '#f472b6' },
-  { key: 'publicServices', label: 'Servicios públicos', color: '#94a3b8' },
+  { key: 'transport',      label: 'areas.transport',      color: '#38bdf8' },
+  { key: 'energy',         label: 'areas.energy',         color: '#f59e0b' },
+  { key: 'food',           label: 'areas.food',           color: '#4ade80' },
+  { key: 'consumption',    label: 'areas.consumption',    color: '#a855f7' },
+  { key: 'waste',          label: 'areas.waste',          color: '#f472b6' },
+  { key: 'publicServices', label: 'areas.publicServices', color: '#94a3b8' },
 ]
 
 const SPAIN_AVG = 8.1
 
+// label = clave i18n (compartida con Step2Results)
 const CATEGORY_CONFIG = {
-  bajo:       { label: 'Huella reducida 🌿' },
-  medio:      { label: 'Huella moderada 🌱' },
-  alto:       { label: 'Huella elevada 🌍' },
-  'muy alto': { label: 'Huella muy elevada 🔥' },
+  bajo:       { label: 'categoryLabels.bajo' },
+  medio:      { label: 'categoryLabels.medio' },
+  alto:       { label: 'categoryLabels.alto' },
+  'muy alto': { label: 'categoryLabels.muy alto' },
 }
 
 function mean(arr) {
@@ -79,6 +82,7 @@ function Navbar({ group }) {
 
 // ── Phase 1: Waiting ─────────────────────────────────────────────────────────
 function WaitingPhase({ group }) {
+  const { t } = useTranslation()
   return (
     <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', flexDirection: 'column' }}>
       <Navbar group={null} />
@@ -93,7 +97,7 @@ function WaitingPhase({ group }) {
           {group}
         </h1>
         <p style={{ fontSize: '1.05rem', color: '#666', maxWidth: 400, lineHeight: 1.65, marginBottom: '3rem' }}>
-          El taller comenzará en breve.<br />Mantened esta pantalla abierta.
+          {t('teamScreen.waiting.line1')}<br />{t('teamScreen.waiting.line2')}
         </p>
         <DotsLoader />
       </div>
@@ -103,6 +107,7 @@ function WaitingPhase({ group }) {
 
 // ── Phase 2: Calculating ──────────────────────────────────────────────────────
 function CalculatingPhase({ group, teamResults }) {
+  const { t } = useTranslation()
   const teamAvg = teamResults.length ? mean(teamResults.map(r => r.tons)) : null
 
   return (
@@ -112,19 +117,19 @@ function CalculatingPhase({ group, teamResults }) {
         {teamAvg === null ? (
           <>
             <p style={{ fontSize: '1rem', color: '#888', marginBottom: '2rem', maxWidth: 360, lineHeight: 1.6 }}>
-              Esperando a que los miembros del equipo calculen su huella
+              {t('teamScreen.calculating.waitingMembers')}
             </p>
             <DotsLoader />
           </>
         ) : (
           <>
             <p style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: '#bbb', marginBottom: '1.25rem' }}>
-              Huella media del equipo · en curso
+              {t('teamScreen.calculating.teamAvgInProgress')}
             </p>
             <div style={{ fontWeight: 900, fontSize: 'clamp(5rem, 16vw, 10rem)', lineHeight: 1, color: '#0a0a0a', letterSpacing: '-0.03em', marginBottom: '0.5rem' }}>
               {fmtTons(teamAvg)}
             </div>
-            <p style={{ fontSize: '1rem', color: '#aaa', marginBottom: '2.5rem' }}>t CO₂/año</p>
+            <p style={{ fontSize: '1rem', color: '#aaa', marginBottom: '2.5rem' }}>{t('common.tCo2PerYear')}</p>
             <DotsLoader />
           </>
         )}
@@ -135,12 +140,13 @@ function CalculatingPhase({ group, teamResults }) {
 
 // ── Phase 3: Results ──────────────────────────────────────────────────────────
 function ResultsPhase({ group, teamResults, sessionResults }) {
+  const { t } = useTranslation()
   if (teamResults.length === 0) {
     return (
       <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', flexDirection: 'column' }}>
         <Navbar group={group} />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-          <p style={{ color: '#aaa', fontSize: '0.95rem' }}>Sin resultados para este equipo.</p>
+          <p style={{ color: '#aaa', fontSize: '0.95rem' }}>{t('teamScreen.results.noResults')}</p>
         </div>
       </div>
     )
@@ -162,7 +168,7 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
       : mean(teamResults.map(r => r.areas?.[a.key] || 0))
   })
   const pieData = AREA_META
-    .map(a => ({ name: a.label, value: areaAvgMap[a.key], color: a.color }))
+    .map(a => ({ name: t(a.label), value: areaAvgMap[a.key], color: a.color }))
     .filter(d => d.value > 0.001)
 
   // Horizontal bars (dynamic scale)
@@ -172,8 +178,8 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
 
   const bars = [
     { label: group,          value: teamAvg,    color: '#0a0a0a', bold: true },
-    ...(sessionAvg != null ? [{ label: 'Media sesión', value: sessionAvg, color: '#38bdf8', bold: false }] : []),
-    { label: 'Media España',  value: SPAIN_AVG,  color: '#4ade80', bold: false },
+    ...(sessionAvg != null ? [{ label: t('teamScreen.avgSession'), value: sessionAvg, color: '#38bdf8', bold: false }] : []),
+    { label: t('teamScreen.avgSpain'),  value: SPAIN_AVG,  color: '#4ade80', bold: false },
   ]
 
   return (
@@ -185,19 +191,19 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
       <div style={{ background: '#0a0a0a', color: '#fff', padding: '2.5rem 2rem 3rem' }}>
         <div style={{ maxWidth: 960, margin: '0 auto', textAlign: 'center' }}>
           <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.5, margin: '0 0 0.6rem' }}>
-            Huella media · {group}
+            {t('teamScreen.heroAvgFootprint', { group })}
           </p>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <span style={{ fontWeight: 900, fontSize: 'clamp(3.5rem, 10vw, 5.5rem)', lineHeight: 1 }}>
               {fmtTons(teamAvg)}
             </span>
-            <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>t CO₂/año</span>
+            <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>{t('common.tCo2PerYear')}</span>
           </div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: '0.9rem', background: 'rgba(255,255,255,0.18)', padding: '0.35rem 0.9rem', borderRadius: 4, fontSize: '0.8rem', fontWeight: 700 }}>
-            {catCfg.label}
+            {t(catCfg.label)}
           </div>
           <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.5rem' }}>
-            {teamResults.length} miembro{teamResults.length !== 1 ? 's' : ''} han completado
+            {t('teamScreen.members', { count: teamResults.length })}
           </div>
         </div>
       </div>
@@ -208,7 +214,7 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
         {/* Donut */}
         <div style={{ flex: '1 1 340px', background: '#fff', borderRadius: 14, border: '1px solid #e5e5e5', padding: '1.75rem', minWidth: 0 }}>
           <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#aaa', marginBottom: '1.5rem' }}>
-            Desglose por áreas — media del equipo
+            {t('teamScreen.breakdownTeamAvg')}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.75rem', flexWrap: 'wrap' }}>
             <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -226,7 +232,7 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
               </PieChart>
               <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                 <span style={{ fontWeight: 900, fontSize: '1.6rem', lineHeight: 1, color: '#0a0a0a' }}>{fmtTons(teamAvg)}</span>
-                <span style={{ fontSize: '0.62rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 2 }}>t CO₂</span>
+                <span style={{ fontSize: '0.62rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 2 }}>{t('common.tCo2')}</span>
               </div>
             </div>
 
@@ -238,7 +244,7 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
                 return (
                   <div key={a.key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <div style={{ width: 10, height: 10, background: a.color, borderRadius: 2, flexShrink: 0 }} />
-                    <span style={{ fontSize: '0.75rem', color: '#555', flex: 1 }}>{a.label}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#555', flex: 1 }}>{t(a.label)}</span>
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0a0a0a', minWidth: 36, textAlign: 'right' }}>{fmtTons(val)} t</span>
                     <span style={{ fontSize: '0.68rem', color: '#bbb', minWidth: 32, textAlign: 'right' }}>{pctArea}%</span>
                   </div>
@@ -251,7 +257,7 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
         {/* Horizontal bar comparison */}
         <div style={{ flex: '1 1 280px', background: '#fff', borderRadius: 14, border: '1px solid #e5e5e5', padding: '1.75rem', minWidth: 0 }}>
           <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#aaa', marginBottom: '1.75rem' }}>
-            Comparativa
+            {t('teamScreen.comparisonTitle')}
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -278,14 +284,14 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
           </div>
 
           <div style={{ fontSize: '0.65rem', color: '#e05555', marginTop: '0.75rem', fontStyle: 'italic' }}>
-            ─ Objetivo climático: 2 t/año por persona
+            {t('teamScreen.objective')}
           </div>
 
           {vsSesion != null && vsSesion < 0 && (
             <div style={{ marginTop: '1.25rem', background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: 8, padding: '0.7rem 1rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <span style={{ fontSize: '1rem' }}>🏆</span>
               <span style={{ fontSize: '0.78rem', color: '#0a0a0a', fontWeight: 700 }}>
-                Por debajo de la media de la sesión
+                {t('teamScreen.belowSession')}
               </span>
             </div>
           )}
@@ -302,6 +308,7 @@ function ResultsPhase({ group, teamResults, sessionResults }) {
 
 // ── Step 3: Display (receiver only) ──────────────────────────────────────────
 function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showValues }) {
+  const { t } = useTranslation()
   const { actions = [], newCarbonTons = 0, totalReduction = 0 } = confirmedData || {}
 
   const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste', 'publicServices']
@@ -353,7 +360,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
             return (
               <div key={a.key} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                 <div style={{ width: 10, height: 10, borderRadius: 2, background: a.color, flexShrink: 0 }} />
-                <span style={{ fontSize: '0.82rem', color: '#555' }}>{a.label}</span>
+                <span style={{ fontSize: '0.82rem', color: '#555' }}>{t(a.label)}</span>
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#333' }}>{fmtTons(areaAvg[a.key] || 0)}t</span>
                 <span style={{ fontSize: '0.82rem', color: '#aaa' }}>{areaPct}%</span>
               </div>
@@ -372,7 +379,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
       {showValues ? (
         <div style={{ background: '#0a0a0a', color: '#fff', padding: 'clamp(1.25rem, 4vw, 2.5rem) clamp(1rem, 4vw, 3rem)', textAlign: 'center' }}>
           <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.45, margin: '0 0 1.25rem' }}>
-            Huella media · {group}
+            {t('teamScreen.heroAvgFootprint', { group })}
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(1.5rem, 5vw, 4rem)', justifyContent: 'center', flexWrap: 'wrap' }}>
             {/* Antes */}
@@ -380,9 +387,9 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
               <span style={{ fontWeight: 900, fontSize: 'clamp(2.8rem, 8vw, 5rem)', lineHeight: 1 }}>
                 {fmtTons(teamAvg)}
               </span>
-              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>t CO₂/año</span>
+              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>{t('common.tCo2PerYear')}</span>
               <div style={{ background: 'rgba(255,255,255,0.18)', padding: '0.25rem 0.75rem', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
-                {CATEGORY_CONFIG[getCategory(teamAvg)].label}
+                {t(CATEGORY_CONFIG[getCategory(teamAvg)].label)}
               </div>
             </div>
             {/* Centro — reducción + flecha */}
@@ -397,26 +404,26 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
               <span style={{ fontWeight: 900, fontSize: 'clamp(2.8rem, 8vw, 5rem)', lineHeight: 1, color: '#4ade80' }}>
                 {fmtTons(newCarbonTons)}
               </span>
-              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>t CO₂/año</span>
+              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>{t('common.tCo2PerYear')}</span>
               <div style={{ background: 'rgba(255,255,255,0.18)', padding: '0.25rem 0.75rem', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
-                {CATEGORY_CONFIG[getCategory(newCarbonTons)].label}
+                {t(CATEGORY_CONFIG[getCategory(newCarbonTons)].label)}
               </div>
             </div>
           </div>
           <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginTop: '1rem' }}>
-            {teamResults.length} miembro{teamResults.length !== 1 ? 's' : ''} han completado
+            {t('teamScreen.members', { count: teamResults.length })}
           </div>
         </div>
       ) : (
         <div style={{ background: '#000000', padding: '2.5rem 2rem 3rem', textAlign: 'center', color: '#fff' }}>
           <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.5, margin: '0 0 0.6rem' }}>
-            Huella actual del equipo
+            {t('teamScreen.step3.currentFootprint')}
           </p>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <span style={{ fontWeight: 900, fontSize: 'clamp(3.5rem, 10vw, 5.5rem)', lineHeight: 1 }}>
               {fmtTons(teamAvg)}
             </span>
-            <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>t CO₂/año</span>
+            <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>{t('common.tCo2PerYear')}</span>
           </div>
         </div>
       )}
@@ -428,16 +435,16 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
           {/* Columna izquierda — desglose antes/después */}
           <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 14, padding: '1.25rem' }}>
             <p style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#aaa', margin: '0 0 1rem' }}>
-              Desglose por áreas
+              {t('teamScreen.step3.breakdown')}
             </p>
-            <StackedBar areaAvg={areaAvgBefore} total={teamAvg}       maxVal={teamAvg} label="Antes"   color="#1a1a1a" showLegend />
-            <StackedBar areaAvg={areaAvgAfter}  total={newCarbonTons} maxVal={teamAvg} label="Después" color="#4ade80" showLegend />
+            <StackedBar areaAvg={areaAvgBefore} total={teamAvg}       maxVal={teamAvg} label={t('teamScreen.step3.before')}   color="#1a1a1a" showLegend />
+            <StackedBar areaAvg={areaAvgAfter}  total={newCarbonTons} maxVal={teamAvg} label={t('teamScreen.step3.after')} color="#4ade80" showLegend />
           </div>
 
           {/* Columna derecha — acciones con reducción */}
           <div>
             <p style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#aaa', margin: '0 0 0.75rem' }}>
-              Acciones del equipo
+              {t('teamScreen.step3.teamActions')}
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.75rem' }}>
             {sortedActions.map(action => (
@@ -462,7 +469,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
       ) : (
         <div style={{ flex: 1, padding: '2.5rem 3rem', textAlign: 'center' }}>
           <p style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#aaa', marginBottom: '1.25rem' }}>
-            Acciones confirmadas para vuestro equipo
+            {t('teamScreen.step3.confirmedActions')}
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', maxWidth: 900, margin: '0 auto' }}>
             {sortedActions.map(action => (
@@ -482,7 +489,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
           </div>
           {sortedActions.length > 0 && (
             <p style={{ fontSize: '0.82rem', color: '#aaa', marginTop: '1.5rem', fontStyle: 'italic' }}>
-              El facilitador revelará los valores en breve
+              {t('teamScreen.step3.revealSoon')}
             </p>
           )}
         </div>
@@ -495,6 +502,7 @@ function Step3DisplayPhase({ group, teamAvg, teamResults, confirmedData, showVal
 export default function TeamScreen() {
   const { code, group } = useParams()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const [phase,            setPhase]            = useState('waiting')
   const [teamResults,      setTeamResults]      = useState([])
@@ -612,28 +620,28 @@ export default function TeamScreen() {
           {/* Hero negro */}
           <div style={{ background: '#0a0a0a', color: '#fff', padding: '2.5rem 2rem 3rem', textAlign: 'center' }}>
             <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', opacity: 0.5, margin: '0 0 0.6rem' }}>
-              Huella media · {group}
+              {t('teamScreen.heroAvgFootprint', { group })}
             </p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
               <span style={{ fontWeight: 900, fontSize: 'clamp(3.5rem, 10vw, 5.5rem)', lineHeight: 1 }}>
                 {tAvg > 0 ? fmtTons(tAvg) : '–'}
               </span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>t CO₂/año</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, opacity: 0.7, textTransform: 'uppercase' }}>{t('common.tCo2PerYear')}</span>
             </div>
             {catCfg && (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: '0.9rem', background: 'rgba(255,255,255,0.18)', padding: '0.35rem 0.9rem', borderRadius: 4, fontSize: '0.8rem', fontWeight: 700 }}>
-                {catCfg.label}
+                {t(catCfg.label)}
               </div>
             )}
             <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.5rem' }}>
-              {teamResults.length} miembro{teamResults.length !== 1 ? 's' : ''} han completado
+              {t('teamScreen.members', { count: teamResults.length })}
             </div>
           </div>
 
           {/* Body — espera */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2.5rem 2rem' }}>
             <p style={{ fontSize: 'clamp(1.4rem, 4vw, 2rem)', fontWeight: 900, color: '#0a0a0a', maxWidth: 500, margin: '0 auto', textAlign: 'center', lineHeight: 1.3 }}>
-              Elige las acciones que reducirán la huella de vuestro equipo
+              {t('teamScreen.step3.chooseActions')}
             </p>
             <div style={{ marginTop: '2rem' }}>
               <DotsLoader />

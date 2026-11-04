@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
 import { useSession } from '../../context/SessionContext.jsx'
@@ -48,13 +49,15 @@ function DotsLoader() {
   )
 }
 
-const homeTypeLabels = {
-  '25a': 'piso pequeño (~45 m²)',
-  '25b': 'piso mediano (~120 m²)',
-  '25c': 'casa grande (más de 180 m²)',
+const homeTypeLabelKeys = {
+  '25a': 'step2Calculator.homeType.25a',
+  '25b': 'step2Calculator.homeType.25b',
+  '25c': 'step2Calculator.homeType.25c',
 }
 
-function NightsInput({ question, answers, onChange, unit = 'noches' }) {
+function NightsInput({ question, answers, onChange, unit }) {
+  const { t } = useTranslation()
+  const u = unit ?? t('step2Calculator.units.nights')
   const handleChange = (value, delta) => {
     const current = answers[value] || 0
     const newVal = Math.max(0, current + delta)
@@ -83,13 +86,13 @@ function NightsInput({ question, answers, onChange, unit = 'noches' }) {
             <button onClick={() => handleChange(opt.value, 1)}
               style={{ width: '26px', height: '26px', borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
           </div>
-          <span style={{ fontSize: '10px', color: '#aaa', width: '32px' }}>{unit}</span>
+          <span style={{ fontSize: '10px', color: '#aaa', width: '32px' }}>{u}</span>
         </div>
       ))}
       {totalNights > 0 && (
         <div style={{ background: '#f5f5f5', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '11px', color: '#888' }}>Total {unit}</span>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: '#0a0a0a' }}>{totalNights} {unit}</span>
+          <span style={{ fontSize: '11px', color: '#888' }}>{t('step2Calculator.nights.total', { unit: u })}</span>
+          <span style={{ fontSize: '12px', fontWeight: 600, color: '#0a0a0a' }}>{totalNights} {u}</span>
         </div>
       )}
     </div>
@@ -97,6 +100,7 @@ function NightsInput({ question, answers, onChange, unit = 'noches' }) {
 }
 
 function DrinksInput({ question, answers, onChange }) {
+  const { t } = useTranslation()
   const handleChange = (value, delta) => {
     const current = answers[value] || 0
     const newVal = Math.max(0, current + delta)
@@ -135,7 +139,7 @@ function DrinksInput({ question, answers, onChange }) {
               }}>−</button>
               <div style={{ textAlign: 'center', minWidth: 20 }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: '#0a0a0a' }}>{val}</div>
-                <div style={{ fontSize: 9, color: '#aaa' }}>por sem.</div>
+                <div style={{ fontSize: 9, color: '#aaa' }}>{t('step2Calculator.drinks.perWeekShort')}</div>
               </div>
               <button onClick={() => handleChange(opt.value, 1)} style={{
                 width: 26, height: 26, borderRadius: '50%',
@@ -153,8 +157,8 @@ function DrinksInput({ question, answers, onChange }) {
           background: '#f5f5f5', borderRadius: 8, padding: '7px 12px',
           display: 'flex', justifyContent: 'space-between', marginTop: 2,
         }}>
-          <span style={{ fontSize: 11, color: '#aaa' }}>Total por semana</span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#0a0a0a' }}>{total} bebidas</span>
+          <span style={{ fontSize: 11, color: '#aaa' }}>{t('step2Calculator.drinks.totalPerWeek')}</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#0a0a0a' }}>{t('step2Calculator.drinks.totalDrinks', { count: total })}</span>
         </div>
       )}
     </div>
@@ -168,6 +172,7 @@ function isWeekDistributionValid(question, answers) {
 }
 
 function WeekDistributionInput({ question, answers, onChange }) {
+  const { t } = useTranslation()
   const dist = answers[question.id] || {}
   const maxDays = question.maxDays || 7
   const total = Object.values(dist).reduce((s, v) => s + v, 0)
@@ -183,10 +188,10 @@ function WeekDistributionInput({ question, answers, onChange }) {
   return (
     <div>
       <div style={{ background: '#f5f5f5', borderRadius: 8, padding: '8px 12px', marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 12, color: '#888' }}>{total} / {maxDays} días</span>
+        <span style={{ fontSize: 12, color: '#888' }}>{t('step2Calculator.weekDist.count', { current: total, total: maxDays })}</span>
         {isValid
-          ? <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 600 }}>✓ Completo</span>
-          : <span style={{ fontSize: 11, color: '#f59e0b' }}>Distribuye los {maxDays} días</span>
+          ? <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 600 }}>{t('step2Calculator.weekDist.complete')}</span>
+          : <span style={{ fontSize: 11, color: '#f59e0b' }}>{t('step2Calculator.weekDist.distribute', { total: maxDays })}</span>
         }
       </div>
       {question.options.map(opt => {
@@ -200,7 +205,7 @@ function WeekDistributionInput({ question, answers, onChange }) {
               <span style={{ fontSize: 15, fontWeight: 700, width: 20, textAlign: 'center' }}>{val}</span>
               <button onClick={() => handleChange(opt.value, 1)} style={{ width: 26, height: 26, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 14, fontWeight: 600, cursor: total >= maxDays ? 'default' : 'pointer', opacity: total >= maxDays ? 0.3 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
             </div>
-            <span style={{ fontSize: 10, color: '#aaa', width: 26, textAlign: 'right' }}>días</span>
+            <span style={{ fontSize: 10, color: '#aaa', width: 26, textAlign: 'right' }}>{t('step2Calculator.units.days')}</span>
           </div>
         )
       })}
@@ -226,7 +231,7 @@ function WeekDistributionInput({ question, answers, onChange }) {
             )}
           </div>
           <span style={{ fontSize: 14, color: answers.breakfastDouble ? '#e8a020' : '#666' }}>
-            También almuerzo a media mañana
+            {t('step2Calculator.weekDist.alsoBreakfast')}
           </span>
         </div>
       )}
@@ -235,6 +240,7 @@ function WeekDistributionInput({ question, answers, onChange }) {
 }
 
 function DailyCountInput({ question, answers, onChange }) {
+  const { t } = useTranslation()
   const counts = answers[question.id] || {}
   const noneOption = question.options.find(o => o.isNone)
   const noneActive = noneOption ? (counts[noneOption.value] || 0) > 0 : false
@@ -265,8 +271,8 @@ function DailyCountInput({ question, answers, onChange }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {total > 0 && (
         <div style={{ background: '#f5f5f5', borderRadius: 8, padding: '7px 12px', display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-          <span style={{ fontSize: 11, color: '#aaa' }}>Total al día</span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#0a0a0a' }}>{total} bebida{total !== 1 ? 's' : ''}</span>
+          <span style={{ fontSize: 11, color: '#aaa' }}>{t('step2Calculator.dailyCount.totalPerDay')}</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#0a0a0a' }}>{t('step2Calculator.dailyCount.totalDrinks', { count: total })}</span>
         </div>
       )}
       {question.options.map(opt => {
@@ -278,14 +284,14 @@ function DailyCountInput({ question, answers, onChange }) {
             <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: '#0a0a0a' }}>{opt.label}</span>
             {isNoneOpt ? (
               <button onClick={() => handleChange(opt.value, active ? -1 : 1)} style={{ padding: '5px 14px', borderRadius: 8, border: `1.5px solid ${active ? '#0a0a0a' : '#e5e5e5'}`, background: active ? '#0a0a0a' : 'transparent', color: active ? '#fff' : '#0a0a0a', fontSize: 12, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                {active ? '✓' : 'Seleccionar'}
+                {active ? '✓' : t('step2Calculator.dailyCount.select')}
               </button>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                 <button onClick={() => handleChange(opt.value, -1)} style={{ width: 26, height: 26, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: val === 0 ? 'default' : 'pointer', opacity: val === 0 ? 0.3 : 1 }}>−</button>
                 <div style={{ textAlign: 'center', minWidth: 20 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: '#0a0a0a' }}>{val}</div>
-                  <div style={{ fontSize: 9, color: '#aaa' }}>por día</div>
+                  <div style={{ fontSize: 9, color: '#aaa' }}>{t('step2Calculator.dailyCount.perDay')}</div>
                 </div>
                 <button onClick={() => handleChange(opt.value, 1)} style={{ width: 26, height: 26, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: noneActive ? 'default' : 'pointer', opacity: noneActive ? 0.3 : 1 }}>+</button>
               </div>
@@ -298,6 +304,7 @@ function DailyCountInput({ question, answers, onChange }) {
 }
 
 function StepperInput({ question, answers, onChange }) {
+  const { t } = useTranslation()
   const val = answers[question.id] || 0
   const min = question.min ?? 0
   const max = question.max ?? 20
@@ -308,7 +315,7 @@ function StepperInput({ question, answers, onChange }) {
           style={{ width: 48, height: 48, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 20, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: val === min ? 'default' : 'pointer', opacity: val === min ? 0.3 : 1 }}>−</button>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 52, fontWeight: 900, color: '#0a0a0a', lineHeight: 1 }}>{val}</div>
-          <div style={{ fontSize: 12, color: '#aaa', marginTop: 4 }}>por semana</div>
+          <div style={{ fontSize: 12, color: '#aaa', marginTop: 4 }}>{t('step2Calculator.stepper.perWeek')}</div>
         </div>
         <button onClick={() => onChange({ ...answers, [question.id]: Math.min(max, val + 1) })}
           style={{ width: 48, height: 48, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 20, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: val === max ? 'default' : 'pointer', opacity: val === max ? 0.3 : 1 }}>+</button>
@@ -344,6 +351,7 @@ function groteskCard(isSel, isNone = false, areaColor = '#0a0a0a', extra = {}) {
 }
 
 function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
+  const { t } = useTranslation()
   if (question.type === 'multi') {
     const selected = Array.isArray(answers[question.id]) ? answers[question.id] : []
 
@@ -364,7 +372,7 @@ function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
             })}
           </div>
           <p style={{ fontSize: 11, color: '#bbb', margin: '2px 0 0', fontStyle: 'italic', fontWeight: 400 }}>
-            {selected.length === 0 ? 'Si no aplica ninguna, continúa sin marcar.' : `${selected.length} seleccionado${selected.length !== 1 ? 's' : ''}`}
+            {selected.length === 0 ? t('step2Calculator.optionList.noneHint') : t('step2Calculator.optionList.selected', { count: selected.length })}
           </p>
         </div>
       )
@@ -387,7 +395,7 @@ function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
           )
         })}
         <p style={{ fontSize: 11, color: '#bbb', margin: '2px 0 0', fontStyle: 'italic', fontWeight: 400 }}>
-          {selected.length === 0 ? 'Si no aplica ninguna, continúa sin marcar.' : `${selected.length} seleccionado${selected.length !== 1 ? 's' : ''}`}
+          {selected.length === 0 ? t('step2Calculator.optionList.noneHint') : t('step2Calculator.optionList.selected', { count: selected.length })}
         </p>
       </div>
     )
@@ -438,6 +446,7 @@ function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
 export default function Step2Calculator() {
   const { code } = useParams()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { participantGroup, participantName, participantAge, participantGender } = useSession()
 
   const [showIntro, setShowIntro]         = useState(true)
@@ -662,19 +671,19 @@ export default function Step2Calculator() {
           {AREAS.map(a => <img key={a.id} src={AREA_ICON_URLS[a.id]} width={24} height={24} alt="" />)}
         </div>
         <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', color: '#0a0a0a', marginBottom: 16 }}>
-          Antes de empezar
+          {t('step2Calculator.intro.title')}
         </h1>
         <p style={{ fontSize: 15, lineHeight: 1.7, color: '#444', maxWidth: 340, marginBottom: 8, textAlign: 'left' }}>
-          ¡Es un cuestionario individual! Responde a las preguntas de forma personal, no en nombre de tu hogar. Por supuesto, algunos elementos son compartidos (mi vivienda con mi familia, el coche con las personas con las que comparto trayecto, etc.). Esto se tendrá en cuenta al calcular tu huella de carbono, así que no te preocupes.
+          {t('step2Calculator.intro.p1')}
         </p>
         <p style={{ fontSize: 15, lineHeight: 1.7, color: '#0a0a0a', fontWeight: 700, maxWidth: 340, marginBottom: 36, textAlign: 'left' }}>
-          Las preguntas se refieren a tu vida personal, no a tu actividad profesional.
+          {t('step2Calculator.intro.p2')}
         </p>
         <button
           onClick={() => setShowIntro(false)}
           style={{ background: '#0a0a0a', color: '#f5f5f5', border: 'none', borderRadius: 999, padding: '14px 32px', fontSize: 15, fontWeight: 500, cursor: 'pointer', letterSpacing: '-0.01em' }}
         >
-          Empezar →
+          {t('step2Calculator.intro.start')}
         </button>
       </div>
     </div>
@@ -689,7 +698,7 @@ export default function Step2Calculator() {
         {/* Sidebar */}
         <div style={{ background: '#ffffff', borderRight: `1px solid ${BORDER}`, padding: '24px 14px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
           <div style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#bbb', marginBottom: 10, paddingLeft: 8 }}>
-            Áreas
+            {t('step2Calculator.sidebarAreas')}
           </div>
           {AREAS.map((a, ai) => {
             const status = getAreaStatus(ai)
@@ -730,7 +739,7 @@ export default function Step2Calculator() {
           {/* Progress */}
           <div style={{ padding: '20px 28px 0', flexShrink: 0 }}>
             <p style={{ fontSize: 12, color: '#999', marginBottom: 6, fontWeight: 400, letterSpacing: '0.01em' }}>
-              Pregunta {questionIndex + 1} de {area.questions.filter(q => !isSkipped(q)).length}
+              {t('step2Calculator.progressQuestion', { current: questionIndex + 1, total: area.questions.filter(q => !isSkipped(q)).length })}
             </p>
             <div style={{ display: 'flex', gap: 4 }}>
               {area.questions.filter(q => !isSkipped(q)).map((q, qi) => (
@@ -746,7 +755,7 @@ export default function Step2Calculator() {
             </p>
             {question.id === 'heating' && answers.homeType && (
               <p style={{ fontSize: 13, color: area.color, margin: '4px 0 0', fontWeight: 400 }}>
-                Para tu {homeTypeLabels[answers.homeType]}
+                {t('step2Calculator.forHome', { home: t(homeTypeLabelKeys[answers.homeType]) })}
               </p>
             )}
             {question.info && (
@@ -760,7 +769,7 @@ export default function Step2Calculator() {
               <DrinksInput question={question} answers={answers} onChange={setAnswers} />
             ) : question.type === 'flights' ? (
               <div style={{ '--area-color': '#4a90d9', '--area-bg': '#e8f2fd' }}>
-                <NightsInput question={question} answers={answers} onChange={setAnswers} unit="vuelo/s" />
+                <NightsInput question={question} answers={answers} onChange={setAnswers} unit={t('step2Calculator.units.flights')} />
               </div>
             ) : question.type === 'nights' ? (
               <div style={{ '--area-color': '#0a0a0a', '--area-bg': '#f5f5f5' }}>
@@ -830,7 +839,7 @@ export default function Step2Calculator() {
         {/* Progress — "Pregunta X de Y" + bar */}
         <div style={{ padding: '18px 18px 0', flexShrink: 0, background: '#f5f5f5', marginBottom: 20 }}>
           <p style={{ fontSize: 12, color: '#999', marginBottom: 6, fontWeight: 400, letterSpacing: '0.01em' }}>
-            Pregunta {questionIndex + 1} de {area.questions.filter(q => !isSkipped(q)).length}
+            {t('step2Calculator.progressQuestion', { current: questionIndex + 1, total: area.questions.filter(q => !isSkipped(q)).length })}
           </p>
           <div style={{ display: 'flex', gap: 4 }}>
             {area.questions.filter(q => !isSkipped(q)).map((q, qi) => (
@@ -851,7 +860,7 @@ export default function Step2Calculator() {
   )}
   {question.id === 'heating' && answers.homeType && (
     <p style={{ fontSize: 12, color: area.color, marginTop: 4, fontWeight: 400 }}>
-      Para tu {homeTypeLabels[answers.homeType]}
+      {t('step2Calculator.forHome', { home: t(homeTypeLabelKeys[answers.homeType]) })}
     </p>
   )}
 </div>
@@ -864,7 +873,7 @@ export default function Step2Calculator() {
             <DrinksInput question={question} answers={answers} onChange={setAnswers} />
           ) : question.type === 'flights' ? (
             <div style={{ '--area-color': '#4a90d9', '--area-bg': '#e8f2fd' }}>
-              <NightsInput question={question} answers={answers} onChange={setAnswers} unit="vuelo/s" />
+              <NightsInput question={question} answers={answers} onChange={setAnswers} unit={t('step2Calculator.units.flights')} />
             </div>
           ) : question.type === 'nights' ? (
             <div style={{ '--area-color': '#0a0a0a', '--area-bg': '#f5f5f5' }}>

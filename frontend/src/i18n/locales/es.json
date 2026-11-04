@@ -1,1 +1,235 @@
-{}
+{
+  "areas": {
+    "transport": "Transporte",
+    "energy": "Vivienda",
+    "food": "Alimentación",
+    "consumption": "Compras y hábitos",
+    "waste": "Vida digital",
+    "publicServices": "Servicios públicos"
+  },
+  "categoryLabels": {
+    "bajo": "Huella reducida 🌿",
+    "medio": "Huella moderada 🌱",
+    "alto": "Huella elevada 🌍",
+    "muy alto": "Huella muy elevada 🔥"
+  },
+  "categoryMessages": {
+    "bajo": "¡Genial! Tu huella está muy por debajo de la media",
+    "medio": "Tu huella es moderada, hay margen de mejora",
+    "alto": "Tu huella está por encima de lo sostenible",
+    "muy alto": "Tu huella es alta — este taller es para ti"
+  },
+  "subcategories": {
+    "transport": {
+      "privateVehicle": "Vehículo privado",
+      "flights": "Vuelos",
+      "publicActive": "Transporte público y activo"
+    },
+    "energy": {
+      "heating": "Calefacción y agua caliente",
+      "cooling": "Refrigeración",
+      "extras": "Extras (piscina y vacaciones)",
+      "renewable": "Energía renovable",
+      "efficiency": "Hábitos de eficiencia"
+    },
+    "food": {
+      "dailyDiet": "Dieta diaria",
+      "drinks": "Bebidas",
+      "sustainable": "Hábitos sostenibles"
+    },
+    "consumption": {
+      "fashion": "Moda",
+      "tech": "Tecnología",
+      "lifestyle": "Estilo de vida"
+    },
+    "waste": {
+      "screens": "Uso de pantallas",
+      "ai": "Inteligencia artificial"
+    },
+    "publicServices": {
+      "base": "Sanidad, educación, infraestructuras..."
+    }
+  },
+  "common": {
+    "tCo2PerYear": "t CO₂/año",
+    "tCo2": "t CO₂"
+  },
+  "demographics": {
+    "age": {
+      "lt20": "< 20",
+      "a2029": "20-29",
+      "a3039": "30-39",
+      "a4049": "40-49",
+      "a5059": "50-59",
+      "a60plus": "60+",
+      "undisclosed": "Prefiero no decirlo"
+    },
+    "gender": {
+      "female": "Mujer",
+      "male": "Hombre",
+      "nonbinary": "No binario",
+      "undisclosed": "Prefiero no decirlo"
+    }
+  },
+  "joinSession": {
+    "tagline": "Calculadora de huella de carbono",
+    "intro": "Esta calculadora mide tu huella de carbono individual — no la de tu familia ni tu hogar compartido.",
+    "codeLabel": "Código de sesión",
+    "groupLabel": "Tu grupo",
+    "ageLabel": "Edad",
+    "genderLabel": "Género",
+    "privacyNote": "Los datos de edad, género y huella de carbono se recogen de forma anónima para los resultados del taller. No se asocian a ningún nombre ni se comparten con terceros.",
+    "submit": "Unirme →",
+    "errors": {
+      "notStarted": "El taller aún no ha comenzado. Espera al facilitador.",
+      "finished": "Este taller ha finalizado.",
+      "notFound": "Sesión no encontrada",
+      "invalidCode": "Ingresa un código válido (ej: DROP-4872)",
+      "selectAge": "Selecciona tu rango de edad",
+      "selectGender": "Selecciona una opción",
+      "selectGroup": "Selecciona un grupo"
+    }
+  },
+  "step2Calculator": {
+    "intro": {
+      "title": "Antes de empezar",
+      "p1": "¡Es un cuestionario individual! Responde a las preguntas de forma personal, no en nombre de tu hogar. Por supuesto, algunos elementos son compartidos (mi vivienda con mi familia, el coche con las personas con las que comparto trayecto, etc.). Esto se tendrá en cuenta al calcular tu huella de carbono, así que no te preocupes.",
+      "p2": "Las preguntas se refieren a tu vida personal, no a tu actividad profesional.",
+      "start": "Empezar →"
+    },
+    "sidebarAreas": "Áreas",
+    "progressQuestion": "Pregunta {{current}} de {{total}}",
+    "forHome": "Para tu {{home}}",
+    "homeType": {
+      "25a": "piso pequeño (~45 m²)",
+      "25b": "piso mediano (~120 m²)",
+      "25c": "casa grande (más de 180 m²)"
+    },
+    "units": {
+      "nights": "noches",
+      "flights": "vuelo/s",
+      "days": "días"
+    },
+    "nights": {
+      "total": "Total {{unit}}"
+    },
+    "drinks": {
+      "perWeekShort": "por sem.",
+      "totalPerWeek": "Total por semana",
+      "totalDrinks": "{{count}} bebidas"
+    },
+    "weekDist": {
+      "count": "{{current}} / {{total}} días",
+      "complete": "✓ Completo",
+      "distribute": "Distribuye los {{total}} días",
+      "alsoBreakfast": "También almuerzo a media mañana"
+    },
+    "dailyCount": {
+      "totalPerDay": "Total al día",
+      "totalDrinks_one": "{{count}} bebida",
+      "totalDrinks_other": "{{count}} bebidas",
+      "perDay": "por día",
+      "select": "Seleccionar"
+    },
+    "stepper": {
+      "perWeek": "por semana"
+    },
+    "optionList": {
+      "noneHint": "Si no aplica ninguna, continúa sin marcar.",
+      "selected_one": "{{count}} seleccionado",
+      "selected_other": "{{count}} seleccionados"
+    }
+  },
+  "step2Results": {
+    "pending": {
+      "message": "Tu huella aún no se ha podido enviar al servidor.",
+      "retry": "Reintentar"
+    },
+    "waiting": {
+      "title": "Espera al facilitador",
+      "subtitle": "El facilitador revelará los resultados de todos al mismo tiempo..."
+    },
+    "eyebrow": "Tu huella de carbono",
+    "donutTitle": "Distribución por áreas",
+    "detailTitle": "Detalle por categoría",
+    "spain": {
+      "title": "Comparativa con España",
+      "you": "Tú",
+      "vs": "VS",
+      "avgSpain": "Media España",
+      "below": "{{pct}}% por debajo de la media de España",
+      "above": "{{pct}}% por encima de la media de España",
+      "source": "Fuente: Ministerio para la Transición Ecológica, 2023"
+    },
+    "percentile": {
+      "title": "Posición en la sesión",
+      "waiting": "Esperando a que el resto complete la calculadora...",
+      "top": "TOP {{pct}}%",
+      "lessThan": "Tu huella es menor que la del {{pct}}% de los participantes",
+      "lowerFootprint": "Menor huella ({{count}})",
+      "higherFootprint": "Mayor huella ({{count}})"
+    },
+    "email": {
+      "title": "Recibe tus resultados",
+      "success": "✓ Revisa tu bandeja de entrada",
+      "desc": "Solo tus datos personales, sin información del resto de participantes.",
+      "placeholder": "tu@email.com",
+      "invalid": "Introduce un email válido",
+      "error": "Algo ha fallado, inténtalo de nuevo",
+      "sending": "Enviando...",
+      "submit": "Enviarme mis resultados"
+    },
+    "footer": "Tu huella forma parte del resultado colectivo del taller"
+  },
+  "teamScreen": {
+    "waiting": {
+      "line1": "El taller comenzará en breve.",
+      "line2": "Mantened esta pantalla abierta."
+    },
+    "calculating": {
+      "waitingMembers": "Esperando a que los miembros del equipo calculen su huella",
+      "teamAvgInProgress": "Huella media del equipo · en curso"
+    },
+    "results": {
+      "noResults": "Sin resultados para este equipo."
+    },
+    "heroAvgFootprint": "Huella media · {{group}}",
+    "members_one": "{{count}} miembro han completado",
+    "members_other": "{{count}} miembros han completado",
+    "breakdownTeamAvg": "Desglose por áreas — media del equipo",
+    "comparisonTitle": "Comparativa",
+    "avgSession": "Media sesión",
+    "avgSpain": "Media España",
+    "objective": "─ Objetivo climático: 2 t/año por persona",
+    "belowSession": "Por debajo de la media de la sesión",
+    "step3": {
+      "currentFootprint": "Huella actual del equipo",
+      "breakdown": "Desglose por áreas",
+      "before": "Antes",
+      "after": "Después",
+      "teamActions": "Acciones del equipo",
+      "confirmedActions": "Acciones confirmadas para vuestro equipo",
+      "revealSoon": "El facilitador revelará los valores en breve",
+      "chooseActions": "Elige las acciones que reducirán la huella de vuestro equipo"
+    }
+  },
+  "waitingRoom": {
+    "title": "Esperando al facilitador...",
+    "subtitle": "El taller comenzará en breve. Mantén esta pantalla abierta.",
+    "inGroup": "Estás en el {{group}}"
+  },
+  "sessionEnd": {
+    "title": "¡Gracias por participar!",
+    "subtitle": "Tu huella de carbono ha quedado registrada.",
+    "viewFootprint": "Ver mi huella →",
+    "tagline": "Pequeños cambios, gran impacto."
+  },
+  "waitingForFacilitator": {
+    "default": "Espera al facilitador para continuar...",
+    "preparing": "El facilitador está preparando la siguiente fase"
+  },
+  "sessionClosedBanner": {
+    "message": "El facilitador ha cerrado esta sesión. Tus resultados han sido guardados.",
+    "viewPartial": "Ver mis resultados parciales"
+  }
+}

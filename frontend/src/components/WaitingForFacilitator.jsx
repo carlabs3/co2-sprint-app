@@ -1,4 +1,8 @@
-export default function WaitingForFacilitator({ message = 'Espera al facilitador para continuar...' }) {
+import { useTranslation } from 'react-i18next'
+
+export default function WaitingForFacilitator({ message }) {
+  const { t } = useTranslation()
+  const msg = message ?? t('waitingForFacilitator.default')
   return (
     <div style={{
       display: 'flex', flexDirection: 'column',
@@ -8,10 +12,10 @@ export default function WaitingForFacilitator({ message = 'Espera al facilitador
     }}>
       <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⏳</div>
       <p style={{ fontSize: '15px', fontWeight: 500, color: '#0a0a0a', marginBottom: '8px' }}>
-        {message}
+        {msg}
       </p>
       <p style={{ fontSize: '13px', color: '#999', marginBottom: '28px' }}>
-        El facilitador está preparando la siguiente fase
+        {t('waitingForFacilitator.preparing')}
       </p>
       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
         {[0, 1, 2].map(i => (

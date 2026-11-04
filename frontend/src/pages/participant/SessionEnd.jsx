@@ -1,8 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 export default function SessionEnd() {
   const { code } = useParams()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   return (
     <div style={{
@@ -24,11 +26,11 @@ export default function SessionEnd() {
           textTransform: 'uppercase', letterSpacing: '0.02em',
           color: '#0a0a0a', marginBottom: '0.6rem',
         }}>
-          ¡Gracias por participar!
+          {t('sessionEnd.title')}
         </h1>
 
         <p style={{ fontSize: '0.95rem', color: '#666', maxWidth: 320, lineHeight: 1.65, marginBottom: '2rem' }}>
-          Tu huella de carbono ha quedado registrada.
+          {t('sessionEnd.subtitle')}
         </p>
 
         <button
@@ -40,11 +42,11 @@ export default function SessionEnd() {
             textTransform: 'uppercase', cursor: 'pointer', marginBottom: '2.5rem',
           }}
         >
-          Ver mi huella →
+          {t('sessionEnd.viewFootprint')}
         </button>
 
         <p style={{ fontSize: '0.85rem', color: '#999', fontStyle: 'italic' }}>
-          Pequeños cambios, gran impacto.
+          {t('sessionEnd.tagline')}
         </p>
       </div>
     </div>
