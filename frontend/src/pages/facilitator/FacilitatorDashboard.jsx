@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next'
 import api from '../../utils/api.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { socket } from '../../utils/socket.js'
+import { fmtNum, fmtDate } from '../../utils/format.js'
 
 function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })
+  return fmtDate(iso, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 const STATUS_STYLE = {
   draft:   { background: '#f5f5f5', color: '#999', border: '1px solid #e5e5e5' },
@@ -206,18 +207,18 @@ export default function FacilitatorDashboard() {
                     <div style={{ background: '#f5f5f5', borderRadius: '12px', padding: '0.9rem 1rem', marginBottom: '1rem', border: '1px solid #e5e5e5' }}>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '0.35rem' }}>
                         <span style={{ fontWeight: 900, fontSize: '1.7rem', lineHeight: 1, color: '#000' }}>
-                          {sm.averageCarbonTons?.toFixed(1)}
+                          {fmtNum(sm.averageCarbonTons)}
                         </span>
                         <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                           {t('dashboard.avgSuffix')}
                         </span>
                       </div>
                       <div style={{ fontSize: '0.72rem', color: '#666', marginBottom: topArea ? '0.4rem' : 0 }}>
-                        {t('dashboard.summaryLine', { count: sm.totalParticipants, min: sm.minCarbonTons?.toFixed(1), max: sm.maxCarbonTons?.toFixed(1) })}
+                        {t('dashboard.summaryLine', { count: sm.totalParticipants, min: fmtNum(sm.minCarbonTons), max: fmtNum(sm.maxCarbonTons) })}
                       </div>
                       {topArea && (
                         <div style={{ fontSize: '0.68rem', color: '#888' }}>
-                          {t('dashboard.topArea')} <strong style={{ color: '#000' }}>{t(`areas.${topArea[0]}`)}</strong> ({topArea[1].toFixed(1)} t)
+                          {t('dashboard.topArea')} <strong style={{ color: '#000' }}>{t(`areas.${topArea[0]}`)}</strong> ({fmtNum(topArea[1])} t)
                         </div>
                       )}
                     </div>

@@ -2,7 +2,9 @@ import { Router } from 'express'
 import { Resend } from 'resend'
 import { authMiddleware } from '../middleware/authMiddleware.js'
 import FootprintResult from '../models/FootprintResult.js'
+import Session from '../models/Session.js'
 import { getCategory } from '../utils/category.js'
+import { emailT, emailNum } from '../i18n/email.js'
 
 const router = Router()
 
@@ -60,42 +62,42 @@ function calcAlcohol(alcohol = {}) {
 
 const SUBCATS = {
   transport: [
-    { label: 'Vehículo privado',            calc: (a) => !a.carKm || a.carKm === 'km_e' ? 0 : a.carType === 'electric' ? (MAP.electricCar[a.carKm] || 0) : (MAP.carKm[a.carKm] || 0) },
-    { label: 'Vuelos',                       calc: (a) => (a.flightShort || 0) * 550 + (a.flightMedium || 0) * 1252 + (a.flightLong || 0) * 1752 },
-    { label: 'Transporte público y activo',  calc: (a) => (MAP.train[a.train] || 0) + (MAP.moto[a.moto] || 0) + (MAP.urbanMobility[a.urbanMobility] || 0) },
-    { label: 'Teletrabajo',                  calc: (a) => MAP.telework[a.telework] ?? 0, negative: true },
+    { key: 'privateVehicle', calc: (a) => !a.carKm || a.carKm === 'km_e' ? 0 : a.carType === 'electric' ? (MAP.electricCar[a.carKm] || 0) : (MAP.carKm[a.carKm] || 0) },
+    { key: 'flights', calc: (a) => (a.flightShort || 0) * 550 + (a.flightMedium || 0) * 1252 + (a.flightLong || 0) * 1752 },
+    { key: 'publicActive', calc: (a) => (MAP.train[a.train] || 0) + (MAP.moto[a.moto] || 0) + (MAP.urbanMobility[a.urbanMobility] || 0) },
+    { key: 'telework', calc: (a) => MAP.telework[a.telework] ?? 0, negative: true },
   ],
   energy: [
-    { label: 'Calefacción y agua caliente',  calc: (a) => { let h = 0; if (a.homeType === '25a') h = MAP.heatingSmall[a.heating] ?? 0; else if (a.homeType === '25b') h = MAP.heatingMedium[a.heating] ?? 0; else if (a.homeType === '25c') h = MAP.heatingLarge[a.heating] ?? 0; return h } },
-    { label: 'Refrigeración',                calc: (a) => a.hasAC === 'yes' ? (a.homeType === '25a' ? 350 : a.homeType === '25b' ? 420 : 438) : 0 },
-    { label: 'Extras (piscina y vacaciones)', calc: (a) => (MAP.pool?.[a.pool] || 0) + (a.hotelNights || 0) * 8 + (a.hostelNights || 0) + (a.campingNights || 0) + (a.airbnbNights || 0) * 5 + (a.secondHome ? 250 : 0) },
-    { label: 'Energía renovable',            calc: (a) => MAP.renewable[a.renewable] ?? 0, negative: true },
-    { label: 'Hábitos de eficiencia',        calc: (a) => ['closeWindows', 'thermostat19', 'ledBulbs', 'ecoPrograms'].filter(h => a.homeHabits?.includes(h)).reduce((s, h) => s + (MAP.homeHabits[h] || 0), 0), negative: true },
+    { key: 'heating', calc: (a) => { let h = 0; if (a.homeType === '25a') h = MAP.heatingSmall[a.heating] ?? 0; else if (a.homeType === '25b') h = MAP.heatingMedium[a.heating] ?? 0; else if (a.homeType === '25c') h = MAP.heatingLarge[a.heating] ?? 0; return h } },
+    { key: 'cooling', calc: (a) => a.hasAC === 'yes' ? (a.homeType === '25a' ? 350 : a.homeType === '25b' ? 420 : 438) : 0 },
+    { key: 'extras', calc: (a) => (MAP.pool?.[a.pool] || 0) + (a.hotelNights || 0) * 8 + (a.hostelNights || 0) + (a.campingNights || 0) + (a.airbnbNights || 0) * 5 + (a.secondHome ? 250 : 0) },
+    { key: 'renewable', calc: (a) => MAP.renewable[a.renewable] ?? 0, negative: true },
+    { key: 'efficiency', calc: (a) => ['closeWindows', 'thermostat19', 'ledBulbs', 'ecoPrograms'].filter(h => a.homeHabits?.includes(h)).reduce((s, h) => s + (MAP.homeHabits[h] || 0), 0), negative: true },
   ],
   food: [
-    { label: 'Dieta diaria', calc: (a) => {
+    { key: 'dailyDiet', calc: (a) => {
       const breakfast = Object.entries(a.breakfastDays || {}).reduce((s, [t, d]) => s + (MAP.breakfastDaily[t] ?? 0) * d * 52, 0) * (a.breakfastDouble ? 1.5 : 1)
       const lunch     = Object.entries(a.lunchDays    || {}).reduce((s, [t, d]) => s + (MAP.mealDaily[t]      ?? 0) * d * 52, 0)
       const dinner    = Object.entries(a.dinnerDays   || {}).reduce((s, [t, d]) => s + (MAP.mealDaily[t]      ?? 0) * d * 52, 0)
       return breakfast + lunch + dinner + (a.deliveryPerWeek || 0) * 3 * 52
     }},
-    { label: 'Bebidas', calc: (a) => {
+    { key: 'drinks', calc: (a) => {
       const hotKg = Object.entries(a.hotDrinksCount || {}).reduce((s, [t, c]) => s + (MAP.hotDrinksDaily[t] ?? 0) * c * 365, 0)
       return hotKg + (MAP.bottledWater[a.bottledWater] || 0) + calcAlcohol(a.alcohol)
     }},
-    { label: 'Hábitos sostenibles', calc: (a) => ['localFood', 'composting', 'noFoodWaste'].filter(h => a.foodHabits?.includes(h)).reduce((s, h) => s + (MAP.foodHabits[h] || 0), 0), negative: true },
+    { key: 'sustainable', calc: (a) => ['localFood', 'composting', 'noFoodWaste'].filter(h => a.foodHabits?.includes(h)).reduce((s, h) => s + (MAP.foodHabits[h] || 0), 0), negative: true },
   ],
   consumption: [
-    { label: 'Moda',                         calc: (a) => MAP.clothes[a.clothes] || 0 },
-    { label: 'Tecnología',                   calc: (a) => (Array.isArray(a.electronics) ? a.electronics : []).reduce((s, v) => s + (MAP.electronics[v] || 0), 0) + (Array.isArray(a.appliances) ? a.appliances : []).reduce((s, v) => s + (MAP.appliances[v] || 0), 0) },
-    { label: 'Estilo de vida',               calc: (a) => ['bigDog', 'medDog', 'smallDog', 'cat'].filter(p => a.pets?.includes(p)).reduce((s, p) => s + (MAP.pets[p] || 0), 0) + (MAP.hygiene[a.hygiene] || 0) + (MAP.smoking[a.smoking] || 0) + (Array.isArray(a.sports) ? a.sports.filter(s => s !== 'none').reduce((sum, s) => sum + (MAP.sports[s] || 0), 0) : 0) },
+    { key: 'fashion', calc: (a) => MAP.clothes[a.clothes] || 0 },
+    { key: 'tech', calc: (a) => (Array.isArray(a.electronics) ? a.electronics : []).reduce((s, v) => s + (MAP.electronics[v] || 0), 0) + (Array.isArray(a.appliances) ? a.appliances : []).reduce((s, v) => s + (MAP.appliances[v] || 0), 0) },
+    { key: 'lifestyle', calc: (a) => ['bigDog', 'medDog', 'smallDog', 'cat'].filter(p => a.pets?.includes(p)).reduce((s, p) => s + (MAP.pets[p] || 0), 0) + (MAP.hygiene[a.hygiene] || 0) + (MAP.smoking[a.smoking] || 0) + (Array.isArray(a.sports) ? a.sports.filter(s => s !== 'none').reduce((sum, s) => sum + (MAP.sports[s] || 0), 0) : 0) },
   ],
   waste: [
-    { label: 'Uso de pantallas',             calc: (a) => (MAP.videoCalls[a.videoCalls] || 0) + (MAP.streaming[a.streaming] || 0) + (MAP.socialMedia[a.socialMedia] || 0) },
-    { label: 'Inteligencia artificial',      calc: (a) => MAP.aiUsage[a.aiUsage] || 0 },
+    { key: 'screens', calc: (a) => (MAP.videoCalls[a.videoCalls] || 0) + (MAP.streaming[a.streaming] || 0) + (MAP.socialMedia[a.socialMedia] || 0) },
+    { key: 'ai', calc: (a) => MAP.aiUsage[a.aiUsage] || 0 },
   ],
   publicServices: [
-    { label: 'Servicios colectivos', calc: () => 1500 },
+    { key: 'collective', calc: () => 1500 },
   ],
 }
 
@@ -149,7 +151,7 @@ router.post('/submit', async (req, res) => {
 // ── Email route ───────────────────────────────────────────────────────────────
 
 router.post('/send-email', async (req, res) => {
-  const { email, carbonTons, category, areas, answers } = req.body
+  const { email, carbonTons, category, areas, answers, sessionCode } = req.body
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ error: 'Email no válido' })
@@ -161,6 +163,16 @@ router.post('/send-email', async (req, res) => {
     return res.status(503).json({ error: 'Servicio de email no configurado' })
   }
 
+  // Idioma de la sesión (sesiones antiguas sin campo → 'es')
+  let lang = 'es'
+  if (sessionCode) {
+    try {
+      const session = await Session.findOne({ code: sessionCode }, 'lang')
+      lang = session?.lang || 'es'
+    } catch { /* usa 'es' */ }
+  }
+  const tr = emailT(lang)
+
   // Build subcategory HTML
   const ans = answers || {}
   const subcatHtml = AREA_META.map(area => {
@@ -169,14 +181,14 @@ router.post('/send-email', async (req, res) => {
 
     const rows = subcats.map(sub => {
       const kg       = sub.calc(ans)
-      const tons     = (kg / 1000).toFixed(2)
+      const tons     = emailNum(lang, kg / 1000, 2)
       const pct      = areaKg > 0 ? Math.round((Math.abs(kg) / areaKg) * 100) : 0
       const isNeg    = sub.negative && kg < 0
       const color    = isNeg ? '#3b6d11' : area.color
       const barWidth = Math.min(pct, 100)
       return `
         <tr>
-          <td style="padding: 6px 0; font-size: 13px; color: #555; border-bottom: 1px solid #f5f5f5;">${sub.label}</td>
+          <td style="padding: 6px 0; font-size: 13px; color: #555; border-bottom: 1px solid #f5f5f5;">${tr.subcats[sub.key]}</td>
           <td style="padding: 6px 0; border-bottom: 1px solid #f5f5f5; width: 120px;">
             <div style="background: #f0f0f0; border-radius: 3px; height: 5px; overflow: hidden;">
               <div style="background: ${color}; height: 100%; width: ${barWidth}%; border-radius: 3px;"></div>
@@ -189,85 +201,66 @@ router.post('/send-email', async (req, res) => {
     return `
       <div style="margin-bottom: 20px;">
         <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 14px; font-weight: 700; color: ${area.color};">${area.label}</span>
-          <span style="font-size: 13px; font-weight: 700; color: ${area.color}; margin-left: 8px;">${Number(areas?.[area.id] || 0).toFixed(1)}t</span>
+          <span style="font-size: 14px; font-weight: 700; color: ${area.color};">${tr.areas[area.id]}</span>
+          <span style="font-size: 13px; font-weight: 700; color: ${area.color}; margin-left: 8px;">${emailNum(lang, areas?.[area.id] || 0, 1)}t</span>
         </div>
         <table style="width: 100%; border-collapse: collapse;">${rows}</table>
       </div>`
   }).join('')
 
-  const CATEGORY_MESSAGES = {
-    bajo:       '¡Genial! Tu huella está muy por debajo de la media',
-    medio:      'Tu huella es moderada, hay margen de mejora',
-    alto:       'Tu huella está por encima de lo sostenible',
-    'muy alto': 'Tu huella es alta — este taller es para ti',
-  }
-  const categoryMsg = CATEGORY_MESSAGES[category] || category
+  // Desglose por áreas — filas generadas (mismo diseño, texto según idioma)
+  const areaRowsHtml = AREA_META.map((a, i) => {
+    const last = i === AREA_META.length - 1
+    const val  = a.id === 'publicServices' ? (areas?.publicServices || 1.5) : (areas?.[a.id] || 0)
+    return `
+            <tr${last ? '' : ' style="border-bottom: 1px solid #f0f0f0;"'}>
+              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${a.color};margin-right:6px;vertical-align:middle;"></span>${a.emoji} ${tr.areas[a.id]}</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${emailNum(lang, val, 1)} t</td>
+            </tr>`
+  }).join('')
+
+  const categoryMsg = tr.categoryMsg[category] || category
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({
       from: 'Drop. <noreply@apps.threeoclock.co>',
       to: email,
-      subject: `Tu huella de carbono — ${Number(carbonTons).toFixed(1)} t CO₂/año`,
+      subject: tr.subject.replace('{tons}', emailNum(lang, carbonTons, 1)),
       html: `
         <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-          <p style="font-size: 13px; color: #666; margin: 0 0 12px; line-height: 1.7;">Gracias por participar en nuestro taller CO₂ Sprint de Drop. 🌱</p>
-          <p style="font-size: 13px; color: #666; margin: 0 0 12px; line-height: 1.7;">Calcular tu huella no es un examen — es conocer tu punto de partida. Pero ese mismo número tiene otra lectura: cuanto mayor es nuestra huella, más dependemos de un sistema frágil. Y eso, poco a poco, podemos cambiarlo.</p>
-          <p style="font-size: 13px; color: #666; margin: 0 0 24px; line-height: 1.7;">Aquí tienes tus resultados:</p>
+          <p style="font-size: 13px; color: #666; margin: 0 0 12px; line-height: 1.7;">${tr.p1}</p>
+          <p style="font-size: 13px; color: #666; margin: 0 0 12px; line-height: 1.7;">${tr.p2}</p>
+          <p style="font-size: 13px; color: #666; margin: 0 0 24px; line-height: 1.7;">${tr.p3}</p>
 
           <div style="background: #000000; border-radius: 12px; padding: 32px; text-align: center; margin-bottom: 24px;">
-            <p style="color: rgba(255,255,255,0.55); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px;">Tu huella total</p>
-            <h2 style="color: #fff; font-size: 52px; font-weight: 700; margin: 0;">${Number(carbonTons).toFixed(1)} t <span style="font-size: 20px; color: rgba(255,255,255,0.55);">CO₂/año</span></h2>
+            <p style="color: rgba(255,255,255,0.55); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px;">${tr.totalLabel}</p>
+            <h2 style="color: #fff; font-size: 52px; font-weight: 700; margin: 0;">${emailNum(lang, carbonTons, 1)} t <span style="font-size: 20px; color: rgba(255,255,255,0.55);">${tr.unit}</span></h2>
             <p style="color: rgba(255,255,255,0.75); font-size: 14px; margin: 12px 0 0;">${categoryMsg}</p>
           </div>
 
-          <h3 style="color: #1a1a1a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;">Desglose por áreas</h3>
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr style="border-bottom: 1px solid #f0f0f0;">
-              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#38bdf8;margin-right:6px;vertical-align:middle;"></span>🚗 Transporte</td>
-              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.transport || 0).toFixed(1)} t</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #f0f0f0;">
-              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f59e0b;margin-right:6px;vertical-align:middle;"></span>🏡 Vivienda</td>
-              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.energy || 0).toFixed(1)} t</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #f0f0f0;">
-              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#4ade80;margin-right:6px;vertical-align:middle;"></span>🥗 Alimentación</td>
-              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.food || 0).toFixed(1)} t</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #f0f0f0;">
-              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#a855f7;margin-right:6px;vertical-align:middle;"></span>🛍️ Compras y hábitos</td>
-              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.consumption || 0).toFixed(1)} t</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #f0f0f0;">
-              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f472b6;margin-right:6px;vertical-align:middle;"></span>📱 Vida digital</td>
-              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.waste || 0).toFixed(1)} t</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px 0; color: #555;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#94a3b8;margin-right:6px;vertical-align:middle;"></span>🏛️ Servicios públicos</td>
-              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${Number(areas?.publicServices || 1.5).toFixed(1)} t</td>
-            </tr>
+          <h3 style="color: #1a1a1a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;">${tr.breakdownTitle}</h3>
+          <table style="width: 100%; border-collapse: collapse;">${areaRowsHtml}
           </table>
 
-          <h3 style="color: #1a1a1a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; margin: 32px 0 16px;">Detalle por categoría</h3>
+          <h3 style="color: #1a1a1a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; margin: 32px 0 16px;">${tr.subcatTitle}</h3>
           ${subcatHtml}
 
           <div style="background: #f5f5f5; border-radius: 8px; padding: 16px 20px; margin: 24px 0;">
-            <p style="font-size: 13px; font-weight: 600; color: #1a1a1a; margin: 0 0 6px;">🎯 El objetivo: 2 t CO₂e por persona para 2050</p>
-            <p style="font-size: 12px; color: #666; margin: 0; line-height: 1.6;">El objetivo de España para alcanzar la neutralidad climática y contribuir a limitar el calentamiento global a +2°C.</p>
+            <p style="font-size: 13px; font-weight: 600; color: #1a1a1a; margin: 0 0 6px;">${tr.objectiveTitle}</p>
+            <p style="font-size: 12px; color: #666; margin: 0; line-height: 1.6;">${tr.objectiveText}</p>
           </div>
 
           <div style="border-top: 1px solid #f0f0f0; padding-top: 20px; margin-top: 8px;">
-            <p style="font-size: 13px; font-weight: 600; color: #1a1a1a; margin: 0 0 6px;">Importante: esto no va solo de ti</p>
-            <p style="font-size: 12px; color: #666; margin: 0 0 12px; line-height: 1.6;">La descarbonización es un esfuerzo colectivo.</p>
-            <p style="font-size: 12px; color: #666; margin: 0 0 8px; line-height: 1.6;">· El Estado puede acelerar la transición con leyes, ayudas e inversiones.</p>
-            <p style="font-size: 12px; color: #666; margin: 0 0 8px; line-height: 1.6;">· Los ayuntamientos configuran el entorno en el que vivimos: el transporte, los espacios, los servicios. Sus decisiones pueden impulsar prácticas más sostenibles locales.</p>
-            <p style="font-size: 12px; color: #666; margin: 0; line-height: 1.6;">· Las empresas trabajan para reducir progresivamente la huella de sus productos y servicios.</p>
+            <p style="font-size: 13px; font-weight: 600; color: #1a1a1a; margin: 0 0 6px;">${tr.collectiveTitle}</p>
+            <p style="font-size: 12px; color: #666; margin: 0 0 12px; line-height: 1.6;">${tr.collectiveP1}</p>
+            <p style="font-size: 12px; color: #666; margin: 0 0 8px; line-height: 1.6;">${tr.collectiveState}</p>
+            <p style="font-size: 12px; color: #666; margin: 0 0 8px; line-height: 1.6;">${tr.collectiveCity}</p>
+            <p style="font-size: 12px; color: #666; margin: 0; line-height: 1.6;">${tr.collectiveCompanies}</p>
           </div>
 
           <p style="font-size: 11px; color: #aaa; margin-top: 32px; text-align: center;">
-            Drop. · Taller de huella de carbono · Una iniciativa de Three o'clock
+            ${tr.footer}
           </p>
         </div>
       `,

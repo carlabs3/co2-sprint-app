@@ -526,6 +526,7 @@ export default function Step2Rankings() {
     const allActionsSorted = [...(step3Data.actionStats || [])].sort((a, b) => b.count - a.count)
     const sorted = sortBy === 'count'
       ? [...allActionsSorted].sort((a, b) => b.count - a.count)
+          .map(a => ({ ...(ACTIONS.find(x => x.id === a.id) || a), count: a.count }))
       : [...ACTIONS].sort((a, b) =>
           sortBy === 'reduction_desc'
             ? b.co2Reduction - a.co2Reduction

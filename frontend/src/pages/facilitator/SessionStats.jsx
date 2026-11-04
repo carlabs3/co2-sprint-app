@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next'
 import api from '../../utils/api.js'
 import { DistributionView, GroupsView, computeGroups } from '../../components/RankingViews.jsx'
 import { applySessionLang } from '../../utils/sessionLang.js'
+import { fmtNum, fmtDate } from '../../utils/format.js'
 
 function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })
+  return fmtDate(iso, { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 export default function SessionStats() {
@@ -117,10 +118,10 @@ export default function SessionStats() {
           return (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem', marginBottom: '2rem' }}>
               {[
-                { label: t('sessionStats.stats.mean'), value: `${sm.averageCarbonTons?.toFixed(1)} t` },
-                { label: t('sessionStats.stats.median'), value: `${sm.medianCarbonTons?.toFixed(1)} t` },
-                { label: t('sessionStats.stats.min'), value: `${sm.minCarbonTons?.toFixed(1)} t` },
-                { label: t('sessionStats.stats.max'), value: `${sm.maxCarbonTons?.toFixed(1)} t` },
+                { label: t('sessionStats.stats.mean'), value: `${fmtNum(sm.averageCarbonTons)} t` },
+                { label: t('sessionStats.stats.median'), value: `${fmtNum(sm.medianCarbonTons)} t` },
+                { label: t('sessionStats.stats.min'), value: `${fmtNum(sm.minCarbonTons)} t` },
+                { label: t('sessionStats.stats.max'), value: `${fmtNum(sm.maxCarbonTons)} t` },
                 { label: t('sessionStats.stats.participants'), value: String(sm.totalParticipants) },
               ].map(({ label, value }) => (
                 <div key={label} style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '16px', padding: '1rem', textAlign: 'center' }}>
