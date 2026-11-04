@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   ReferenceLine, Tooltip, ResponsiveContainer, Cell,
@@ -124,12 +125,12 @@ function getMostFrequent(values) {
 // ── constants ─────────────────────────────────────────────────────────────────
 
 export const HISTOGRAM_TABS = [
-  { id: 'total',       label: 'Total',            color: '#1a1a1a' },
-  { id: 'transport',   label: '🚗 Transporte',     color: '#38bdf8' },
-  { id: 'energy',      label: '🏠 Vivienda',           color: '#f59e0b' },
-  { id: 'food',        label: '🥗 Alimentación',      color: '#4ade80' },
-  { id: 'consumption', label: '🛍 Compras y hábitos', color: '#a855f7' },
-  { id: 'waste',       label: '📱 Vida digital',      color: '#f472b6' },
+  { id: 'total',       label: 'rankings.tabs.total',       color: '#1a1a1a' },
+  { id: 'transport',   label: 'rankings.tabs.transport',   color: '#38bdf8' },
+  { id: 'energy',      label: 'rankings.tabs.energy',      color: '#f59e0b' },
+  { id: 'food',        label: 'rankings.tabs.food',        color: '#4ade80' },
+  { id: 'consumption', label: 'rankings.tabs.consumption', color: '#a855f7' },
+  { id: 'waste',       label: 'rankings.tabs.waste',       color: '#f472b6' },
 ]
 
 export const SPAIN_AVERAGES = {
@@ -147,47 +148,47 @@ export const AREA_COLORS = {
 }
 
 export const AREA_LABELS = {
-  transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación',
-  consumption: 'Compras y hábitos', waste: 'Vida digital',
-  publicServices: 'Servicios públicos',
+  transport: 'areas.transport', energy: 'areas.energy', food: 'areas.food',
+  consumption: 'areas.consumption', waste: 'areas.waste',
+  publicServices: 'areas.publicServices',
 }
 
 export const CATEGORY_COLORS = { bajo: '#16a34a', medio: '#555555', alto: '#b07a30', 'muy alto': '#cc4444' }
 export const CATEGORY_BG     = { bajo: '#f0fdf4', medio: '#f5f5f5', alto: '#fff7ed', 'muy alto': '#fef2f2' }
-export const CATEGORY_LABELS = { bajo: 'BAJO', medio: 'MEDIO', alto: 'ALTO', 'muy alto': 'MUY ALTO' }
+export const CATEGORY_LABELS = { bajo: 'rankings.categoryShort.bajo', medio: 'rankings.categoryShort.medio', alto: 'rankings.categoryShort.alto', 'muy alto': 'rankings.categoryShort.muy alto' }
 
 // ── Subcategory definitions ───────────────────────────────────────────────────
 
 const AREA_SUBCATEGORIES = {
   transport: [
-    { label: 'Vehículo privado',           keys: ['carKm'] },
-    { label: 'Vuelos',                      keys: ['flights'] },
-    { label: 'Transporte público y activo', keys: ['train', 'moto', 'urbanMobility'] },
-    { label: 'Teletrabajo',                 keys: ['telework'], negative: true },
+    { label: 'subcategories.transport.privateVehicle', keys: ['carKm'] },
+    { label: 'subcategories.transport.flights', keys: ['flights'] },
+    { label: 'subcategories.transport.publicActive', keys: ['train', 'moto', 'urbanMobility'] },
+    { label: 'subcategories.transport.telework', keys: ['telework'], negative: true },
   ],
   energy: [
-    { label: 'Calefacción y agua caliente', keys: ['heating'] },
-    { label: 'Refrigeración',               keys: ['hasAC'] },
-    { label: 'Extras (piscina y vacaciones)', keys: ['pool', 'hotelNights', 'hostelNights', 'campingNights', 'airbnbNights', 'secondHome'] },
-    { label: 'Energía renovable',           keys: ['renewable'],   negative: true },
-    { label: 'Hábitos de eficiencia',       keys: ['homeHabits'],  negative: true },
+    { label: 'subcategories.energy.heating', keys: ['heating'] },
+    { label: 'subcategories.energy.cooling', keys: ['hasAC'] },
+    { label: 'subcategories.energy.extras', keys: ['pool', 'hotelNights', 'hostelNights', 'campingNights', 'airbnbNights', 'secondHome'] },
+    { label: 'subcategories.energy.renewable', keys: ['renewable'], negative: true },
+    { label: 'subcategories.energy.efficiency', keys: ['homeHabits'], negative: true },
   ],
   food: [
-    { label: 'Dieta diaria',        keys: ['breakfastDays', 'lunchDays', 'dinnerDays', 'deliveryPerWeek'] },
-    { label: 'Bebidas',             keys: ['hotDrinksCount', 'alcohol', 'bottledWater'] },
-    { label: 'Hábitos sostenibles', keys: ['foodHabits'], negative: true },
+    { label: 'subcategories.food.dailyDiet', keys: ['breakfastDays', 'lunchDays', 'dinnerDays', 'deliveryPerWeek'] },
+    { label: 'subcategories.food.drinks', keys: ['hotDrinksCount', 'alcohol', 'bottledWater'] },
+    { label: 'subcategories.food.sustainable', keys: ['foodHabits'], negative: true },
   ],
   consumption: [
-    { label: 'Moda',                        keys: ['clothes'] },
-    { label: 'Tecnología',                  keys: ['electronics', 'appliances'] },
-    { label: 'Estilo de vida',              keys: ['pets', 'hygiene', 'smoking', 'sports'] },
+    { label: 'subcategories.consumption.fashion', keys: ['clothes'] },
+    { label: 'subcategories.consumption.tech', keys: ['electronics', 'appliances'] },
+    { label: 'subcategories.consumption.lifestyle', keys: ['pets', 'hygiene', 'smoking', 'sports'] },
   ],
   waste: [
-    { label: 'Uso de pantallas',            keys: ['videoCalls', 'streaming', 'socialMedia'] },
-    { label: 'Inteligencia artificial',     keys: ['aiUsage'] },
+    { label: 'subcategories.waste.screens', keys: ['videoCalls', 'streaming', 'socialMedia'] },
+    { label: 'subcategories.waste.ai', keys: ['aiUsage'] },
   ],
   publicServices: [
-    { label: 'Servicios colectivos', keys: ['publicServices'] },
+    { label: 'subcategories.publicServices.collective', keys: ['publicServices'] },
   ],
 }
 
@@ -283,6 +284,7 @@ const SUBCAT_PALETTES = {
 }
 
 function AnswerDistribution({ ranking, activeTab, tab }) {
+  const { t } = useTranslation()
   const [openSections, setOpenSections] = useState(() =>
     Object.fromEntries((AREA_SUBCATEGORIES[activeTab] || []).map((s, i) => [i, false]))
   )
@@ -292,7 +294,7 @@ function AnswerDistribution({ ranking, activeTab, tab }) {
   return (
     <div>
       <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '1rem' }}>
-        Distribución de respuestas
+        {t('rankings.answerDistTitle')}
       </div>
       {subcats.map((sub, si) => {
         const subDist = allDist.filter(d => sub.keys.includes(d.question.id))
@@ -311,8 +313,8 @@ function AnswerDistribution({ ranking, activeTab, tab }) {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <div style={{ width: 10, height: 10, borderRadius: 2, background: sub.negative ? '#3b6d11' : (SUBCAT_PALETTES[activeTab]?.[si] ?? tab.color), flexShrink: 0 }} />
-                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.01rem' }}>{sub.label}</span>
-                <span style={{ fontSize: '0.72rem', color: '#bbb' }}>({subDist.length} pregunta{subDist.length !== 1 ? 's' : ''})</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.01rem' }}>{t(sub.label)}</span>
+                <span style={{ fontSize: '0.72rem', color: '#bbb' }}>{t('rankings.questionsCount', { count: subDist.length })}</span>
               </div>
               <span style={{ fontSize: '0.8rem', color: '#bbb', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▼</span>
             </button>
@@ -322,7 +324,7 @@ function AnswerDistribution({ ranking, activeTab, tab }) {
                   <div key={question.id}>
                     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.5rem' }}>
                       <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#333', lineHeight: 1.4 }}>
-                        {question.text}
+                        {t(question.text)}
                       </div>
                       {(() => {
                         const avgKg = getQuestionAvgKg(ranking, question.id)
@@ -336,14 +338,14 @@ function AnswerDistribution({ ranking, activeTab, tab }) {
                             color: isNegative ? '#16a34a' : '#aaa',
                             opacity: 0.85,
                           }}>
-                            {isNegative ? '↓' : '+'}{Math.abs(Math.round(avgKg))} kg CO₂ media
+                            {t('rankings.kgAvg', { sign: isNegative ? '↓' : '+', kg: Math.abs(Math.round(avgKg)) })}
                           </div>
                         )
                       })()}
                     </div>
                     {question.type === 'multi' && (
                       <div style={{ fontSize: '0.68rem', color: '#bbb', marginBottom: '0.65rem' }}>
-                        Selección múltiple · % sobre {ranking.length} participantes
+                        {t('rankings.multiSelectNote', { count: ranking.length })}
                       </div>
                     )}
                     {question.type !== 'multi' && <div style={{ marginBottom: '0.65rem' }} />}
@@ -354,7 +356,7 @@ function AnswerDistribution({ ranking, activeTab, tab }) {
                         <div key={opt.value} style={{ marginBottom: '0.6rem' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
                             <span style={{ fontSize: '0.75rem', fontWeight: isMost ? 700 : 400, color: isMost ? '#1a1a1a' : '#777' }}>
-                              {opt.label}
+                              {t(opt.label)}
                             </span>
                             <span style={{ fontSize: '0.75rem', fontWeight: isMost ? 700 : 400, color: isMost ? barColor : '#aaa' }}>
                               {opt.pct}%
@@ -367,7 +369,7 @@ function AnswerDistribution({ ranking, activeTab, tab }) {
                       )
                     })}
                     <div style={{ fontSize: '0.68rem', color: '#bbb', marginTop: '0.4rem' }}>
-                      {qTotal} de {ranking.length} respondieron
+                      {t('rankings.answered', { answered: qTotal, total: ranking.length })}
                     </div>
                   </div>
                 ))}
@@ -383,9 +385,10 @@ function AnswerDistribution({ ranking, activeTab, tab }) {
 // ── DistributionView ──────────────────────────────────────────────────────────
 
 export function DistributionView({ ranking }) {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState('total')
 
-  const tab = HISTOGRAM_TABS.find(t => t.id === activeTab)
+  const tab = HISTOGRAM_TABS.find(tb => tb.id === activeTab)
 
   const values = ranking
     .map(r => activeTab === 'total' ? r.tons : (r.areas?.[activeTab] ?? 0))
@@ -418,7 +421,7 @@ export function DistributionView({ ranking }) {
 
   if (ranking.length === 0) return (
     <div style={{ color: '#bbb', padding: '4rem 2rem', textAlign: 'center', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-      Aún no hay resultados.
+      {t('rankings.noResults')}
     </div>
   )
 
@@ -426,7 +429,7 @@ export function DistributionView({ ranking }) {
     <div>
       {ranking.length < 3 && (
         <div style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '12px', padding: '0.65rem 1rem', marginBottom: '1.5rem', fontSize: '0.78rem', color: '#666' }}>
-          Con pocos datos la distribución puede no ser representativa.
+          {t('rankings.fewDataWarning')}
         </div>
       )}
 
@@ -434,16 +437,16 @@ export function DistributionView({ ranking }) {
       <div style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.25rem' }}>
         {/* Category tabs */}
         <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
-          {HISTOGRAM_TABS.map(t => (
-            <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
+          {HISTOGRAM_TABS.map(tb => (
+            <button key={tb.id} onClick={() => setActiveTab(tb.id)} style={{
               padding: '0.3rem 0.9rem', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 600,
-              border: `1.5px solid ${activeTab === t.id ? t.color : '#e5e5e5'}`,
-              background: activeTab === t.id ? t.color : '#ffffff',
-              color: activeTab === t.id ? (t.id === 'total' ? '#fff' : '#0a0a0a') : '#666',
+              border: `1.5px solid ${activeTab === tb.id ? tb.color : '#e5e5e5'}`,
+              background: activeTab === tb.id ? tb.color : '#ffffff',
+              color: activeTab === tb.id ? (tb.id === 'total' ? '#fff' : '#0a0a0a') : '#666',
               cursor: 'pointer', whiteSpace: 'nowrap',
               transition: 'all 0.15s ease',
             }}>
-              {t.label}
+              {t(tb.label)}
             </button>
           ))}
         </div>
@@ -458,7 +461,7 @@ export function DistributionView({ ranking }) {
               const d = payload[0].payload
               return (
                 <div style={{ background: '#ffffff', border: '1px solid #e5e5e5', borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                  <strong>{d.range} t</strong> — {d.count} participante{d.count !== 1 ? 's' : ''}
+                  <strong>{d.range} t</strong> — {t('rankings.tooltip', { count: d.count })}
                 </div>
               )
             }} />
@@ -481,19 +484,19 @@ export function DistributionView({ ranking }) {
               stroke="#000000"
               strokeDasharray="4 3"
               strokeWidth={1.5}
-              label={{ value: `España ${spainAvg}t`, position: 'top', fontSize: 13, fill: '#555' }}
+              label={{ value: t('rankings.refSpain', { value: spainAvg }), position: 'top', fontSize: 13, fill: '#555' }}
             />
             {values.length > 0 && (
               <ReferenceLine x={meanBucket} stroke={tab.color} strokeWidth={2.5} strokeDasharray="5 3"
-                label={{ value: `media`, fill: tab.color, fontSize: 14, fontWeight: 700, position: 'top' }} />
+                label={{ value: t('rankings.refMean'), fill: tab.color, fontSize: 14, fontWeight: 700, position: 'top' }} />
             )}
             {values.length > 0 && minBucket !== meanBucket && (
               <ReferenceLine x={minBucket} stroke="#3b6d11" strokeWidth={1} strokeDasharray="3 3"
-                label={{ value: `mín ${fmtTons(minVal)}t`, fill: '#3b6d11', fontSize: 13, position: 'top' }} />
+                label={{ value: t('rankings.refMin', { value: fmtTons(minVal) }), fill: '#3b6d11', fontSize: 13, position: 'top' }} />
             )}
             {values.length > 0 && maxBucket !== meanBucket && maxBucket !== minBucket && (
               <ReferenceLine x={maxBucket} stroke="#cc4444" strokeWidth={1} strokeDasharray="3 3"
-                label={{ value: `máx ${fmtTons(maxVal)}t`, fill: '#cc4444', fontSize: 13, position: 'top' }} />
+                label={{ value: t('rankings.refMax', { value: fmtTons(maxVal) }), fill: '#cc4444', fontSize: 13, position: 'top' }} />
             )}
           </BarChart>
         </ResponsiveContainer>
@@ -501,11 +504,11 @@ export function DistributionView({ ranking }) {
         {/* Legend */}
         <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginTop: '0.75rem', fontSize: '0.82rem', color: '#666', alignItems: 'center' }}>
           {[
-            { label: 'Valor medio',     line: `2px dashed ${tab.color}`, box: null,   border: null },
-            { label: 'Mínimo',        line: '2px dashed #3b6d11',  box: null,      border: null },
-            { label: 'Máximo',        line: '2px dashed #cc4444',  box: null,      border: null },
-            { label: 'Media España',  line: '2px dashed #000',     box: null,      border: null },
-            { label: 'Más frecuente', line: null, box: '#fff',     border: `2px solid ${activeTab === 'total' ? '#1a1a1a' : tab.color}` },
+            { label: t('rankings.legend.mean'),  line: `2px dashed ${tab.color}`, box: null,   border: null },
+            { label: t('rankings.legend.min'),   line: '2px dashed #3b6d11',  box: null,      border: null },
+            { label: t('rankings.legend.max'),   line: '2px dashed #cc4444',  box: null,      border: null },
+            { label: t('rankings.legend.spain'), line: '2px dashed #000',     box: null,      border: null },
+            { label: t('rankings.legend.mostFrequent'), line: null, box: '#fff',     border: `2px solid ${activeTab === 'total' ? '#1a1a1a' : tab.color}` },
           ].map(({ label, line, box, border }) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
               {line
@@ -524,7 +527,7 @@ export function DistributionView({ ranking }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.85rem', marginBottom: '1.5rem' }}>
             {[
               {
-                label: 'Huella media',
+                label: t('rankings.stats.mean'),
                 value: values.length ? `${fmtTons(meanVal)} t` : '–',
                 bg: activeTab === 'total' ? '#1a1a1a' : tab.color,
                 color: '#ffffff',
@@ -532,19 +535,19 @@ export function DistributionView({ ranking }) {
                 labelColor: 'rgba(255,255,255,0.6)',
               },
               {
-                label: 'Huella mínima',
+                label: t('rankings.stats.min'),
                 value: values.length ? `${fmtTons(minVal)} t` : '–',
                 bg: '#ffffff', color: '#2d5a27', border: '#3b6d11',
                 labelColor: '#3b6d11',
               },
               {
-                label: 'Huella máxima',
+                label: t('rankings.stats.max'),
                 value: values.length ? `${fmtTons(maxVal)} t` : '–',
                 bg: '#ffffff', color: '#cc4444', border: '#cc4444',
                 labelColor: '#cc4444',
               },
               {
-                label: 'Huella más frecuente',
+                label: t('rankings.stats.mostFrequent'),
                 value: mostFrequent !== '–' ? `${mostFrequent} t` : '–',
                 bg: activeTab === 'total' ? '#f0f0ee' : `${tab.color}18`,
                 color: activeTab === 'total' ? '#1a1a1a' : tab.color,
@@ -552,7 +555,7 @@ export function DistributionView({ ranking }) {
                 labelColor: activeTab === 'total' ? '#555' : tab.color,
               },
               {
-                label: 'Total CO₂ emitido',
+                label: t('rankings.stats.total'),
                 value: values.length ? `${fmtTons(values.reduce((s, v) => s + v, 0))} t` : '–',
                 bg: '#ffffff', color: '#444', border: '#e0e0d8',
                 labelColor: '#aaa',
@@ -579,14 +582,14 @@ export function DistributionView({ ranking }) {
           {activeTab === 'total' ? (
             <>
               <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#000', marginBottom: '1rem' }}>
-                Media por categorías
+                {t('rankings.avgByCategory')}
               </div>
               {/* Stacked bar */}
               <div style={{ display: 'flex', height: 44, borderRadius: '12px', overflow: 'hidden', marginBottom: '0.85rem' }}>
                 {Object.entries(AREA_COLORS).map(([key, color]) => {
                   const w = areaAvg[key] / areaTotal * 100
                   return w > 0 ? (
-                    <div key={key} title={`${AREA_LABELS[key]}: ${fmtTons(areaAvg[key])} t`}
+                    <div key={key} title={`${t(AREA_LABELS[key])}: ${fmtTons(areaAvg[key])} t`}
                       style={{ width: `${w}%`, background: color, transition: 'width 0.5s ease' }} />
                   ) : null
                 })}
@@ -596,7 +599,7 @@ export function DistributionView({ ranking }) {
                 {Object.entries(AREA_COLORS).map(([key, color]) => (
                   <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.95rem' }}>
                     <div style={{ width: 20, height: 20, borderRadius: 2, background: color, flexShrink: 0 }} />
-                    <span style={{ color: '#555' }}>{AREA_LABELS[key]}</span>
+                    <span style={{ color: '#555' }}>{t(AREA_LABELS[key])}</span>
                     <span style={{ fontWeight: 700, color: '#000' }}>
                       {areaTotal > 0 ? Math.round((areaAvg[key] / areaTotal) * 100) : 0}%
                     </span>
@@ -607,7 +610,7 @@ export function DistributionView({ ranking }) {
           ) : (() => {
               const subcats = AREA_SUBCATEGORIES[activeTab] || []
               const subcatData = subcats.map(sub => ({
-                label: sub.label,
+                label: t(sub.label),
                 kg: Math.max(0, getSubcatAvg(ranking, sub.keys)),
                 negative: sub.negative,
               }))
@@ -616,7 +619,7 @@ export function DistributionView({ ranking }) {
               return (
                 <>
                   <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#aaa', marginBottom: '0.85rem' }}>
-                    Distribución de subcategorías
+                    {t('rankings.subcatDist')}
                   </div>
 
                   {/* Stacked bar */}
@@ -665,20 +668,21 @@ export function DistributionView({ ranking }) {
 // ── GroupsView ────────────────────────────────────────────────────────────────
 
 const AREA_ORDER = ['transport', 'energy', 'food', 'consumption', 'waste', 'publicServices']
-const CATEGORY_LABEL_F = { bajo: 'baja', medio: 'media', alto: 'alta', 'muy alto': 'muy alta' }
+const CATEGORY_LABEL_F = { bajo: 'rankings.categoryFem.bajo', medio: 'rankings.categoryFem.medio', alto: 'rankings.categoryFem.alto', 'muy alto': 'rankings.categoryFem.muy alto' }
 const AREA_LABEL_SHORT = {
-  transport:      'Transporte',
-  energy:         'Vivienda',
-  food:           'Alimentación',
-  consumption:    'Compras y hábitos',
-  waste:          'Vida digital',
-  publicServices: 'Servicios púb.',
+  transport:      'areas.transport',
+  energy:         'areas.energy',
+  food:           'areas.food',
+  consumption:    'areas.consumption',
+  waste:          'areas.waste',
+  publicServices: 'rankings.areaShortPublic',
 }
 
 export function GroupsView({ groups }) {
+  const { t } = useTranslation()
   if (groups.length === 0) return (
     <div style={{ textAlign: 'center', color: '#bbb', padding: '4rem 2rem', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-      Sin datos de equipos aún...
+      {t('rankings.noGroups')}
     </div>
   )
 
@@ -708,10 +712,10 @@ export function GroupsView({ groups }) {
                 letterSpacing: '0.04em',
                 borderRadius: 999,
               }}>
-                {g.category === 'bajo' ? '🌿' : g.category === 'medio' ? '🌱' : '🔥'} Huella {CATEGORY_LABEL_F[g.category]}
+                {g.category === 'bajo' ? '🌿' : g.category === 'medio' ? '🌱' : '🔥'} {t('rankings.footprintFem', { cat: t(CATEGORY_LABEL_F[g.category]) })}
               </span>
               <span style={{ fontWeight: 900, fontSize: '1.5rem', color: '#1a1a1a' }}>{fmtTons(g.avg)}t</span>
-              <span style={{ fontSize: '0.85rem', color: '#bbb', minWidth: 48 }}>{g.count} pers.</span>
+              <span style={{ fontSize: '0.85rem', color: '#bbb', minWidth: 48 }}>{t('rankings.persons', { count: g.count })}</span>
             </div>
 
             {/* Stacked bar */}
@@ -739,7 +743,7 @@ export function GroupsView({ groups }) {
                     return (
                       <div key={area} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', color: '#555' }}>
                         <div style={{ width: 11, height: 11, borderRadius: 3, background: AREA_COLORS[area], flexShrink: 0 }} />
-                        <span>{AREA_LABEL_SHORT[area]}</span>
+                        <span>{t(AREA_LABEL_SHORT[area])}</span>
                         <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{pct}%</span>
                       </div>
                     )

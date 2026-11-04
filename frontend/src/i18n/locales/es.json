@@ -23,7 +23,8 @@
     "transport": {
       "privateVehicle": "Vehículo privado",
       "flights": "Vuelos",
-      "publicActive": "Transporte público y activo"
+      "publicActive": "Transporte público y activo",
+      "telework": "Teletrabajo"
     },
     "energy": {
       "heating": "Calefacción y agua caliente",
@@ -47,7 +48,8 @@
       "ai": "Inteligencia artificial"
     },
     "publicServices": {
-      "base": "Sanidad, educación, infraestructuras..."
+      "base": "Sanidad, educación, infraestructuras...",
+      "collective": "Servicios colectivos"
     }
   },
   "common": {
@@ -351,5 +353,476 @@
       "s3Title": "Ve los resultados",
       "s3Text": "Compara con tu equipo y la media de España en tiempo real."
     }
+  },
+  "questions": {
+    "carKm": {
+      "text": "¿Cuántos km haces en coche al año?",
+      "info": "Cuenta los km que haces al trabajo, escapadas y vacaciones. Si compartes coche habitualmente, cuenta los km totales.",
+      "options": {
+        "km_a": "Poco — menos de 3.000 km/año",
+        "km_b": "Uso moderado (3.000–10.000 km/año)",
+        "km_c": "Uso habitual (10.000–20.000 km/año)",
+        "km_d": "Lo uso mucho — más de 20.000 km/año",
+        "km_e": "No tengo coche o no lo uso"
+      }
+    },
+    "carType": {
+      "text": "¿Es eléctrico o de gasolina/diésel?",
+      "options": {
+        "gasoline": "Gasolina o diésel",
+        "electric": "Eléctrico"
+      }
+    },
+    "flights": {
+      "text": "¿Cuántos vuelos haces al año?",
+      "info": "Cuenta los vuelos de ida y vuelta como uno. Pon 0 si no vuelas.",
+      "options": {
+        "flightShort": "Cortos (menos de 3h, ej. Madrid–París)",
+        "flightMedium": "Medianos (3–6h, ej. Madrid–Estambul)",
+        "flightLong": "Transoceánicos (más de 6h, ej. Madrid–Nueva York)"
+      }
+    },
+    "train": {
+      "text": "¿Cuánto usas el tren?",
+      "info": "Incluye vacaciones y escapadas.",
+      "options": {
+        "3a": "Poco (menos de 1.000 km/año)",
+        "3b": "Bastante para vacaciones y viajes (1.000–5.000 km)",
+        "3c": "A diario o muy frecuentemente (más de 10.000 km)",
+        "3d": "No uso el tren"
+      }
+    },
+    "moto": {
+      "text": "¿Tienes moto o scooter de gasolina?",
+      "options": {
+        "4a": "Casi nada (menos de 150 km/año)",
+        "4b": "La uso a diario (~500 km/año)",
+        "4c": "La uso para todo (más de 1.000 km/año)",
+        "4d": "No tengo moto"
+      }
+    },
+    "urbanMobility": {
+      "text": "¿Cómo te mueves habitualmente por la ciudad?",
+      "info": "Los trayectos cortos en ciudad son donde hay más margen de mejora.",
+      "options": {
+        "5a": "A pie",
+        "5b": "Bicicleta convencional",
+        "5c": "Bicicleta eléctrica",
+        "5d": "Patinete eléctrico",
+        "5e": "Transporte público urbano (bus, metro, tranvía)",
+        "5f": "Taxi / Uber / Cabify"
+      }
+    },
+    "telework": {
+      "text": "¿Puedes teletrabajar? ¿Con qué frecuencia lo haces?",
+      "info": "Trabajar desde casa reduce los desplazamientos y, con ello, las emisiones asociadas al transporte",
+      "options": {
+        "always": "Siempre teletrabajo",
+        "mostly": "3–5 días/semana (principalmente remoto)",
+        "partial": "1–2 días/semana",
+        "never": "Nunca, voy a la oficina todos los días"
+      }
+    },
+    "homeType": {
+      "text": "¿En qué tipo de vivienda vives?",
+      "info": "El tamaño de la vivienda afecta directamente al consumo de calefacción y refrigeración.",
+      "options": {
+        "25a": "Piso pequeño / estudio (~45 m²)",
+        "25b": "Piso de 2–3 habitaciones (~80–120 m²)",
+        "25c": "Casa grande o chalet (más de 180 m²)"
+      }
+    },
+    "heating": {
+      "text": "¿Qué sistema de calefacción tienes?",
+      "info": "Esta pregunta cubre calefacción, agua caliente y cocina. Factor de emisión adaptado a la red española.",
+      "options": {
+        "26a": "Sin calefacción",
+        "26b": "Calefacción eléctrica (resistencia)",
+        "26c": "Caldera de gas natural",
+        "26d": "Gasóleo / gasoil",
+        "26e": "Pellets de madera",
+        "26f": "Bomba de calor / aerotermia",
+        "26g": "No sé / combinado"
+      }
+    },
+    "renewable": {
+      "text": "¿Tienes paneles solares o has contratado tarifa de energía 100% renovable?",
+      "info": "La energía renovable reduce tu huella eléctrica y también tu dependencia de combustibles importados.",
+      "options": {
+        "a": "Sí, tengo paneles solares en casa",
+        "b": "Tengo tarifa de electricidad 100% renovable certificada",
+        "c": "No, consumo el mix eléctrico convencional"
+      }
+    },
+    "hasAC": {
+      "text": "¿Tienes aire acondicionado?",
+      "info": "Si tienes ventiladores pero no aire acondicionado, marca No.",
+      "options": {
+        "yes": "Sí tengo aire acondicionado",
+        "no": "No tengo aire acondicionado"
+      }
+    },
+    "pool": {
+      "text": "¿Tienes en casa...?",
+      "options": {
+        "privatePool": "Piscina privada",
+        "communityPool": "Piscina comunitaria",
+        "noPool": "No tengo piscina"
+      }
+    },
+    "homeHabits": {
+      "text": "¿Haces alguna de estas cosas en casa? (selecciona todas las que apliquen)",
+      "info": "Pequeñas acciones que reducen el consumo energético del hogar.",
+      "options": {
+        "closeWindows": "Cierro ventanas cuando tengo calefacción encendida",
+        "thermostat19": "Pongo la calefacción a 19–20°C (no más)",
+        "ledBulbs": "Tengo todas las bombillas LED",
+        "ecoPrograms": "Uso los programas eco de la lavadora y lavavajillas",
+        "none": "No hago nada de esto"
+      }
+    },
+    "vacationNights": {
+      "text": "Cuando te vas de vacaciones, ¿dónde te quedas?",
+      "info": "Piensa en un año típico. Puedes dejar en 0 los que no uses.",
+      "options": {
+        "hotelNights": "Hotel",
+        "hostelNights": "Albergue / hostel",
+        "campingNights": "Camping",
+        "airbnbNights": "Apartamento turístico (Airbnb)",
+        "secondHome": "Segunda residencia propia",
+        "friendsNights": "Casa de amigos o familiares"
+      }
+    },
+    "breakfastDays": {
+      "text": "¿Qué sueles desayunar durante la semana?",
+      "info": "Distribuye tus 7 días entre los tipos de desayuno. Si también almuerzas, activa la opción.",
+      "options": {
+        "6a": "Bollería o tostadas con mermelada",
+        "6b": "Leche o yogur con cereales/granola",
+        "6c": "Tostadas, jamón y tomate",
+        "6d": "Fruta",
+        "6e": "Mix variado (huevo + fruta + tostadas)",
+        "6f": "No desayuno"
+      }
+    },
+    "hotDrinksCount": {
+      "text": "¿Cuántas bebidas calientes tomas al día?",
+      "info": "Indica cuántas unidades de cada tipo tomas de media al día.",
+      "options": {
+        "7a": "No tomo bebidas calientes",
+        "7b": "Leche con cacao",
+        "7c": "Té",
+        "7d_cow": "Café con leche de vaca",
+        "7d_veg": "Café con leche vegetal (avena)",
+        "7d_chai": "Chai latte",
+        "7e": "Café solo"
+      }
+    },
+    "alcohol": {
+      "text": "¿Cuánto bebes durante una semana normal (incluyendo fin de semana)?",
+      "info": "Sin juicios — todo suma a tu huella. Piensa en una semana típica incluyendo el finde. Deja en 0 lo que no tomes.",
+      "options": {
+        "soda": "Refrescos",
+        "wine": "Vino",
+        "beer": "Cerveza",
+        "spirits": "Destilados"
+      },
+      "sub": {
+        "soda": "Coca-Cola, Fanta, energéticas...",
+        "wine": "Copa de 150 ml",
+        "beer": "Caña o botellín (330 ml)",
+        "spirits": "Gin, whisky, vodka... (50 ml)"
+      }
+    },
+    "lunchDays": {
+      "text": "¿Qué sueles comer al mediodía en una semana típica?",
+      "info": "Distribuye tus 7 comidas de la semana entre los tipos. Tanto en casa como en restaurante.",
+      "options": {
+        "9a": "Vegana",
+        "9b": "Vegetariana",
+        "9c": "Carne blanca (pollo, pavo...)",
+        "9d": "Pescado",
+        "9e": "Carne roja (ternera, cerdo...)",
+        "none": "No como"
+      }
+    },
+    "dinnerDays": {
+      "text": "¿Qué sueles cenar en una semana típica?",
+      "info": "Distribuye tus 7 cenas de la semana entre los tipos.",
+      "options": {
+        "10a": "Vegana",
+        "10b": "Vegetariana",
+        "10c": "Carne blanca (pollo, pavo...)",
+        "10d": "Pescado",
+        "10e": "Carne roja (ternera, cerdo...)",
+        "none": "No ceno"
+      }
+    },
+    "bottledWater": {
+      "text": "¿Bebes agua embotellada?",
+      "info": "Si bebes principalmente del grifo, marca que no. El agua del grifo española es segura en la mayoría de ciudades.",
+      "options": {
+        "13a": "Sí, compramos agua embotellada en casa",
+        "13b": "A veces compro alguna botella",
+        "13c": "Nunca, bebo del grifo"
+      }
+    },
+    "foodHabits": {
+      "text": "¿Sueles hacer algo de esto? (selecciona todas las que apliquen)",
+      "info": "Pequeñas acciones que reducen tu huella alimentaria.",
+      "options": {
+        "localFood": "Compro productos locales y de temporada",
+        "composting": "Composting en casa",
+        "noFoodWaste": "Evito el desperdicio alimentario",
+        "none": "No hago nada de esto"
+      }
+    },
+    "deliveryPerWeek": {
+      "text": "¿Cuántos pedidos a domicilio haces a la semana?",
+      "info": "Cada pedido suma aproximadamente 3 kgCO₂e (transporte última milla + packaging)."
+    },
+    "clothes": {
+      "text": "¿Cuánta ropa nueva compras al año? (prendas y zapatos incluidos)",
+      "info": "Jerseys, pantalones, abrigos, zapatos... Cuenta todo lo que sea nuevo. La ropa de segunda mano tiene una huella casi nula.",
+      "options": {
+        "15a": "2 o menos prendas",
+        "15b": "3–5 prendas",
+        "15c": "6–10 prendas",
+        "15d": "11–20 prendas",
+        "15e": "21–30 prendas",
+        "15f": "Más de 30 prendas",
+        "15g": "Compro principalmente de segunda mano"
+      }
+    },
+    "electronics": {
+      "text": "¿Qué aparatos nuevos has comprado en el último año? (selecciona todos)",
+      "info": "Si lo compraste hace 1-2 años puedes contarlo. Si fue hace más de 3 años, no lo cuentes.",
+      "options": {
+        "16a": "Smartphone",
+        "16b": "Tablet",
+        "16c": "Ordenador portátil",
+        "16d": "Ordenador de sobremesa",
+        "16e": "Televisor",
+        "16f": "Consola tipo PS / Xbox",
+        "16g": "Cámara de fotos",
+        "16h": "Reloj inteligente / smartwatch",
+        "16i": "Ninguno"
+      }
+    },
+    "appliances": {
+      "text": "¿Qué electrodomésticos de menos de 5 años tienes en casa? (selecciona todos)",
+      "info": "La fabricación de electrodomésticos tiene una huella importante. Si son de hace más de 5 años, no los cuentes.",
+      "options": {
+        "19a": "Lavadora",
+        "19b": "Secadora",
+        "19c": "Lavavajillas",
+        "19d": "Frigorífico",
+        "19e": "Horno",
+        "19f": "Congelador",
+        "19g": "Microondas",
+        "19h": "Televisor",
+        "19i": "Ninguno reciente"
+      }
+    },
+    "pets": {
+      "text": "¿Tienes mascotas? (selecciona todas)",
+      "info": "La alimentación de las mascotas (sobre todo perros y gatos) tiene una huella de carbono real — principalmente por la carne que contiene su comida.",
+      "options": {
+        "bigDog": "Perro grande (más de 20 kg)",
+        "medDog": "Perro mediano (10–20 kg)",
+        "smallDog": "Perro pequeño (menos de 10 kg)",
+        "cat": "Gato",
+        "none": "No tengo mascotas"
+      }
+    },
+    "hygiene": {
+      "text": "¿Cuántos productos de higiene y limpieza compras al mes?",
+      "info": "Champú, gel, maquillaje, cremas, detergentes, productos de limpieza del hogar...",
+      "options": {
+        "22a": "Pocos (1–2 al mes)",
+        "22b": "Normal (4–5 al mes)",
+        "22c": "Muchos (alrededor de 10)"
+      }
+    },
+    "smoking": {
+      "text": "¿Fumas o vapeas?",
+      "options": {
+        "23a": "No fumo",
+        "23b": "Vapeo",
+        "23c": "Poco (1 paquete al mes)",
+        "23d": "Normal (1 paquete a la semana)",
+        "23e": "Mucho (1 paquete al día)"
+      }
+    },
+    "sports": {
+      "text": "¿Qué deportes practicas habitualmente?",
+      "info": "Selecciona todos los que practiques. La huella incluye instalaciones, desplazamientos y equipamiento.",
+      "options": {
+        "outdoor": "Deportes individuales al aire libre (running, senderismo...)",
+        "cycling": "Ciclismo",
+        "racket": "Deportes de raqueta o balón (tenis, fútbol, pádel...)",
+        "pool": "Deportes de piscina (natación, water polo...)",
+        "gym": "Gimnasio o sala de musculación",
+        "fitness": "Fitness, yoga o pilates",
+        "martial": "Artes marciales y deportes de combate",
+        "athletics": "Atletismo",
+        "equestrian": "Hípica",
+        "golf": "Golf",
+        "nautical": "Deportes acuáticos (kayak, surf, vela...)",
+        "ski": "Deportes de invierno (esquí, snowboard...)",
+        "motor": "Deportes de motor (karting, motocross...)",
+        "climbing": "Escalada",
+        "none": "No practico deporte"
+      }
+    },
+    "videoCalls": {
+      "text": "¿Con qué frecuencia haces videollamadas? (Zoom, Teams, Meet...)",
+      "options": {
+        "vc_none": "Nunca o casi nunca (0–0,5 h/semana)",
+        "vc_sometimes": "A veces (1–2 h/semana)",
+        "vc_often": "Bastante (3–5 h/semana)",
+        "vc_lots": "Mucho, me encanta videollamar (más de 5 h/semana)"
+      }
+    },
+    "streaming": {
+      "text": "¿Con qué frecuencia ves streaming? (Netflix, YouTube, HBO...)",
+      "options": {
+        "st_none": "No veo nada",
+        "st_little": "Poco (1–3 h/semana)",
+        "st_often": "Bastante (1–2 h/día)",
+        "st_lots": "Mucho (más de 3 h/día)"
+      }
+    },
+    "socialMedia": {
+      "text": "¿Con qué frecuencia usas las redes sociales? (Instagram, TikTok, X...)",
+      "options": {
+        "sm_none": "No tengo redes sociales",
+        "sm_little": "Poco (1–3 h/semana)",
+        "sm_often": "Bastante (1–2 h/día)",
+        "sm_lots": "Mucho (más de 3 h/día)"
+      }
+    },
+    "aiUsage": {
+      "text": "¿Cuánto usas herramientas de IA al día? (ChatGPT, Claude, Copilot...)",
+      "info": "Una consulta a un modelo de IA grande consume ~10× más energía que una búsqueda en Google.",
+      "options": {
+        "none": "No uso IA",
+        "low": "Poco (menos de 30 min/día)",
+        "medium": "Bastante (30 min – 2h/día)",
+        "high": "Mucho (más de 2h/día)"
+      }
+    }
+  },
+  "rankings": {
+    "tabs": {
+      "total": "Total",
+      "transport": "🚗 Transporte",
+      "energy": "🏠 Vivienda",
+      "food": "🥗 Alimentación",
+      "consumption": "🛍 Compras y hábitos",
+      "waste": "📱 Vida digital"
+    },
+    "categoryShort": {
+      "bajo": "BAJO",
+      "medio": "MEDIO",
+      "alto": "ALTO",
+      "muy alto": "MUY ALTO"
+    },
+    "categoryFem": {
+      "bajo": "baja",
+      "medio": "media",
+      "alto": "alta",
+      "muy alto": "muy alta"
+    },
+    "areaShortPublic": "Servicios púb.",
+    "answerDistTitle": "Distribución de respuestas",
+    "questionsCount_one": "({{count}} pregunta)",
+    "questionsCount_other": "({{count}} preguntas)",
+    "kgAvg": "{{sign}}{{kg}} kg CO₂ media",
+    "multiSelectNote": "Selección múltiple · % sobre {{count}} participantes",
+    "answered": "{{answered}} de {{total}} respondieron",
+    "noResults": "Aún no hay resultados.",
+    "fewDataWarning": "Con pocos datos la distribución puede no ser representativa.",
+    "tooltip_one": "{{count}} participante",
+    "tooltip_other": "{{count}} participantes",
+    "refSpain": "España {{value}}t",
+    "refMean": "media",
+    "refMin": "mín {{value}}t",
+    "refMax": "máx {{value}}t",
+    "legend": {
+      "mean": "Valor medio",
+      "min": "Mínimo",
+      "max": "Máximo",
+      "spain": "Media España",
+      "mostFrequent": "Más frecuente"
+    },
+    "stats": {
+      "mean": "Huella media",
+      "min": "Huella mínima",
+      "max": "Huella máxima",
+      "mostFrequent": "Huella más frecuente",
+      "total": "Total CO₂ emitido"
+    },
+    "avgByCategory": "Media por categorías",
+    "subcatDist": "Distribución de subcategorías",
+    "noGroups": "Sin datos de equipos aún...",
+    "footprintFem": "Huella {{cat}}",
+    "persons": "{{count}} pers."
+  },
+  "step2Rankings": {
+    "revealConfirm": "¿Revelar los resultados a los {{count}} participantes?",
+    "closeConfirm": "¿Qué quieres hacer con esta sesión?\n\nPulsa ACEPTAR para CERRAR la sesión (los participantes verán la pantalla de fin).\n\nPulsa CANCELAR para dejarla activa y retomarla más tarde.",
+    "draftText": "La sesión está en borrador. Actívala para que los participantes puedan entrar.",
+    "activate": "Activar sesión →",
+    "waitCalculator": "Espera a que terminen la calculadora",
+    "actionsPhase": "Fase de acciones",
+    "teamsConfirmed": "{{count}}/{{total}} equipos confirmados",
+    "areaShort": {
+      "transport": "Transp.",
+      "energy": "Vivienda",
+      "food": "Alim.",
+      "consumption": "Compras",
+      "waste": "Digital",
+      "publicServices": "Serv. púb."
+    },
+    "currentFootprint": "Huella actual del equipo",
+    "co2PerYearAvg": "CO₂/año · media",
+    "selectedActions": "Acciones seleccionadas · {{count}}",
+    "noActionsSelected": "Sin acciones seleccionadas aún",
+    "confirmAgain": "✓ Confirmar de nuevo",
+    "confirmTeam": "Confirmar acciones de {{group}} →",
+    "revealReductionAll": "Revelar reducción a todos los equipos →",
+    "reductionRevealedAll": "✓ Reducción revelada a todos los equipos",
+    "teamResultsTitle": "Resultados por equipo",
+    "teams": "Equipos",
+    "badge": {
+      "bajo": "🌿 Huella reducida",
+      "medio": "🌱 Huella moderada",
+      "alto": "🌍 Huella elevada",
+      "muy alto": "🔥 Huella muy alta"
+    },
+    "actionsSummary": "Resumen de acciones",
+    "sort": {
+      "count": "Más elegidas",
+      "reduction_desc": "Mayor impacto",
+      "reduction_asc": "Menor impacto"
+    },
+    "noActions": "Sin acciones aún",
+    "notChosen": "Sin elegir",
+    "revealWinners": "Revelar ganadores →",
+    "footprintsReceived": "Huellas recibidas",
+    "tabFootprints": "Huellas",
+    "tabActions": "Acciones",
+    "calculatorActive": "Calculadora activa",
+    "startActionsPhase": "→ Iniciar fase de acciones",
+    "revealReduction": "Revelar reducción →",
+    "reductionRevealed": "✓ Reducción revelada",
+    "sessionClosed": "Sesión cerrada",
+    "closeSession": "Cerrar sesión",
+    "waitingResults": "Esperando resultados...",
+    "distIndividual": "Distribución de huellas individuales",
+    "rankingByTeams": "Ranking por equipos",
+    "viewGlobal": "Global",
+    "viewTeams": "Equipos"
   }
 }

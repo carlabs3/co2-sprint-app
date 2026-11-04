@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { QRCodeSVG } from 'qrcode.react'
 import api from '../../utils/api.js'
 import { socket } from '../../utils/socket.js'
@@ -32,6 +33,7 @@ function DotsLoader({ color = '#0a0a0a' }) {
 export default function Step2Rankings() {
   const { code } = useParams()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const [view, setView]                             = useState('individual')
   const [ranking, setRanking]                       = useState([])
@@ -134,7 +136,7 @@ export default function Step2Rankings() {
   }, [code])
 
   async function handleReveal() {
-    if (!window.confirm(`¿Revelar los resultados a los ${ranking.length} participantes?`)) return
+    if (!window.confirm(t('step2Rankings.revealConfirm', { count: ranking.length }))) return
     setRevealed(true)
     setShowRanking(true)
     socket.emit('results:reveal', { sessionCode: code })
@@ -143,7 +145,7 @@ export default function Step2Rankings() {
 
   async function handleClose() {
     const choice = window.confirm(
-      '¿Qué quieres hacer con esta sesión?\n\nPulsa ACEPTAR para CERRAR la sesión (los participantes verán la pantalla de fin).\n\nPulsa CANCELAR para dejarla activa y retomarla más tarde.'
+      t('step2Rankings.closeConfirm')
     )
     if (!choice) return
     try { await api.patch(`/api/sessions/${code}/close`) } catch {}
@@ -196,10 +198,10 @@ export default function Step2Rankings() {
       </div>
       <div style={{ fontWeight: 900, fontSize: 'clamp(2rem, 6vw, 3.5rem)', letterSpacing: '0.1em', color: '#0a0a0a', lineHeight: 1 }}>{code}</div>
       <p style={{ fontSize: '0.9rem', color: '#999', maxWidth: 360, lineHeight: 1.65 }}>
-        La sesión está en borrador. Actívala para que los participantes puedan entrar.
+        {t('step2Rankings.draftText')}
       </p>
       <button onClick={handleActivate} style={{ background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.9rem 2.5rem', fontSize: '0.85rem', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' }}>
-        Activar sesión →
+        {t('step2Rankings.activate')}
       </button>
     </div>
   )
@@ -253,7 +255,7 @@ export default function Step2Rankings() {
         <div style={{ textAlign: 'center', color: '#aaa' }}>
           <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>⏳</div>
           <div style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            Espera a que terminen la calculadora
+            {t('step2Rankings.waitCalculator')}
           </div>
         </div>
       </div>
@@ -265,9 +267,9 @@ export default function Step2Rankings() {
 
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-            <h1 style={{ fontWeight: 900, fontSize: '1.4rem', color: '#0a0a0a' }}>Fase de acciones</h1>
+            <h1 style={{ fontWeight: 900, fontSize: '1.4rem', color: '#0a0a0a' }}>{t('step2Rankings.actionsPhase')}</h1>
             <span style={{ fontSize: '0.75rem', color: '#666', background: '#fff', padding: '0.3rem 0.85rem', borderRadius: 999, border: '1px solid #e5e5e5' }}>
-              {confirmedCount}/{sessionGroups.length} equipos confirmados
+              {t('step2Rankings.teamsConfirmed', { count: confirmedCount, total: sessionGroups.length })}
             </span>
           </div>
 
@@ -308,7 +310,6 @@ export default function Step2Rankings() {
             })
             const areaTotal = Object.values(areaAvg).reduce((s, v) => s + v, 0)
             const AREA_COLORS_LOCAL = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6', publicServices: '#94a3b8' }
-            const AREA_LABELS_LOCAL = { transport: 'Transp.', energy: 'Vivienda', food: 'Alim.', consumption: 'Compras', waste: 'Digital', publicServices: 'Serv. púb.' }
 
             return (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'start' }}>
@@ -318,12 +319,12 @@ export default function Step2Rankings() {
 
                   {/* Huella actual card */}
                   <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 16, padding: '1rem 1.25rem' }}>
-                    <p style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 0.5rem' }}>Huella actual del equipo</p>
+                    <p style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 0.5rem' }}>{t('step2Rankings.currentFootprint')}</p>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: '0.75rem' }}>
                       <span style={{ fontWeight: 900, fontSize: '2rem', color: '#0a0a0a', lineHeight: 1 }}>
                         {originalAvg != null ? `${fmtTons(originalAvg)} t` : '–'}
                       </span>
-                      <span style={{ fontSize: '0.78rem', color: '#aaa' }}>CO₂/año · media</span>
+                      <span style={{ fontSize: '0.78rem', color: '#aaa' }}>{t('step2Rankings.co2PerYearAvg')}</span>
                     </div>
                     {areaTotal > 0 && (
                       <>
@@ -341,7 +342,7 @@ export default function Step2Rankings() {
                             return (
                               <div key={area} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#666' }}>
                                 <div style={{ width: 8, height: 8, borderRadius: 2, background: AREA_COLORS_LOCAL[area], flexShrink: 0 }} />
-                                {AREA_LABELS_LOCAL[area]} {pct}%
+                                {t(`step2Rankings.areaShort.${area}`)} {pct}%
                               </div>
                             )
                           })}
@@ -353,11 +354,11 @@ export default function Step2Rankings() {
                   {/* Acciones seleccionadas card */}
                   <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 16, padding: '1rem 1.25rem' }}>
                     <p style={{ fontSize: '0.68rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 0.75rem' }}>
-                      Acciones seleccionadas · {selected.length}
+                      {t('step2Rankings.selectedActions', { count: selected.length })}
                     </p>
 
                     {selected.length === 0 ? (
-                      <p style={{ fontSize: '0.78rem', color: '#ccc', fontStyle: 'italic' }}>Sin acciones seleccionadas aún</p>
+                      <p style={{ fontSize: '0.78rem', color: '#ccc', fontStyle: 'italic' }}>{t('step2Rankings.noActionsSelected')}</p>
                     ) : (
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.6rem', marginBottom: '0.75rem' }}>
                         {selected.map(id => {
@@ -393,7 +394,7 @@ export default function Step2Rankings() {
                           cursor: selected.length > 0 ? 'pointer' : 'default',
                         }}
                       >
-                        {conf?.confirmed ? '✓ Confirmar de nuevo' : `Confirmar acciones de ${group} →`}
+                        {conf?.confirmed ? t('step2Rankings.confirmAgain') : t('step2Rankings.confirmTeam', { group })}
                       </button>
                     )}
                   </div>
@@ -405,7 +406,6 @@ export default function Step2Rankings() {
                   {/* Filtros por categoría */}
                   <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
                     {['transport','energy','food','consumption','waste'].map(area => {
-                      const labels = { transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación', consumption: 'Compras y hábitos', waste: 'Vida digital' }
                       const colors = { transport: '#38bdf8', energy: '#f59e0b', food: '#4ade80', consumption: '#a855f7', waste: '#f472b6' }
                       const isActive = filter3Area === area
                       return (
@@ -418,7 +418,7 @@ export default function Step2Rankings() {
                           cursor: 'pointer',
                         }}>
                           <img src={AREA_ICON_URL[area]} width={14} height={14} alt="" style={{ flexShrink: 0 }} />
-                          {labels[area]}
+                          {t(`areas.${area}`)}
                         </button>
                       )
                     })}
@@ -472,14 +472,14 @@ export default function Step2Rankings() {
                   cursor: 'pointer', letterSpacing: '0.04em',
                 }}
               >
-                Revelar reducción a todos los equipos →
+                {t('step2Rankings.revealReductionAll')}
               </button>
             </div>
           )}
 
           {step3Revealed && (
             <div style={{ marginTop: '1.5rem', padding: '0.85rem 1.25rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 12, textAlign: 'center' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#16a34a' }}>✓ Reducción revelada a todos los equipos</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#16a34a' }}>{t('step2Rankings.reductionRevealedAll')}</span>
             </div>
           )}
 
@@ -567,8 +567,6 @@ export default function Step2Rankings() {
       return after
     }
 
-    const AREA_LABELS_S3 = { transport: 'Transporte', energy: 'Vivienda', food: 'Alimentación', consumption: 'Compras y hábitos', waste: 'Vida digital', publicServices: 'Servicios públicos' }
-
     const StackedBar = ({ areaAvg, total, maxVal, label, muted = false }) => {
       const areaSum = AREA_ORDER.reduce((s, a) => s + (areaAvg[a] || 0), 0)
       return (
@@ -590,7 +588,7 @@ export default function Step2Rankings() {
               return (
                 <div key={area} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '0.72rem' }}>
                   <div style={{ width: 8, height: 8, borderRadius: 2, background: A_COLORS[area], flexShrink: 0 }} />
-                  <span style={{ color: '#666' }}>{AREA_LABELS_S3[area]}</span>
+                  <span style={{ color: '#666' }}>{t(`areas.${area}`)}</span>
                   <span style={{ fontWeight: 700, color: '#333' }}>{fmtTons(areaAvg[area] || 0)}t</span>
                   <span style={{ color: '#bbb' }}>{areaPct}%</span>
                 </div>
@@ -614,20 +612,20 @@ export default function Step2Rankings() {
 
     return (
       <div style={{ flex: 1, padding: '2rem', overflow: 'auto', background: '#f5f5f5' }}>
-        <h1 style={{ fontWeight: 900, fontSize: '1.4rem', color: '#0a0a0a', marginBottom: '1.5rem' }}>Resultados por equipo</h1>
+        <h1 style={{ fontWeight: 900, fontSize: '1.4rem', color: '#0a0a0a', marginBottom: '1.5rem' }}>{t('step2Rankings.teamResultsTitle')}</h1>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
           {/* Column 1: Teams */}
           <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', marginBottom: '0.85rem' }}>Equipos</div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', marginBottom: '0.85rem' }}>{t('step2Rankings.teams')}</div>
             {enrichedTeams.map((team, i) => {
               const areaAvg   = getGroupAreaAvg(team.group)
               const areaAfter = getGroupAreaAfter(team.group, areaAvg)
               const cat       = getCategory(team.newTons || 0)
               const catBadge  = {
-                bajo:      { label: '🌿 Huella reducida',  color: '#16a34a', bg: 'rgba(74,222,128,0.1)'  },
-                medio:     { label: '🌱 Huella moderada',  color: '#ca8a04', bg: 'rgba(251,191,36,0.1)'  },
-                alto:      { label: '🌍 Huella elevada',   color: '#ea580c', bg: 'rgba(251,146,60,0.1)'  },
-                'muy alto':{ label: '🔥 Huella muy alta',  color: '#dc2626', bg: 'rgba(248,113,113,0.1)' },
+                bajo:      { label: t('step2Rankings.badge.bajo'),       color: '#16a34a', bg: 'rgba(74,222,128,0.1)'  },
+                medio:     { label: t('step2Rankings.badge.medio'),      color: '#ca8a04', bg: 'rgba(251,191,36,0.1)'  },
+                alto:      { label: t('step2Rankings.badge.alto'),       color: '#ea580c', bg: 'rgba(251,146,60,0.1)'  },
+                'muy alto':{ label: t('step2Rankings.badge.muy alto'),  color: '#dc2626', bg: 'rgba(248,113,113,0.1)' },
               }[cat]
               return (
                 <div key={team.group} style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 14, padding: '1.25rem', marginBottom: '0.75rem' }}>
@@ -647,8 +645,8 @@ export default function Step2Rankings() {
                     <span style={{ fontWeight: 900, fontSize: '1.6rem', color: '#16a34a' }}>{fmtTons(team.newTons || 0)}</span>
                     <span style={{ fontSize: '0.75rem', color: '#aaa' }}>t</span>
                   </div>
-                  <StackedBar areaAvg={areaAvg}   total={team.originalTons || 0} maxVal={maxOriginal} label="Antes" />
-                  <StackedBar areaAvg={areaAfter} total={team.newTons || 0}      maxVal={maxOriginal} label="Después" muted />
+                  <StackedBar areaAvg={areaAvg}   total={team.originalTons || 0} maxVal={maxOriginal} label={t('teamScreen.step3.before')} />
+                  <StackedBar areaAvg={areaAfter} total={team.newTons || 0}      maxVal={maxOriginal} label={t('teamScreen.step3.after')} muted />
                   {team.totalReduction > 0 && (
                     <div style={{ textAlign: 'right', marginTop: 8 }}>
                       <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#16a34a' }}>
@@ -665,13 +663,13 @@ export default function Step2Rankings() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.85rem' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888' }}>
-                Resumen de acciones
+                {t('step2Rankings.actionsSummary')}
               </div>
               <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
                 {[
-                  { id: 'count',          label: 'Más elegidas'  },
-                  { id: 'reduction_desc', label: 'Mayor impacto' },
-                  { id: 'reduction_asc',  label: 'Menor impacto' },
+                  { id: 'count',          label: t('step2Rankings.sort.count')          },
+                  { id: 'reduction_desc', label: t('step2Rankings.sort.reduction_desc') },
+                  { id: 'reduction_asc',  label: t('step2Rankings.sort.reduction_asc')  },
                 ].map(opt => (
                   <button key={opt.id} onClick={() => setSortBy(opt.id)} style={{
                     padding: '0.25rem 0.75rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 600,
@@ -686,7 +684,7 @@ export default function Step2Rankings() {
               </div>
             </div>
             {allActionsSorted.length === 0 ? (
-              <div style={{ color: '#ccc', fontSize: '0.8rem', fontStyle: 'italic' }}>Sin acciones aún</div>
+              <div style={{ color: '#ccc', fontSize: '0.8rem', fontStyle: 'italic' }}>{t('step2Rankings.noActions')}</div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem' }}>
                 {sorted.map((a, i) => {
@@ -709,12 +707,12 @@ export default function Step2Rankings() {
                     <div style={{ padding: '0.75rem' }}>
                       <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{a.label}</div>
                       <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#16a34a', marginTop: 6 }}>
-                        −{fmtTons(a.co2Reduction / 1000)} t CO₂
+                        −{fmtTons(a.co2Reduction / 1000)} {t('common.tCo2')}
                       </div>
                       <div style={{ fontSize: '0.68rem', color: (actionTeams[a.id]?.length > 0) ? '#16a34a' : '#bbb', lineHeight: 1.4 }}>
                         {actionTeams[a.id]?.length > 0
                           ? actionTeams[a.id].join(', ')
-                          : 'Sin elegir'}
+                          : t('step2Rankings.notChosen')}
                       </div>
                     </div>
                   </div>
@@ -728,7 +726,7 @@ export default function Step2Rankings() {
                 onClick={handleRevealWinners}
                 style={{ width: '100%', marginTop: '1.5rem', padding: '0.9rem', background: '#0a0a0a', color: '#fff', border: 'none', borderRadius: '999px', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer' }}
               >
-                Revelar ganadores →
+                {t('step2Rankings.revealWinners')}
               </button>
             )}
           </div>
@@ -763,7 +761,7 @@ export default function Step2Rankings() {
       <div style={{ textAlign: 'center', padding: '0.25rem 0' }}>
         <div style={{ fontSize: 32, fontWeight: 900, color: '#0a0a0a', lineHeight: 1 }}>{completed}</div>
         <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>
-          Huellas recibidas
+          {t('step2Rankings.footprintsReceived')}
         </div>
       </div>
 
@@ -783,7 +781,7 @@ export default function Step2Rankings() {
               transition: 'all 0.15s ease',
             }}
           >
-            Huellas
+            {t('step2Rankings.tabFootprints')}
           </button>
           <button
             onClick={() => { setActiveStep(3); if (!step3Started) handleStartStep3() }}
@@ -796,7 +794,7 @@ export default function Step2Rankings() {
               transition: 'all 0.15s ease',
             }}
           >
-            Acciones
+            {t('step2Rankings.tabActions')}
           </button>
         </div>
       )}
@@ -808,7 +806,7 @@ export default function Step2Rankings() {
             disabled
             style={{ width: '100%', background: '#f5f5f5', color: '#999', border: '1px solid #e5e5e5', padding: '0.8rem', fontSize: '0.78rem', fontWeight: 600, borderRadius: '999px', cursor: 'default' }}
           >
-            Calculadora activa
+            {t('step2Rankings.calculatorActive')}
           </button>
 
           {revealed && !step3Started && !isClosed && (
@@ -816,7 +814,7 @@ export default function Step2Rankings() {
               onClick={() => { setActiveStep(3); handleStartStep3() }}
               style={{ width: '100%', background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.85rem', fontSize: '0.78rem', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' }}
             >
-              → Iniciar fase de acciones
+              {t('step2Rankings.startActionsPhase')}
             </button>
           )}
         </>
@@ -827,7 +825,7 @@ export default function Step2Rankings() {
         <>
           <div style={{ width: '100%' }}>
             <div style={{ fontSize: '0.68rem', color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
-              Equipos
+              {t('step2Rankings.teams')}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
               {sessionGroups.map(g => {
@@ -851,12 +849,12 @@ export default function Step2Rankings() {
               onClick={handleRevealStep3}
               style={{ width: '100%', background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: 999, cursor: 'pointer' }}
             >
-              Revelar reducción →
+              {t('step2Rankings.revealReduction')}
             </button>
           )}
           {step3Revealed && (
             <button disabled style={{ width: '100%', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', padding: '0.8rem', fontSize: '0.75rem', fontWeight: 600, borderRadius: 999, cursor: 'default' }}>
-              ✓ Reducción revelada
+              {t('step2Rankings.reductionRevealed')}
             </button>
           )}
         </>
@@ -864,11 +862,11 @@ export default function Step2Rankings() {
 
       {isClosed ? (
         <div style={{ width: '100%', textAlign: 'center', fontSize: '0.72rem', color: '#aaa', marginTop: 'auto', padding: '0.5rem 0' }}>
-          Sesión cerrada
+          {t('step2Rankings.sessionClosed')}
         </div>
       ) : (
         <button onClick={handleClose} style={{ width: '100%', background: '#0a0a0a', color: '#fff', border: 'none', padding: '0.7rem', fontSize: '0.72rem', fontWeight: 600, borderRadius: '999px', marginTop: 'auto', cursor: 'pointer' }}>
-          Cerrar sesión
+          {t('step2Rankings.closeSession')}
         </button>
       )}
       </div>
@@ -890,7 +888,7 @@ export default function Step2Rankings() {
         </div>
       ) : (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', padding: '2.5rem' }}>
-          <p style={{ fontSize: '1rem', color: '#888', margin: 0 }}>Esperando resultados...</p>
+          <p style={{ fontSize: '1rem', color: '#888', margin: 0 }}>{t('step2Rankings.waitingResults')}</p>
           <DotsLoader color="#aaa" />
         </div>
       )}
@@ -906,11 +904,11 @@ export default function Step2Rankings() {
         <div style={{ flex: 1, padding: '2.5rem', overflow: 'auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
             <h1 style={{ fontWeight: 900, fontSize: '1.6rem', color: '#0a0a0a' }}>
-              {view === 'individual' ? 'Distribución de huellas individuales' : 'Ranking por equipos'}
+              {view === 'individual' ? t('step2Rankings.distIndividual') : t('step2Rankings.rankingByTeams')}
             </h1>
             {/* Global / Equipos toggle pill */}
             <div style={{ display: 'flex', gap: '0.4rem' }}>
-              {[{ id: 'individual', label: 'Global' }, { id: 'groups', label: 'Equipos' }].map(v => (
+              {[{ id: 'individual', label: t('step2Rankings.viewGlobal') }, { id: 'groups', label: t('step2Rankings.viewTeams') }].map(v => (
                 <button key={v.id} onClick={() => setView(v.id)} style={{
                   background: view === v.id ? '#0a0a0a' : 'transparent',
                   color: view === v.id ? '#fff' : '#666',

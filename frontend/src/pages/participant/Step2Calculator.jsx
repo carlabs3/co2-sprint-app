@@ -76,7 +76,7 @@ function NightsInput({ question, answers, onChange, unit }) {
           background: '#ffffff',
         }}>
           <span style={{ fontSize: '18px', width: '24px', textAlign: 'center' }}>{opt.emoji}</span>
-          <span style={{ flex: 1, fontSize: '12px', fontWeight: 500, color: '#0a0a0a' }}>{opt.label}</span>
+          <span style={{ flex: 1, fontSize: '12px', fontWeight: 500, color: '#0a0a0a' }}>{t(opt.label)}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <button onClick={() => handleChange(opt.value, -1)}
               style={{ width: '26px', height: '26px', borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
@@ -126,8 +126,8 @@ function DrinksInput({ question, answers, onChange }) {
           }}>
             <span style={{ fontSize: 18, width: 24, textAlign: 'center', flexShrink: 0 }}>{opt.emoji}</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, fontWeight: 500, color: '#0a0a0a' }}>{opt.label}</div>
-              <div style={{ fontSize: 10, color: '#aaa', marginTop: 1 }}>{opt.sublabel}</div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: '#0a0a0a' }}>{t(opt.label)}</div>
+              <div style={{ fontSize: 10, color: '#aaa', marginTop: 1 }}>{t(opt.sublabel)}</div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
               <button onClick={() => handleChange(opt.value, -1)} style={{
@@ -199,7 +199,7 @@ function WeekDistributionInput({ question, answers, onChange }) {
         const active = val > 0
         return (
           <div key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, marginBottom: 6, border: `1px solid ${active ? '#0a0a0a' : '#e5e5e5'}`, background: '#ffffff' }}>
-            <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: '#0a0a0a', lineHeight: 1.3 }}>{opt.label}</span>
+            <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: '#0a0a0a', lineHeight: 1.3 }}>{t(opt.label)}</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
               <button onClick={() => handleChange(opt.value, -1)} style={{ width: 26, height: 26, borderRadius: '50%', border: '1.5px solid #0a0a0a', background: 'transparent', color: '#0a0a0a', fontSize: 14, fontWeight: 600, cursor: val === 0 ? 'default' : 'pointer', opacity: val === 0 ? 0.3 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
               <span style={{ fontSize: 15, fontWeight: 700, width: 20, textAlign: 'center' }}>{val}</span>
@@ -281,7 +281,7 @@ function DailyCountInput({ question, answers, onChange }) {
         const isNoneOpt = opt.isNone
         return (
           <div key={opt.value} style={{ background: '#fff', border: `1px solid ${active ? '#0a0a0a' : '#e5e5e5'}`, borderRadius: 12, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: '#0a0a0a' }}>{opt.label}</span>
+            <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: '#0a0a0a' }}>{t(opt.label)}</span>
             {isNoneOpt ? (
               <button onClick={() => handleChange(opt.value, active ? -1 : 1)} style={{ padding: '5px 14px', borderRadius: 8, border: `1.5px solid ${active ? '#0a0a0a' : '#e5e5e5'}`, background: active ? '#0a0a0a' : 'transparent', color: active ? '#fff' : '#0a0a0a', fontSize: 12, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                 {active ? '✓' : t('step2Calculator.dailyCount.select')}
@@ -366,7 +366,7 @@ function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
                 <button key={opt.value} onClick={() => onToggle(question.id, opt.value)}
                   style={groteskCard(isSel, isNone, area.color)}
                 >
-                  {opt.label}
+                  {t(opt.label)}
                 </button>
               )
             })}
@@ -390,7 +390,7 @@ function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
               <div style={{ width: 16, height: 16, borderRadius: 4, flexShrink: 0, border: `1.5px solid ${isSel ? area.color : '#ccc'}`, background: isSel ? area.color : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {isSel && <span style={{ color: 'rgba(0,0,0,0.75)', fontSize: 10, fontWeight: 700, lineHeight: 1 }}>✓</span>}
               </div>
-              <span style={{ fontSize: 14, fontWeight: isSel ? 500 : 400, color: isSel ? 'rgba(0,0,0,0.75)' : '#666', lineHeight: 1.4, letterSpacing: '-0.01em' }}>{opt.label}</span>
+              <span style={{ fontSize: 14, fontWeight: isSel ? 500 : 400, color: isSel ? 'rgba(0,0,0,0.75)' : '#666', lineHeight: 1.4, letterSpacing: '-0.01em' }}>{t(opt.label)}</span>
             </button>
           )
         })}
@@ -414,7 +414,7 @@ function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
             <button key={opt.value} onClick={() => onSelect(question.id, opt.value)}
               style={groteskCard(isSel, isNone, area.color)}
             >
-              {opt.label}
+              {t(opt.label)}
             </button>
           )
         })}
@@ -435,7 +435,7 @@ function OptionList({ question, area, answers, onSelect, onToggle, compact }) {
             <div style={{ width: 16, height: 16, borderRadius: '50%', flexShrink: 0, border: `1.5px solid ${isSel ? area.color : '#ccc'}`, background: isSel ? area.color : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {isSel && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(0,0,0,0.75)' }} />}
             </div>
-            <span style={{ fontSize: 14, fontWeight: isSel ? 500 : 400, color: isSel ? 'rgba(0,0,0,0.75)' : '#666', lineHeight: 1.4 }}>{opt.label}</span>
+            <span style={{ fontSize: 14, fontWeight: isSel ? 500 : 400, color: isSel ? 'rgba(0,0,0,0.75)' : '#666', lineHeight: 1.4 }}>{t(opt.label)}</span>
           </button>
         )
       })}
@@ -718,7 +718,7 @@ export default function Step2Calculator() {
                 <img src={AREA_ICON_URLS[a.id]} width={22} height={22} alt="" style={{ flexShrink: 0 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12.5, fontWeight: isAct ? 500 : 400, color: isDone ? '#0a0a0a' : '#0a0a0a', letterSpacing: '-0.01em' }}>
-                    {a.label}
+                    {t(a.label)}
                   </div>
                   {isAct && (
                     <div style={{ display: 'flex', gap: 3, marginTop: 4 }}>
@@ -751,7 +751,7 @@ export default function Step2Calculator() {
           {/* Question */}
           <div style={{ padding: '22px 28px 14px', flexShrink: 0 }}>
             <p style={{ fontSize: 22, fontWeight: 700, maxWidth: 560, lineHeight: 1.4, letterSpacing: '-0.01em', color: '#0a0a0a', margin: 0 }}>
-              {question.text}
+              {t(question.text)}
             </p>
             {question.id === 'heating' && answers.homeType && (
               <p style={{ fontSize: 13, color: area.color, margin: '4px 0 0', fontWeight: 400 }}>
@@ -759,7 +759,7 @@ export default function Step2Calculator() {
               </p>
             )}
             {question.info && (
-              <p style={{ fontSize: 14, color: '#999', margin: '6px 0 0', fontWeight: 400, lineHeight: 1.4 }}>{question.info}</p>
+              <p style={{ fontSize: 14, color: '#999', margin: '6px 0 0', fontWeight: 400, lineHeight: 1.4 }}>{t(question.info)}</p>
             )}
           </div>
 
@@ -851,11 +851,11 @@ export default function Step2Calculator() {
       {/* Question */}
 <div style={{ padding: '18px 18px 18px', flexShrink: 0, background: '#f5f5f5' }}>
   <p style={{ fontSize: 22, fontWeight: 700, color: '#0a0a0a', lineHeight: 1.4, margin: 0, letterSpacing: '-0.01em' }}>
-    {question.text}
+    {t(question.text)}
   </p>
   {question.info && (
     <p style={{ fontSize: 14, color: '#999', marginTop: 6, fontWeight: 400, lineHeight: 1.4 }}>
-      {question.info}
+      {t(question.info)}
     </p>
   )}
   {question.id === 'heating' && answers.homeType && (
