@@ -135,13 +135,28 @@ age: { type: String, default: '' }
 
 ---
 
-## 7. Decisiones pendientes para el usuario (bloqueantes)
+## 7. Decisiones del gate — RESUELTAS (Fase 0b)
 
-1. **`category`** (`bajo/medio/alto/muy alto`): recomendación — **dejar el enum tal cual como ID estable** y traducir solo las etiquetas visibles vía i18next (ES: "BAJO"… / EN: "LOW"…). Así no se migran datos ni se toca el cálculo. Alternativa (no recomendada): migrar el enum a IDs en inglés (`low/medium/high/very_high`), lo que exige migración de datos históricos y tocar 6 sitios.
-2. **`gender`** (`Mujer/Hombre/No binario/Prefiero no decirlo`): hoy se guarda el texto ES. Si queremos que una sesión EN guarde/mostrar valores coherentes, conviene guardar un **ID neutro** (`female/male/nonbinary/undisclosed`) y traducir en UI. Esto afecta a datos históricos (quedarían en ES) — decidir si se migran o se tratan como legado.
-3. **`age`**: similar; el único valor con idioma es `Prefiero no decirlo`. Opciones: mantener rangos como IDs neutros (`u20/20-29/.../60+/undisclosed`) o dejar como está.
+Decidido por el usuario e implementado en el commit `i18n fase 0b`:
 
-Ninguna de estas decisiones se ha implementado. Espero tu respuesta antes de pasar a Fase 1.
+1. **`category`** (`bajo/medio/alto/muy alto`): **se queda exactamente igual** como ID interno. Solo se traducen las etiquetas visibles con i18next. Cero migración, cero cambio de cálculo. ✅ sin cambios de código en Fase 0b.
+2. **`gender`** → **IDs neutros** `female/male/nonbinary/undisclosed`.
+   - `JoinSession.jsx`: `GENDERS` ahora es `{ value: ID, label: 'texto ES' }`; el `value` enviado es el ID, la etiqueta visible sigue en español (pasará a i18next en Fase 2).
+   - Schema: `gender` con `enum: ['', 'female', 'male', 'nonbinary', 'undisclosed']` en `FootprintResult.js` y `Participant.js`.
+   - Datos históricos: **se migran** con `scripts/migrate-gender-age.js`.
+3. **`age`**: los rangos se quedan igual; solo `'Prefiero no decirlo'` → `'undisclosed'`.
+   - `JoinSession.jsx`: `AGE_RANGES` ahora es `{ value, label }`; solo cambia el `value` del último.
+   - Schema: `age` se deja como `String` libre (no hay cambio estructural; los rangos son abiertos). Solo cambia el valor almacenado.
+   - Datos históricos: se migra ese único valor con el mismo script.
+
+### ⚠ Orden de despliegue (importante)
+El `enum` de `gender` rechaza los valores españoles antiguos **al escribir** (no al leer). Como todas las escrituras nuevas ya usan IDs neutros, el riesgo es bajo, pero conviene **ejecutar la migración antes o a la vez que se despliega** este código para que la colección quede homogénea. La migración es idempotente.
+
+### Migración — cómo ejecutarla
+Desde `backend/` (lee la conexión de `MONGODB_URI`, nunca credenciales en el código):
+1. Prueba (no escribe nada, solo cuenta): `node scripts/migrate-gender-age.js --dry-run`
+2. Real: `node scripts/migrate-gender-age.js`
+3. Es idempotente: si se vuelve a lanzar, los valores ya migrados no se tocan; los desconocidos se listan al final sin modificarse.
 
 ---
 

@@ -3,8 +3,22 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSession } from '../../context/SessionContext.jsx'
 import api from '../../utils/api.js'
 
-const AGE_RANGES = ['< 20', '20-29', '30-39', '40-49', '50-59', '60+', 'Prefiero no decirlo']
-const GENDERS    = ['Mujer', 'Hombre', 'No binario', 'Prefiero no decirlo']
+// value = ID neutro guardado en DB · label = texto visible (pasará a i18next en Fase 2)
+const AGE_RANGES = [
+  { value: '< 20',        label: '< 20' },
+  { value: '20-29',       label: '20-29' },
+  { value: '30-39',       label: '30-39' },
+  { value: '40-49',       label: '40-49' },
+  { value: '50-59',       label: '50-59' },
+  { value: '60+',         label: '60+' },
+  { value: 'undisclosed', label: 'Prefiero no decirlo' },
+]
+const GENDERS = [
+  { value: 'female',      label: 'Mujer' },
+  { value: 'male',        label: 'Hombre' },
+  { value: 'nonbinary',   label: 'No binario' },
+  { value: 'undisclosed', label: 'Prefiero no decirlo' },
+]
 
 const s = {
   page: {
@@ -261,7 +275,7 @@ export default function JoinSession() {
                 style={{ ...s.select, color: age ? '#0a0a0a' : '#aaa', ...(ageError ? s.fieldError : {}) }}
               >
                 <option value="">—</option>
-                {AGE_RANGES.map(r => <option key={r} value={r}>{r}</option>)}
+                {AGE_RANGES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
               </select>
               {ageError && <div style={s.error}>{ageError}</div>}
             </div>
@@ -274,7 +288,7 @@ export default function JoinSession() {
                 style={{ ...s.select, color: gender ? '#0a0a0a' : '#aaa', ...(genderError ? s.fieldError : {}) }}
               >
                 <option value="">—</option>
-                {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
+                {GENDERS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
               </select>
               {genderError && <div style={s.error}>{genderError}</div>}
             </div>

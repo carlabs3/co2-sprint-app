@@ -6,7 +6,7 @@ const footprintResultSchema = new Schema({
   participantId: { type: Schema.Types.ObjectId, ref: 'Participant' },
   group:         { type: String, required: true },
   age:           { type: String, default: '' },
-  gender:        { type: String, default: '' },
+  gender:        { type: String, default: '', enum: ['', 'female', 'male', 'nonbinary', 'undisclosed'] },
   carbonTons:    { type: Number, required: true },
   areas: {
     transport:      Number,
