@@ -28,7 +28,7 @@ export const AREA_LABEL = {
 
 export const ACTIONS = [
   { id: "t01", area: "transport", co2Reduction: 230, title: "actions.t01.title", description: "actions.t01.description", image: "/actions/t01.png" },
-  { id: "t02", area: "transport", co2Reduction: 1000, title: "actions.t02.title", description: "actions.t02.description", image: "/actions/t02.png" },
+  { id: "t02", area: "transport", co2Reduction: 1000, title: "actions.t02.title", description: "actions.t02.description", image: "/actions/t02.png", hiddenIn: ["en"] },
   { id: "t03", area: "transport", co2Reduction: 250, title: "actions.t03.title", description: "actions.t03.description", image: "/actions/t03.png" },
   { id: "t04", area: "transport", co2Reduction: 130, title: "actions.t04.title", description: "actions.t04.description", image: "/actions/t04.png" },
   { id: "t05", area: "transport", co2Reduction: 560, title: "actions.t05.title", description: "actions.t05.description", image: "/actions/t05.png" },
@@ -60,9 +60,16 @@ export const ACTIONS = [
   { id: "c07", area: "consumption", co2Reduction: 15, title: "actions.c07.title", description: "actions.c07.description", image: "/actions/c07.png" },
   { id: "c08", area: "consumption", co2Reduction: 30, title: "actions.c08.title", description: "actions.c08.description", image: "/actions/c08.png" },
   { id: "c09", area: "consumption", co2Reduction: 7, title: "actions.c09.title", description: "actions.c09.description", image: "/actions/c09.png" },
-  { id: "d01", area: "waste", co2Reduction: 15, title: "actions.d01.title", description: "actions.d01.description", image: "/actions/d01.png" },
+  { id: "d01", area: "waste", co2Reduction: 15, title: "actions.d01.title", description: "actions.d01.description", image: "/actions/d01.png", hiddenIn: ["en"] },
   { id: "d02", area: "waste", co2Reduction: 20, title: "actions.d02.title", description: "actions.d02.description", image: "/actions/d02.png" },
   { id: "d03", area: "waste", co2Reduction: 15, title: "actions.d03.title", description: "actions.d03.description", image: "/actions/d03.png" },
   { id: "d04", area: "waste", co2Reduction: 10, title: "actions.d04.title", description: "actions.d04.description", image: "/actions/d04.png" },
   { id: "d05", area: "waste", co2Reduction: 20, title: "actions.d05.title", description: "actions.d05.description", image: "/actions/d05.png" },
 ]
+
+// Acciones visibles para un idioma de sesión: oculta las marcadas con
+// hiddenIn que incluyan ese idioma. En 'es' se devuelven las 38.
+// No afecta a sesiones antiguas ni al cálculo de reducción (que usan los IDs).
+export function getVisibleActions(lang) {
+  return ACTIONS.filter(a => !(a.hiddenIn && a.hiddenIn.includes(lang)))
+}

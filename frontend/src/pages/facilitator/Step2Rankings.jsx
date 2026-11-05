@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { QRCodeSVG } from 'qrcode.react'
 import api from '../../utils/api.js'
 import { socket } from '../../utils/socket.js'
-import { ACTIONS, AREA_ICON_URL } from '../../utils/actions.js'
+import { ACTIONS, AREA_ICON_URL, getVisibleActions } from '../../utils/actions.js'
 import {
   DistributionView, GroupsView,
   computeGroups,
@@ -34,7 +34,7 @@ function DotsLoader({ color = '#0a0a0a' }) {
 export default function Step2Rankings() {
   const { code } = useParams()
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   const [view, setView]                             = useState('individual')
   const [ranking, setRanking]                       = useState([])
@@ -428,7 +428,7 @@ export default function Step2Rankings() {
 
                   {/* Listado de acciones */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem' }}>
-                    {ACTIONS.filter(a => filter3Area === 'all' || a.area === filter3Area).map(a => {
+                    {getVisibleActions(i18n.language).filter(a => filter3Area === 'all' || a.area === filter3Area).map(a => {
                       const isSel = selected.includes(a.id)
                       return (
                         <div key={a.id}
@@ -523,11 +523,13 @@ export default function Step2Rankings() {
       const newTons = Math.max(0, originalTons - (team.totalReduction || 0) / 1000)
       return { ...team, originalTons, newTons }
     })
-    const allActionsSorted = [...(step3Data.actionStats || [])].sort((a, b) => b.count - a.count)
+    const visibleActions = getVisibleActions(i18n.language)
+    const visibleIds = new Set(visibleActions.map(a => a.id))
+    const allActionsSorted = [...(step3Data.actionStats || [])].filter(a => visibleIds.has(a.id)).sort((a, b) => b.count - a.count)
     const sorted = sortBy === 'count'
       ? [...allActionsSorted].sort((a, b) => b.count - a.count)
           .map(a => ({ ...(ACTIONS.find(x => x.id === a.id) || a), count: a.count }))
-      : [...ACTIONS].sort((a, b) =>
+      : [...visibleActions].sort((a, b) =>
           sortBy === 'reduction_desc'
             ? b.co2Reduction - a.co2Reduction
             : a.co2Reduction - b.co2Reduction
