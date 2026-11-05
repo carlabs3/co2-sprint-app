@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useSession } from '../../context/SessionContext.jsx'
 import api from '../../utils/api.js'
 import { applySessionLang } from '../../utils/sessionLang.js'
+import { safeSet } from '../../utils/safeStorage.js'
 
 // value = ID neutro guardado en DB · labelKey = clave i18n del texto visible
 const AGE_RANGES = [
@@ -212,7 +213,7 @@ export default function JoinSession() {
     }
     if (!valid) return
 
-    localStorage.setItem(`co2sprint_participant_${code}`, JSON.stringify({
+    safeSet(`co2sprint_participant_${code}`, JSON.stringify({
       code, name: 'Anónimo', group, age, gender,
       joinedAt: new Date().toISOString(),
     }))

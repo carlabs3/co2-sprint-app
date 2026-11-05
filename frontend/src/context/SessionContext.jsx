@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { socket } from '../utils/socket.js'
 import api from '../utils/api.js'
+import { safeGet, safeRemove, safeKeys } from '../utils/safeStorage.js'
 
 const SessionContext = createContext(null)
 
@@ -31,11 +32,11 @@ export function SessionProvider({ children }) {
     socket.on('connect', onConnect)
 
     // Try to restore participant session from localStorage
-    const keys = Object.keys(localStorage).filter(k => k.startsWith('co2sprint_participant_'))
+    const keys = safeKeys().filter(k => k.startsWith('co2sprint_participant_'))
     if (keys.length > 0) {
       const key = keys[keys.length - 1]
       try {
-        const saved = JSON.parse(localStorage.getItem(key))
+        const saved = JSON.parse(safeGet(key))
         api.get(`/api/sessions/${saved.code}/info`)
           .then(res => {
             if (res.data.status === 'active') {
@@ -53,12 +54,12 @@ export function SessionProvider({ children }) {
                 gender: saved.gender,
               })
             } else {
-              localStorage.removeItem(key)
+              safeRemove(key)
             }
           })
-          .catch(() => localStorage.removeItem(key))
+          .catch(() => safeRemove(key))
       } catch {
-        localStorage.removeItem(key)
+        safeRemove(key)
       }
     }
 
@@ -83,13 +84,13 @@ export function SessionProvider({ children }) {
 
   function clearSession() {
     // Clear participant and progress keys from localStorage
-    Object.keys(localStorage)
+    safeKeys()
       .filter(k =>
         k.startsWith('co2sprint_participant_') ||
         k.startsWith('co2sprint_progress_') ||
         k.startsWith('co2sprint_results_')
       )
-      .forEach(k => localStorage.removeItem(k))
+      .forEach(k => safeRemove(k))
     setSessionCode(null)
     setParticipantName('')
     setParticipantGroup('')

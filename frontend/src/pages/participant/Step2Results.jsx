@@ -9,6 +9,7 @@ import WaitingForFacilitator from '../../components/WaitingForFacilitator.jsx'
 import { socket } from '../../utils/socket.js'
 import api from '../../utils/api.js'
 import { applySessionLang } from '../../utils/sessionLang.js'
+import { safeGet, safeSet, safeRemove } from '../../utils/safeStorage.js'
 import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
 import { MAP, calcAlcohol } from '../../utils/calculator.js'
 import { fmtTons } from '../../utils/format.js'
@@ -320,7 +321,7 @@ export default function Step2Results() {
 
   // Restore from localStorage if available (survives page reload)
   const RESULTS_KEY = `co2sprint_results_${code}`
-  const savedRaw = localStorage.getItem(RESULTS_KEY)
+  const savedRaw = safeGet(RESULTS_KEY)
   const saved = savedRaw ? (() => { try { return JSON.parse(savedRaw) } catch { return null } })() : null
 
   const data = location.state?.carbonTons != null
@@ -332,7 +333,7 @@ export default function Step2Results() {
 
   // Save real results to localStorage on mount (revealed:true for late participants)
   if (location.state?.carbonTons != null && !savedRaw) {
-    localStorage.setItem(RESULTS_KEY, JSON.stringify({
+    safeSet(RESULTS_KEY, JSON.stringify({
       carbonTons: location.state.carbonTons,
       areas: location.state.areas || {},
       answers: location.state.answers || {},
@@ -352,7 +353,7 @@ export default function Step2Results() {
 
   const retryPending = useCallback(() => {
     const pendingKey = `co2sprint_pending_${code}`
-    const pending = localStorage.getItem(pendingKey)
+    const pending = safeGet(pendingKey)
     if (!pending) return
     try {
       const payload = JSON.parse(pending)
@@ -363,21 +364,21 @@ export default function Step2Results() {
         keepalive: true,
       }).then(r => {
         if (r.ok) {
-          localStorage.removeItem(pendingKey)
+          safeRemove(pendingKey)
           setPendingBanner(false)
         } else {
           setPendingBanner(true)
         }
       }).catch(() => setPendingBanner(true))
     } catch {
-      localStorage.removeItem(pendingKey)
+      safeRemove(pendingKey)
     }
   }, [code])
 
   useEffect(() => {
     // Retry any pending submission from localStorage (capa 3)
     const pendingKey = `co2sprint_pending_${code}`
-    if (localStorage.getItem(pendingKey)) retryPending()
+    if (safeGet(pendingKey)) retryPending()
 
     api.get(`/api/sessions/${code}/info`)
       .then(res => {
@@ -390,7 +391,7 @@ export default function Step2Results() {
     function onResultsRevealed() {
       setRevealed(true)
       const existing = savedRaw ? JSON.parse(savedRaw) : { carbonTons, areas, answers: answers || {} }
-      localStorage.setItem(RESULTS_KEY, JSON.stringify({ ...existing, revealed: true }))
+      safeSet(RESULTS_KEY, JSON.stringify({ ...existing, revealed: true }))
     }
     function onStepChange({ step }) { if (step >= 3) setStep3Started(true) }
     function onSessionClosed() { navigate(`/session/${code}/end`, { replace: true }) }
@@ -404,7 +405,7 @@ export default function Step2Results() {
       }
     }
     function onFootprintSaved() {
-      localStorage.removeItem(`co2sprint_pending_${code}`)
+      safeRemove(`co2sprint_pending_${code}`)
       setPendingBanner(false)
     }
 

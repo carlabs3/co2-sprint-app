@@ -9,6 +9,7 @@ import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
 import { calculator } from '../../utils/calculator.js'
 import { applySessionLang } from '../../utils/sessionLang.js'
 import { uid } from '../../utils/ids.js'
+import { safeGet, safeSet, safeRemove } from '../../utils/safeStorage.js'
 
 const AREA_VISUAL = {
   transport:   { color: '#38bdf8', bg: '#e8f2fd', iconBg: '#d0e8f8' },
@@ -473,7 +474,7 @@ export default function Step2Calculator() {
   // Retry pending submission on mount (capa 3 — localStorage)
   useEffect(() => {
     const pendingKey = `co2sprint_pending_${code}`
-    const pending = localStorage.getItem(pendingKey)
+    const pending = safeGet(pendingKey)
     if (!pending) return
     try {
       const payload = JSON.parse(pending)
@@ -482,15 +483,15 @@ export default function Step2Calculator() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
         keepalive: true,
-      }).then(r => { if (r.ok) localStorage.removeItem(pendingKey) }).catch(() => {})
+      }).then(r => { if (r.ok) safeRemove(pendingKey) }).catch(() => {})
     } catch {
-      localStorage.removeItem(pendingKey)
+      safeRemove(pendingKey)
     }
   }, [code]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Restore progress on mount
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
+    const saved = safeGet(STORAGE_KEY)
     if (!saved) return
     try {
       const { answers: a, areaIndex: ai, questionIndex: qi } = JSON.parse(saved)
@@ -499,19 +500,19 @@ export default function Step2Calculator() {
       setAreaIndex(ai || 0)
       setQuestionIndex(qi || 0)
     } catch {
-      localStorage.removeItem(STORAGE_KEY)
+      safeRemove(STORAGE_KEY)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Save progress on every change (never remove here — server confirms via footprint:saved)
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers, areaIndex, questionIndex }))
+    safeSet(STORAGE_KEY, JSON.stringify({ answers, areaIndex, questionIndex }))
   }, [answers, areaIndex, questionIndex]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     function onFootprintSaved() {
-      localStorage.removeItem(STORAGE_KEY)
-      localStorage.removeItem(PARTICIPANT_KEY)
+      safeRemove(STORAGE_KEY)
+      safeRemove(PARTICIPANT_KEY)
     }
     socket.on('footprint:saved', onFootprintSaved)
     return () => {
@@ -594,13 +595,13 @@ export default function Step2Calculator() {
       // Capa 3: localStorage pending — se reintenta en Step2Results si fetch falla
       ;(() => {
         const pendingKey = `co2sprint_pending_${code}`
-        localStorage.setItem(pendingKey, JSON.stringify(payload))
+        safeSet(pendingKey, JSON.stringify(payload))
         fetch(`${import.meta.env.VITE_BACKEND_URL}/api/results/submit`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
           keepalive: true,
-        }).then(r => { if (r.ok) localStorage.removeItem(pendingKey) }).catch(() => {})
+        }).then(r => { if (r.ok) safeRemove(pendingKey) }).catch(() => {})
       })()
       // Navigate immediately — no waiting screen needed
       navigate(`/session/${code}/results`, { state })
