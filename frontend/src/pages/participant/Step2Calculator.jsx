@@ -8,6 +8,7 @@ import SessionClosedBanner from '../../components/SessionClosedBanner.jsx'
 import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
 import { calculator } from '../../utils/calculator.js'
 import { applySessionLang } from '../../utils/sessionLang.js'
+import { uid } from '../../utils/ids.js'
 
 const AREA_VISUAL = {
   transport:   { color: '#38bdf8', bg: '#e8f2fd', iconBg: '#d0e8f8' },
@@ -574,7 +575,7 @@ export default function Step2Calculator() {
     if (isLast) {
       const calcResult = calculator(currentAnswers)
       const state = { ...calcResult, answers: currentAnswers }
-      const submissionId = `${code}_${participantGroup}_${Date.now()}`
+      const submissionId = `${code}_${participantGroup}_${Date.now()}_${uid()}`
       const payload = {
         submissionId,
         sessionCode: code,
