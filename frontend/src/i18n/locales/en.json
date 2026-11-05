@@ -163,7 +163,7 @@
       "avgSpain": "Spain average",
       "below": "{{pct}}% below the Spanish average",
       "above": "{{pct}}% above the Spanish average",
-      "source": "Source: Ministerio para la Transición Ecológica, 2023"
+      "source": "Source: Spanish Ministry for the Ecological Transition (MITECO), 2023"
     },
     "percentile": {
       "title": "Your place in the session",
@@ -441,9 +441,9 @@
         "26a": "No heating",
         "26b": "Electric heating (resistive)",
         "26c": "Natural gas boiler",
-        "26d": "Heating oil / diesel",
+        "26d": "Heating oil",
         "26e": "Wood pellets",
-        "26f": "Heat pump / aerothermal",
+        "26f": "Heat pump (air source)",
         "26g": "Not sure / mixed"
       }
     },
@@ -453,7 +453,7 @@
       "options": {
         "a": "Yes, I have solar panels at home",
         "b": "I have a certified 100% renewable electricity tariff",
-        "c": "No, I use the standard electricity mix"
+        "c": "No, I use standard grid electricity"
       }
     },
     "hasAC": {
@@ -515,9 +515,9 @@
         "7b": "Hot chocolate",
         "7c": "Tea",
         "7d_cow": "Coffee with cow's milk",
-        "7d_veg": "Coffee with plant milk (oat)",
+        "7d_veg": "Coffee with oat milk",
         "7d_chai": "Chai latte",
-        "7e": "Black coffee"
+        "7e": "Espresso / black coffee"
       }
     },
     "alcohol": {
@@ -532,7 +532,7 @@
       "sub": {
         "soda": "Coca-Cola, Fanta, energy drinks...",
         "wine": "150 ml glass",
-        "beer": "Half-pint or bottle (330 ml)",
+        "beer": "Small beer or bottle (330 ml)",
         "spirits": "Gin, whisky, vodka... (50 ml)"
       }
     },
@@ -769,7 +769,7 @@
     "subcatDist": "Subcategory distribution",
     "noGroups": "No team data yet...",
     "footprintFem": "{{cat}} footprint",
-    "persons": "{{count}} ppl"
+    "persons": "{{count}} people"
   },
   "step2Rankings": {
     "revealConfirm": "Reveal the results to the {{count}} participants?",
@@ -792,7 +792,7 @@
     "selectedActions": "Selected actions · {{count}}",
     "noActionsSelected": "No actions selected yet",
     "confirmAgain": "✓ Confirm again",
-    "confirmTeam": "Confirm {{group}}'s actions →",
+    "confirmTeam": "Confirm actions for {{group}} →",
     "revealReductionAll": "Reveal reduction to all teams →",
     "reductionRevealedAll": "✓ Reduction revealed to all teams",
     "teamResultsTitle": "Results by team",

@@ -5,12 +5,12 @@
 
 const T = {
   es: {
-    subject: 'Tu huella de carbono — {tons} t CO₂/año',
+    subject: 'Tu huella de carbono — {tons} t CO₂e/año',
     p1: 'Gracias por participar en nuestro taller CO₂ Sprint de Drop. 🌱',
     p2: 'Calcular tu huella no es un examen — es conocer tu punto de partida. Pero ese mismo número tiene otra lectura: cuanto mayor es nuestra huella, más dependemos de un sistema frágil. Y eso, poco a poco, podemos cambiarlo.',
     p3: 'Aquí tienes tus resultados:',
     totalLabel: 'Tu huella total',
-    unit: 'CO₂/año',
+    unit: 'CO₂e/año',
     breakdownTitle: 'Desglose por áreas',
     subcatTitle: 'Detalle por categoría',
     objectiveTitle: '🎯 El objetivo: 2 t CO₂e por persona para 2050',
