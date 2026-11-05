@@ -101,6 +101,9 @@
       "p2": "The questions are about your personal life, not your work activity.",
       "start": "Start →"
     },
+    "saving": {
+      "title": "Saving your footprint…"
+    },
     "sidebarAreas": "Areas",
     "progressQuestion": "Question {{current}} of {{total}}",
     "forHome": "For your {{home}}",

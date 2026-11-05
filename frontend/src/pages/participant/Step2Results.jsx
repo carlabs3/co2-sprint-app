@@ -349,7 +349,7 @@ export default function Step2Results() {
   const [sessionResults, setSessionResults] = useState(null)
   const [emailInput,     setEmailInput]     = useState('')
   const [emailStatus,    setEmailStatus]    = useState('idle')
-  const [pendingBanner,  setPendingBanner]  = useState(false)
+  const [pendingBanner,  setPendingBanner]  = useState(() => location.state?.pendingUnconfirmed || false)
 
   const retryPending = useCallback(() => {
     const pendingKey = `co2sprint_pending_${code}`

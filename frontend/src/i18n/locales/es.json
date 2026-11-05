@@ -101,6 +101,9 @@
       "p2": "Las preguntas se refieren a tu vida personal, no a tu actividad profesional.",
       "start": "Empezar →"
     },
+    "saving": {
+      "title": "Guardando tu huella…"
+    },
     "sidebarAreas": "Áreas",
     "progressQuestion": "Pregunta {{current}} de {{total}}",
     "forHome": "Para tu {{home}}",

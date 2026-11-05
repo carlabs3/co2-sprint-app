@@ -457,6 +457,8 @@ export default function Step2Calculator() {
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answers, setAnswers]             = useState({})
   const [isMobile, setIsMobile]           = useState(() => window.innerWidth <= 768)
+  const [saving, setSaving]               = useState(false)
+  const savedResolveRef                   = useRef(null)   // resuelve al llegar footprint:saved
   const STORAGE_KEY                       = `co2sprint_progress_${code}`
   const PARTICIPANT_KEY                   = `co2sprint_participant_${code}`
 
@@ -513,6 +515,7 @@ export default function Step2Calculator() {
     function onFootprintSaved() {
       safeRemove(STORAGE_KEY)
       safeRemove(PARTICIPANT_KEY)
+      savedResolveRef.current?.()   // confirma el envío en curso (punto 3)
     }
     socket.on('footprint:saved', onFootprintSaved)
     return () => {
@@ -589,22 +592,38 @@ export default function Step2Calculator() {
         answers: currentAnswers,
         category: calcResult.category,
       }
-      // Capa 1: socket (tiempo real)
+      // Capa 3: pending en localStorage (tolerante a fallos)
+      const pendingKey = `co2sprint_pending_${code}`
+      safeSet(pendingKey, JSON.stringify(payload))
+
+      // Muestra "Guardando tu huella…" y espera confirmación antes de navegar.
+      setSaving(true)
+
+      let settled = false
+      const finish = (confirmed) => {
+        if (settled) return
+        settled = true
+        savedResolveRef.current = null
+        if (confirmed) safeRemove(pendingKey)
+        navigate(`/session/${code}/results`, {
+          state: confirmed ? state : { ...state, pendingUnconfirmed: true },
+        })
+      }
+
+      // Capa 1: socket (tiempo real) — confirma vía footprint:saved
+      savedResolveRef.current = () => finish(true)
       socket.emit('footprint:submit', payload)
-      // Capa 2: HTTP de respaldo con keepalive (sobrevive al bloqueo de pantalla del móvil)
-      // Capa 3: localStorage pending — se reintenta en Step2Results si fetch falla
-      ;(() => {
-        const pendingKey = `co2sprint_pending_${code}`
-        safeSet(pendingKey, JSON.stringify(payload))
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/results/submit`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          keepalive: true,
-        }).then(r => { if (r.ok) safeRemove(pendingKey) }).catch(() => {})
-      })()
-      // Navigate immediately — no waiting screen needed
-      navigate(`/session/${code}/results`, { state })
+
+      // Capa 2: HTTP de respaldo con keepalive (sobrevive al bloqueo de pantalla)
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/results/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      }).then(r => { if (r.ok) finish(true) }).catch(() => {})
+
+      // A los 8 s sin confirmación: pasa a resultados igual, deja el pending y avisa.
+      setTimeout(() => finish(false), 8000)
       return
     }
     let nextQ = questionIndex + 1
@@ -663,6 +682,22 @@ export default function Step2Calculator() {
   }
 
   const nextIcon = isLast ? '✓' : '→'
+
+  // ── saving screen (espera confirmación del envío) ────────────────────────────
+  if (saving) return (
+    <div style={{
+      minHeight: 'calc(100dvh - 52px)', background: '#f5f5f5',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      padding: '2rem', textAlign: 'center',
+    }}>
+      <div style={{ fontSize: '3rem', marginBottom: '1.25rem', lineHeight: 1 }}>🌱</div>
+      <h1 style={{ fontWeight: 900, fontSize: '1.35rem', textTransform: 'uppercase', marginBottom: '0.75rem', color: '#0a0a0a' }}>
+        {t('step2Calculator.saving.title')}
+      </h1>
+      <DotsLoader />
+    </div>
+  )
 
   // ── intro screen ─────────────────────────────────────────────────────────────
   if (showIntro) return (
