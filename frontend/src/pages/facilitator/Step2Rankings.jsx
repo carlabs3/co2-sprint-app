@@ -137,6 +137,33 @@ export default function Step2Rankings() {
     }
   }, [code])
 
+  // Consulta periódica de respaldo (cada 3 s) por si se pierde un evento de
+  // socket. Solo durante la fase de cálculo (activa) o de resultados (revelada),
+  // nunca con la sesión cerrada. Usa el endpoint de ranking que ya existe.
+  useEffect(() => {
+    if (sessionStatus === 'closed') return
+    if (!(sessionStatus === 'active' || revealed)) return
+    const poll = setInterval(() => {
+      api.get(`/api/results/${code}/ranking`)
+        .then(res => {
+          const items = res.data.map(r => ({
+            name: 'Anónimo',
+            group: r.group,
+            tons: r.carbonTons,
+            category: r.category,
+            areas: r.areas || {},
+            answers: r.answers || {},
+          }))
+          const sorted = [...items].sort((a, b) => a.tons - b.tons)
+          setRanking(sorted)
+          setGroups(computeGroups(sorted))
+          setTotalJoined(prev => Math.max(prev, items.length))
+        })
+        .catch(() => {})
+    }, 3000)
+    return () => clearInterval(poll)
+  }, [code, sessionStatus, revealed])
+
   async function handleReveal() {
     if (!window.confirm(t('step2Rankings.revealConfirm', { count: ranking.length }))) return
     setRevealed(true)
