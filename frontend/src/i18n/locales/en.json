@@ -476,7 +476,7 @@
       "text": "Do you do any of these at home? (tick all that apply)",
       "info": "Small actions that cut your home's energy use.",
       "options": {
-        "closeWindows": "I close windows when the heating is on",
+        "closeWindows": "I close the windows when I turn on the heating.",
         "thermostat19": "I keep the heating at 19–20°C (no higher)",
         "ledBulbs": "All my bulbs are LED",
         "ecoPrograms": "I use the eco programmes on my washing machine and dishwasher",
@@ -829,7 +829,7 @@
   },
   "actions": {
     "t01": {
-      "title": "I take the train instead of the plane for a weekend break",
+      "title": "I take the train instead of flying for a weekend getaway.",
       "description": "Example: Madrid–Santiago de Compostela."
     },
     "t02": {
@@ -837,35 +837,35 @@
       "description": "I choose a domestic destination and share the journey."
     },
     "t03": {
-      "title": "I take the bus instead of the car for my daily commute",
+      "title": "I take the bus instead of the car for my daily journeys.",
       "description": "An urban bus emits up to 6× less CO₂e per passenger."
     },
     "t04": {
-      "title": "I cycle instead of driving",
+      "title": "I cycle instead of driving for my daily journeys.",
       "description": "Zero emissions and better health."
     },
     "t05": {
-      "title": "I take the train instead of the car for my daily commute",
+      "title": "I take the train instead of the car for my daily journeys.",
       "description": "Commuter trains emit up to 10× less than the car."
     },
     "t06": {
-      "title": "I choose a short-haul flight instead of a long-haul one for my holiday",
+      "title": "I choose a short-haul flight instead of a transoceanic one for my holidays (for example, a European city instead of New York).",
       "description": "I go to Lisbon instead of New York."
     },
     "t07": {
-      "title": "I car-share with three people for my daily commute",
+      "title": "I share a car with at least two other people for a weekend trip.",
       "description": "Example: Madrid–Bilbao (700 km round trip)."
     },
     "v01": {
-      "title": "I replace my gas boiler with a heat pump",
+      "title": "I replace my fossil fuel heating with a heat pump (and my energy bills can go down too).",
       "description": "It also lowers my energy bill."
     },
     "v02": {
-      "title": "I swap my bulbs for low-energy LEDs (10 bulbs)",
+      "title": "I replace my light bulbs with energy-efficient LED bulbs.",
       "description": "LEDs use up to 80% less energy."
     },
     "v03": {
-      "title": "I keep my home at 19.5 °C in winter",
+      "title": "I keep the temperature at home at 19.5°C in winter.",
       "description": "Each degree lower saves 7% on heating."
     },
     "v04": {
@@ -873,91 +873,91 @@
       "description": "It avoids unnecessary heat loss."
     },
     "v05": {
-      "title": "I use the eco programmes on my appliances",
+      "title": "I use the eco programmes on my appliances.",
       "description": "It saves hot water and electricity."
     },
     "v06": {
-      "title": "I hang my washing to dry instead of using the tumble dryer",
+      "title": "I hang my clothes out to dry instead of using the tumble dryer.",
       "description": "The tumble dryer is one of the most power-hungry appliances."
     },
     "v07": {
-      "title": "I unplug electronic devices I'm not using",
+      "title": "I unplug electronic devices when not in use.",
       "description": "Standby mode can account for up to 10% of the bill."
     },
     "a01": {
-      "title": "I stop eating meat at lunch and dinner",
+      "title": "I stop eating meat.",
       "description": "One of the highest-impact individual actions."
     },
     "a02": {
-      "title": "I compost at home",
+      "title": "I make compost at home.",
       "description": "It cuts the methane from organic waste in landfill."
     },
     "a03": {
-      "title": "I swap red meat for white meat (2–3 times a week)",
+      "title": "I replace red meat with white meat (at least once per week).",
       "description": "Beef emits 6× more than chicken."
     },
     "a04": {
-      "title": "I cut beef to 2 meals a week",
-      "description": "I replace it with veg, fruit and grains."
+      "title": "I limit beef to 1 meal a week.",
+      "description": "I replace the rest with vegetables, fruit and grains."
     },
     "a05": {
-      "title": "I buy in bulk",
+      "title": "I buy in bulk.",
       "description": "It cuts packaging and food waste."
     },
     "a06": {
-      "title": "I eat seasonal, local food",
+      "title": "I eat seasonal and local food.",
       "description": "It cuts transport and refrigeration."
     },
     "a07": {
-      "title": "I join schemes like \"Meat-free Monday\"",
+      "title": "I take part in initiatives like \"Meatless Monday\"",
       "description": "One meat-free day a week makes a difference."
     },
     "a08": {
-      "title": "I have just 1 coffee a day",
+      "title": "I have just 1 coffee a day.",
       "description": "Coffee has a significant water and carbon footprint."
     },
     "a09": {
-      "title": "I swap one cup of coffee for tea each day",
+      "title": "I replace one cup of coffee with tea each day.",
       "description": "Tea emits up to 4× less CO₂e than coffee."
     },
     "a10": {
-      "title": "I stop buying plastic bottled water (I use a reusable bottle)",
+      "title": "I stop drinking water from plastic bottles (I use a reusable bottle).",
       "description": "It cuts out making and shipping plastic."
     },
     "c01": {
-      "title": "I buy refurbished appliances",
-      "description": "I support the circular economy."
+      "title": "I buy repaired appliances.",
+      "description": "I contribute to the circular economy."
     },
     "c02": {
-      "title": "I buy fewer clothes but better quality",
+      "title": "I buy fewer clothes, but of better quality.",
       "description": "Fast fashion causes 10% of global emissions."
     },
     "c03": {
-      "title": "I buy or swap second-hand items",
+      "title": "I buy or swap second-hand items.",
       "description": "Extending a product's life cuts its footprint."
     },
     "c04": {
-      "title": "I buy and wear second-hand clothes",
+      "title": "I buy second-hand clothes.",
       "description": "Each reused garment saves water, energy and emissions."
     },
     "c05": {
-      "title": "I repair my broken appliance",
+      "title": "I repair my broken appliances.",
       "description": "Extending its life by 2 years halves its footprint."
     },
     "c06": {
-      "title": "I take up more sustainable sports, like running instead of golf",
+      "title": "I choose more sustainable sports, like running instead of golf.",
       "description": "Golf needs large areas of land and water."
     },
     "c07": {
-      "title": "I choose eco-friendly, biodegradable cleaning products",
+      "title": "I choose eco-friendly and biodegradable cleaning products.",
       "description": "Fewer chemicals, less energy in production."
     },
     "c08": {
-      "title": "I give my smartphone a second life",
+      "title": "I give my smartphone a second chance.",
       "description": "Manufacturing is 80% of a phone's footprint."
     },
     "c09": {
-      "title": "I quit smoking",
+      "title": "I quit smoking.",
       "description": "As well as the health benefits, it cuts waste and emissions."
     },
     "d01": {
@@ -965,20 +965,20 @@
       "description": "Every active cloud service uses energy even when you don't."
     },
     "d02": {
-      "title": "I watch streaming in SD instead of HD when I don't need it",
+      "title": "I stream in basic quality instead of HD when I don't need it, reducing data use by 80%.",
       "description": "It cuts data use by 80%."
     },
     "d03": {
-      "title": "I listen to music via audio streaming instead of video",
-      "description": "Spotify vs YouTube: audio uses 10× less than video."
+      "title": "I stream music as audio instead of video (Spotify vs YouTube).",
+      "description": "Audio uses one-tenth as much as video."
     },
     "d04": {
-      "title": "I use AI only when I need it",
-      "description": "An AI query uses 10 times more energy than a Google search."
+      "title": "I use AI only when I need it.",
+      "description": "An AI query uses 10 times more energy than a search engine."
     },
     "d05": {
-      "title": "I delete what I don't use in the cloud: photos, files and emails",
-      "description": "Servers never rest — less data, less energy."
+      "title": "I delete unused cloud content: photos, files and emails.",
+      "description": "Servers never rest: less data, less energy."
     }
   }
 }
