@@ -31,6 +31,25 @@ export function SessionProvider({ children }) {
     }
     socket.on('connect', onConnect)
 
+    // Reintento global de huellas pendientes por HTTP: al abrir la app, al
+    // volver a primer plano (visibilitychange) y al recuperar conexión (online).
+    function retryAllPending() {
+      for (const key of safeKeys()) {
+        if (!key.startsWith('co2sprint_pending_')) continue
+        const raw = safeGet(key)
+        if (!raw) continue
+        let payload
+        try { payload = JSON.parse(raw) } catch { safeRemove(key); continue }
+        api.post('/api/results/submit', payload)
+          .then(() => safeRemove(key))
+          .catch(() => {})
+      }
+    }
+    retryAllPending()
+    function onVisible() { if (document.visibilityState === 'visible') retryAllPending() }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('online', retryAllPending)
+
     // Try to restore participant session from localStorage
     const keys = safeKeys().filter(k => k.startsWith('co2sprint_participant_'))
     if (keys.length > 0) {
@@ -67,6 +86,8 @@ export function SessionProvider({ children }) {
       socket.off('step:change')
       socket.off('session:closed')
       socket.off('connect', onConnect)
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('online', retryAllPending)
       socket.disconnect()
     }
   }, [])
