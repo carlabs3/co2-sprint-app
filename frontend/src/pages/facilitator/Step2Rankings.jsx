@@ -178,6 +178,7 @@ export default function Step2Rankings() {
 
   const completed   = ranking.length
   const total       = Math.max(totalJoined, completed)
+  const missing     = Math.max(0, totalJoined - completed)
   const progressPct = total > 0 ? Math.round((completed / total) * 100) : 0
   const isClosed    = sessionStatus === 'closed'
 
@@ -768,6 +769,11 @@ export default function Step2Rankings() {
         <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>
           {t('step2Rankings.footprintsReceived')}
         </div>
+        {missing > 0 && (
+          <div style={{ fontSize: 11, color: '#cc4444', fontWeight: 600, marginTop: 6 }}>
+            {t('step2Rankings.missingFootprints', { count: missing })}
+          </div>
+        )}
       </div>
 
       <div style={{ width: '100%', borderTop: '1px solid #e5e5e5' }} />

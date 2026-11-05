@@ -816,6 +816,8 @@
     "notChosen": "Not chosen",
     "revealWinners": "Reveal winners →",
     "footprintsReceived": "Footprints received",
+    "missingFootprints_one": "{{count}} footprint missing",
+    "missingFootprints_other": "{{count}} footprints missing",
     "tabFootprints": "Footprints",
     "tabActions": "Actions",
     "calculatorActive": "Calculator active",

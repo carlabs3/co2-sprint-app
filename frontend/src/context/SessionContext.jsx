@@ -1,9 +1,22 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { socket } from '../utils/socket.js'
 import api from '../utils/api.js'
-import { safeGet, safeRemove, safeKeys } from '../utils/safeStorage.js'
+import { safeGet, safeSet, safeRemove, safeKeys } from '../utils/safeStorage.js'
+import { uid } from '../utils/ids.js'
 
 const SessionContext = createContext(null)
+
+// Id estable del participante (persistente en localStorage). Permite deduplicar
+// reconexiones y contar participantes reales. Si localStorage falla, genera uno
+// efímero por sesión de página.
+function getPid() {
+  let pid = safeGet('co2sprint_pid')
+  if (!pid) {
+    pid = uid()
+    safeSet('co2sprint_pid', pid)
+  }
+  return pid
+}
 
 export function SessionProvider({ children }) {
   const [sessionCode,       setSessionCode]       = useState(null)
@@ -59,7 +72,8 @@ export function SessionProvider({ children }) {
         api.get(`/api/sessions/${saved.code}/info`)
           .then(res => {
             if (res.data.status === 'active') {
-              participantDataRef.current = { code: saved.code, name: saved.name, group: saved.group, age: saved.age, gender: saved.gender }
+              const pid = getPid()
+              participantDataRef.current = { code: saved.code, name: saved.name, group: saved.group, age: saved.age, gender: saved.gender, pid }
               setSessionCode(saved.code)
               setParticipantName(saved.name || '')
               setParticipantGroup(saved.group || '')
@@ -71,6 +85,7 @@ export function SessionProvider({ children }) {
                 group:  saved.group,
                 age:    saved.age,
                 gender: saved.gender,
+                pid,
               })
             } else {
               safeRemove(key)
@@ -93,14 +108,15 @@ export function SessionProvider({ children }) {
   }, [])
 
   function joinSession(code, name, group, age, gender) {
-    participantDataRef.current = { code, name, group, age: age || '', gender: gender || '' }
+    const pid = getPid()
+    participantDataRef.current = { code, name, group, age: age || '', gender: gender || '', pid }
     setSessionCode(code)
     setParticipantName(name)
     setParticipantGroup(group)
     setParticipantAge(age || '')
     setParticipantGender(gender || '')
     setSessionClosed(false)
-    socket.emit('session:join', { code, name, group, age, gender })
+    socket.emit('session:join', { code, name, group, age, gender, pid })
   }
 
   function clearSession() {

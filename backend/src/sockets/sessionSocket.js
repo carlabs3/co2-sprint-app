@@ -44,28 +44,31 @@ export function registerSocketHandlers(io) {
       } catch {}
     })
 
-    socket.on('session:join', async ({ code, name, group, age, gender }) => {
+    socket.on('session:join', async ({ code, name, group, age, gender, pid }) => {
       try {
         socket.data.name = name || 'Anónimo'
         socket.data.group = group
         socket.data.sessionCode = code
+        socket.data.pid = pid || null
 
         // Join the room IMMEDIATELY before any async DB operations
         // so the socket receives broadcasts (step:change etc.) without race conditions
         socket.join(code)
         console.log(`[socket] ${socket.id} joined room ${code} (group: ${group})`)
 
+        // Upsert por pid estable: una reconexión reutiliza el mismo documento
+        // (no crea un Participant nuevo). Sin pid (caché antigua) → por socketId.
         const participant = await Participant.findOneAndUpdate(
-          { socketId: socket.id },
-          { sessionCode: code, group, age: age || '', gender: gender || '', socketId: socket.id },
+          pid ? { sessionCode: code, pid } : { socketId: socket.id },
+          { sessionCode: code, group, age: age || '', gender: gender || '', socketId: socket.id, ...(pid ? { pid } : {}) },
           { upsert: true, new: true }
         )
         if (participant?._id) {
           participantNames.set(participant._id.toString(), socket.data.name)
         }
 
-        // Track unique participant by group+name (reconnects reuse the same slot)
-        const uniqueKey = `${group}_${name || socket.id}`
+        // Track unique participant by group+pid (estable); fallback a nombre/socket
+        const uniqueKey = `${group}_${pid || name || socket.id}`
         if (!sessionParticipants.has(code)) sessionParticipants.set(code, new Map())
         sessionParticipants.get(code).set(uniqueKey, { name, group, socketId: socket.id })
         const totalUnique = sessionParticipants.get(code).size
@@ -146,10 +149,14 @@ export function registerSocketHandlers(io) {
       io.to(sessionCode).emit('results:revealed')
     })
 
-    socket.on('footprint:submit', async ({ submissionId, sessionCode, group, age, gender, carbonTons, areas, answers }) => {
+    socket.on('footprint:submit', async ({ submissionId, sessionCode, group, age, gender, carbonTons, areas, answers, pid }) => {
       try {
-        // Only look up by socket.id — never fall back to group to avoid overwriting another participant's data
-        const participant = await Participant.findOne({ socketId: socket.id })
+        // Busca por pid estable (sobrevive a reconexiones); si no, por socket.id.
+        // Nunca por grupo, para no pisar datos de otro participante.
+        const lookupPid = pid || socket.data.pid
+        const participant = lookupPid
+          ? await Participant.findOne({ sessionCode, pid: lookupPid })
+          : await Participant.findOne({ socketId: socket.id })
 
         if (participant?._id && socket.data.name) {
           participantNames.set(participant._id.toString(), socket.data.name)

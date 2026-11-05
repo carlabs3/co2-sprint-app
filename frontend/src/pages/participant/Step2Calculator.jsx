@@ -591,6 +591,7 @@ export default function Step2Calculator() {
         areas: calcResult.areas,
         answers: currentAnswers,
         category: calcResult.category,
+        pid: safeGet('co2sprint_pid') || undefined,
       }
       // Capa 3: pending en localStorage (tolerante a fallos)
       const pendingKey = `co2sprint_pending_${code}`

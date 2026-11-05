@@ -816,6 +816,8 @@
     "notChosen": "Sin elegir",
     "revealWinners": "Revelar ganadores →",
     "footprintsReceived": "Huellas recibidas",
+    "missingFootprints_one": "Falta {{count}} huella",
+    "missingFootprints_other": "Faltan {{count}} huellas",
     "tabFootprints": "Huellas",
     "tabActions": "Acciones",
     "calculatorActive": "Calculadora activa",
