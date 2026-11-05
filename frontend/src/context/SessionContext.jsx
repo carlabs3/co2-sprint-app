@@ -63,6 +63,13 @@ export function SessionProvider({ children }) {
     document.addEventListener('visibilitychange', onVisible)
     window.addEventListener('online', retryAllPending)
 
+    // Fallo del socket (p. ej. guardado fallido): reintenta por HTTP.
+    function onSocketError(e) {
+      console.warn('[socket] error', e)
+      retryAllPending()
+    }
+    socket.on('error', onSocketError)
+
     // Try to restore participant session from localStorage
     const keys = safeKeys().filter(k => k.startsWith('co2sprint_participant_'))
     if (keys.length > 0) {
@@ -103,6 +110,7 @@ export function SessionProvider({ children }) {
       socket.off('connect', onConnect)
       document.removeEventListener('visibilitychange', onVisible)
       window.removeEventListener('online', retryAllPending)
+      socket.off('error', onSocketError)
       socket.disconnect()
     }
   }, [])

@@ -143,7 +143,10 @@ router.post('/submit', async (req, res) => {
     })
     res.json({ ok: true, id: result._id })
   } catch (err) {
-    console.error('Submit error:', err.message)
+    console.error('[HTTP /submit] error al guardar resultado', {
+      submissionId: req.body?.submissionId, sessionCode: req.body?.sessionCode,
+      group: req.body?.group, message: err?.message,
+    })
     res.status(500).json({ error: 'Error al guardar resultado' })
   }
 })

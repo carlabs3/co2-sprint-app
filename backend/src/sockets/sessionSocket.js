@@ -204,8 +204,11 @@ export function registerSocketHandlers(io) {
         }))
 
         io.to(sessionCode).emit('ranking:update', { individual })
-      } catch {
-        socket.emit('error', { message: 'Error al guardar huella' })
+      } catch (err) {
+        console.error('[footprint:submit] error al guardar huella', {
+          submissionId, sessionCode, group, pid: pid || socket.data.pid, message: err?.message,
+        })
+        socket.emit('error', { message: 'Error al guardar huella', context: 'footprint:submit' })
       }
     })
 
