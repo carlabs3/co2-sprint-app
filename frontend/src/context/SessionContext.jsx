@@ -6,15 +6,23 @@ import { uid } from '../utils/ids.js'
 
 const SessionContext = createContext(null)
 
-// Id estable del participante (persistente en localStorage). Permite deduplicar
-// reconexiones y contar participantes reales. Si localStorage falla, genera uno
-// efímero por sesión de página.
+// pid del participante guardado en localStorage. Se REUTILIZA al recargar la
+// página o al reconectar dentro de la misma sesión (deduplicar, contar bien).
 function getPid() {
   let pid = safeGet('co2sprint_pid')
   if (!pid) {
     pid = uid()
     safeSet('co2sprint_pid', pid)
   }
+  return pid
+}
+
+// pid NUEVO: se genera al enviar el formulario de unirse (JoinSession). Así,
+// dos personas que usan el mismo móvil una detrás de otra no comparten pid
+// (no se pisan la huella ni el recuento).
+function newPid() {
+  const pid = uid()
+  safeSet('co2sprint_pid', pid)
   return pid
 }
 
@@ -116,7 +124,7 @@ export function SessionProvider({ children }) {
   }, [])
 
   function joinSession(code, name, group, age, gender) {
-    const pid = getPid()
+    const pid = newPid()   // pid nuevo por cada envío del formulario de unirse
     participantDataRef.current = { code, name, group, age: age || '', gender: gender || '', pid }
     setSessionCode(code)
     setParticipantName(name)
