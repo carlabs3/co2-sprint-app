@@ -8,6 +8,7 @@ import { ACTIONS, AREA_ICON_URL } from '../../utils/actions.js'
 import WaitingForFacilitator from '../../components/WaitingForFacilitator.jsx'
 import { fmtTons } from '../../utils/format.js'
 import { applySessionLang } from '../../utils/sessionLang.js'
+import { getReference } from '../../utils/reference.js'
 
 // Normalize group name for comparison: "Equipo A" === "equipo-a"
 function normalizeGroup(g) {
@@ -28,8 +29,6 @@ const AREA_META = [
   { key: 'waste',          label: 'areas.waste',          color: '#f472b6' },
   { key: 'publicServices', label: 'areas.publicServices', color: '#94a3b8' },
 ]
-
-const SPAIN_AVG = 8.1
 
 // label = clave i18n (compartida con Step2Results)
 const CATEGORY_CONFIG = {
@@ -141,7 +140,8 @@ function CalculatingPhase({ group, teamResults }) {
 
 // ── Phase 3: Results ──────────────────────────────────────────────────────────
 function ResultsPhase({ group, teamResults, sessionResults }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const SPAIN_AVG = getReference(i18n.language).total   // referencia por idioma
   if (teamResults.length === 0) {
     return (
       <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', flexDirection: 'column' }}>

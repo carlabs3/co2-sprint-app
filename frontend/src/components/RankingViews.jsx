@@ -7,6 +7,7 @@ import {
 import { AREA_QUESTIONS } from '../utils/answerLabels.js'
 import { MAP, calcAlcohol } from '../utils/calculator.js'
 import { fmtTons } from '../utils/format.js'
+import { getReference } from '../utils/reference.js'
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -385,8 +386,9 @@ function AnswerDistribution({ ranking, activeTab, tab }) {
 // ── DistributionView ──────────────────────────────────────────────────────────
 
 export function DistributionView({ ranking }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [activeTab, setActiveTab] = useState('total')
+  const ref = getReference(i18n.language)   // cifra de referencia por idioma
 
   const tab = HISTOGRAM_TABS.find(tb => tb.id === activeTab)
 
@@ -397,8 +399,9 @@ export function DistributionView({ ranking }) {
 
   const histStep = activeTab === 'total' ? 1 : 0.5
   const histData = buildHistogram(values, activeTab === 'total', histStep)
-  const spainAvg = SPAIN_AVERAGES[activeTab]
-  const spainBucket = `${Math.floor(spainAvg)}–${Math.floor(spainAvg) + 1}`
+  // Referencia del país para la pestaña activa; null si no hay cifra (EN por área)
+  const spainAvg = activeTab === 'total' ? ref.total : (ref.areas ? ref.areas[activeTab] : undefined)
+  const spainBucket = spainAvg != null ? `${Math.floor(spainAvg)}–${Math.floor(spainAvg) + 1}` : null
 
   const meanVal      = values.length ? values.reduce((s, v) => s + v, 0) / values.length : 0
   const minVal       = values[0] ?? 0
@@ -478,14 +481,16 @@ export function DistributionView({ ranking }) {
                 )
               })}
             </Bar>
-            {/* Spain average reference line */}
-            <ReferenceLine
-              x={spainBucket}
-              stroke="#000000"
-              strokeDasharray="4 3"
-              strokeWidth={1.5}
-              label={{ value: t('rankings.refSpain', { value: spainAvg }), position: 'top', fontSize: 13, fill: '#555' }}
-            />
+            {/* Country average reference line (oculta si no hay cifra, p. ej. EN por área) */}
+            {spainAvg != null && (
+              <ReferenceLine
+                x={spainBucket}
+                stroke="#000000"
+                strokeDasharray="4 3"
+                strokeWidth={1.5}
+                label={{ value: t('rankings.refSpain', { value: spainAvg }), position: 'top', fontSize: 13, fill: '#555' }}
+              />
+            )}
             {values.length > 0 && (
               <ReferenceLine x={meanBucket} stroke={tab.color} strokeWidth={2.5} strokeDasharray="5 3"
                 label={{ value: t('rankings.refMean'), fill: tab.color, fontSize: 14, fontWeight: 700, position: 'top' }} />

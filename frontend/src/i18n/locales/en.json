@@ -160,13 +160,13 @@
     "donutTitle": "Breakdown by area",
     "detailTitle": "Detail by category",
     "spain": {
-      "title": "Compared with Spain",
+      "title": "Compared with Ireland",
       "you": "You",
       "vs": "VS",
-      "avgSpain": "Spain average",
-      "below": "{{pct}}% below the Spanish average",
-      "above": "{{pct}}% above the Spanish average",
-      "source": "Source: Spanish Ministry for the Ecological Transition (MITECO), 2023"
+      "avgSpain": "Ireland average",
+      "below": "{{pct}}% below the Irish average",
+      "above": "{{pct}}% above the Irish average",
+      "source": "Source: Eurostat, greenhouse gas footprint per capita, 2023"
     },
     "percentile": {
       "title": "Your place in the session",
@@ -206,7 +206,7 @@
     "breakdownTeamAvg": "Breakdown by area — team average",
     "comparisonTitle": "Comparison",
     "avgSession": "Session average",
-    "avgSpain": "Spain average",
+    "avgSpain": "Ireland average",
     "objective": "─ Climate goal: 2 t/year per person",
     "belowSession": "Below the session average",
     "step3": {
@@ -382,9 +382,9 @@
       "text": "How many flights do you take a year?",
       "info": "Count a return flight as one. Enter 0 if you don't fly.",
       "options": {
-        "flightShort": "Short (under 3h, e.g. Madrid–Paris)",
-        "flightMedium": "Medium (3–6h, e.g. Madrid–Istanbul)",
-        "flightLong": "Long-haul (over 6h, e.g. Madrid–New York)"
+        "flightShort": "Short (under 3h)",
+        "flightMedium": "Medium (3–6h)",
+        "flightLong": "Long-haul (over 6h)"
       }
     },
     "train": {
@@ -750,7 +750,7 @@
     "fewDataWarning": "With little data, the distribution may not be representative.",
     "tooltip_one": "{{count}} participant",
     "tooltip_other": "{{count}} participants",
-    "refSpain": "Spain {{value}}t",
+    "refSpain": "Ireland {{value}}t",
     "refMean": "mean",
     "refMin": "min {{value}}t",
     "refMax": "max {{value}}t",
@@ -758,7 +758,7 @@
       "mean": "Mean value",
       "min": "Minimum",
       "max": "Maximum",
-      "spain": "Spain average",
+      "spain": "Ireland average",
       "mostFrequent": "Most frequent"
     },
     "stats": {

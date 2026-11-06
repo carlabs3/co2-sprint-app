@@ -13,8 +13,8 @@ import { safeGet, safeSet, safeRemove } from '../../utils/safeStorage.js'
 import { AREA_QUESTIONS } from '../../utils/answerLabels.js'
 import { MAP, calcAlcohol } from '../../utils/calculator.js'
 import { fmtTons } from '../../utils/format.js'
+import { getReference } from '../../utils/reference.js'
 
-const SPAIN_AVG = 8.1
 const BAR_MAX_H = 120
 
 const CATEGORY_CONFIG = {
@@ -316,8 +316,9 @@ export default function Step2Results() {
   const location = useLocation()
   const { code }  = useParams()
   const navigate  = useNavigate()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { participantGroup } = useSession()
+  const SPAIN_AVG = getReference(i18n.language).total   // cifra de referencia por idioma
 
   // Restore from localStorage if available (survives page reload)
   const RESULTS_KEY = `co2sprint_results_${code}`
