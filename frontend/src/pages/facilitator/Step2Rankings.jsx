@@ -789,17 +789,12 @@ export default function Step2Rankings() {
 
       <div style={{ width: '100%', borderTop: '1px solid #e5e5e5' }} />
 
-      {/* Counter */}
+      {/* Contador — solo en el control del facilitador; se oculta al colapsar
+          la barra para proyectar. Sin total ni cuántas faltan. */}
       <div style={{ textAlign: 'center', padding: '0.25rem 0' }}>
-        <div style={{ fontSize: 32, fontWeight: 900, color: '#0a0a0a', lineHeight: 1 }}>{completed}</div>
-        <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>
-          {t('step2Rankings.footprintsReceived')}
+        <div style={{ fontSize: 15, fontWeight: 700, color: '#0a0a0a' }}>
+          {t('step2Rankings.submittedCount', { count: completed })}
         </div>
-        {total > 0 && (
-          <div style={{ fontSize: 11, color: '#999', marginTop: 6 }}>
-            {t('step2Rankings.submittedCount', { sent: completed, total })}
-          </div>
-        )}
       </div>
 
       <div style={{ width: '100%', borderTop: '1px solid #e5e5e5' }} />
