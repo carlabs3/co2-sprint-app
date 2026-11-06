@@ -51,13 +51,16 @@ const MIN_GROUPS = 2
 const MAX_GROUPS = 8
 
 export default function SessionCreate() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   // Equipos por defecto en el idioma de la sesión: "Equipo A/B/C" · "Team A/B/C"
   const defaultTeams = (lng) => ['A', 'B', 'C'].map(l => `${t('sessionCreate.teamPrefix', { lng })} ${l}`)
+  // Arranca con el idioma actual de la interfaz (elección de la Home); el
+  // facilitador puede cambiarlo con el selector ES/EN.
+  const initLang = i18n.language === 'en' ? 'en' : 'es'
 
   const [sessionName, setSessionName] = useState('')
-  const [lang, setLang]         = useState('es')
-  const [groups, setGroups]     = useState(() => defaultTeams('es'))
+  const [lang, setLang]         = useState(initLang)
+  const [groups, setGroups]     = useState(() => defaultTeams(initLang))
   const [newGroup, setNewGroup] = useState('')
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')

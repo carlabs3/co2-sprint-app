@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useSession } from '../context/SessionContext.jsx'
+import { applySessionLang } from '../utils/sessionLang.js'
+import { safeGet, safeSet } from '../utils/safeStorage.js'
 
 function formatCode(val) {
   const clean = val.toUpperCase().replace(/[^A-Z0-9]/g, '')
@@ -16,11 +18,22 @@ export default function Home() {
   const [code, setCode]   = useState('')
   const [error, setError] = useState('')
   const { clearSession } = useSession()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   useEffect(() => {
     clearSession()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fuera de una sesión, la Home manda: aplica la elección de idioma guardada
+  // (o español por defecto). Recupera la elección al volver desde una sesión.
+  useEffect(() => {
+    applySessionLang(safeGet('co2sprint_ui_lang') || 'es')
+  }, [])
+
+  function chooseLang(l) {
+    applySessionLang(l)                 // i18n.changeLanguage + <html lang>
+    safeSet('co2sprint_ui_lang', l)     // persiste la elección (tolerante a fallos)
+  }
 
   useEffect(() => {
     if (codeFromUrl) setCode(formatCode(codeFromUrl))
@@ -56,6 +69,32 @@ export default function Home() {
       {/* ── HERO ─────────────────────────────────────────────── */}
       <div style={{ background: '#fff', borderBottom: '1px solid var(--gris-borde)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+
+          {/* Selector de idioma — arriba a la derecha. "ES"/"EN" no se traducen. */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 4, padding: '12px 24px 0' }}>
+            {['es', 'en'].map(l => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => chooseLang(l)}
+                aria-pressed={i18n.language === l}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '4px 6px',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  fontSize: 13,
+                  letterSpacing: '0.04em',
+                  fontWeight: i18n.language === l ? 700 : 400,
+                  color: i18n.language === l ? '#0a0a0a' : '#999',
+                }}
+              >
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
+
           <div className="hero-grid">
 
             {/* Left */}
