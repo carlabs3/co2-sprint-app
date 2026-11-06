@@ -345,7 +345,7 @@
       "realtime": "Real-time results"
     },
     "stats": {
-      "spainAvg": "Average CO₂e per person per year in Spain",
+      "spainAvg": "Average CO₂e per person per year in Ireland",
       "double": "Twice what the planet can absorb",
       "minutes": "Minutes to work out your footprint and start changing"
     },
@@ -356,7 +356,7 @@
       "s2Title": "Work out your footprint",
       "s2Text": "Answer questions about transport, energy, food and more.",
       "s3Title": "See the results",
-      "s3Text": "Compare with your team and the Spanish average in real time."
+      "s3Text": "Compare with your team and the Irish average in real time."
     }
   },
   "questions": {
@@ -565,7 +565,7 @@
     },
     "bottledWater": {
       "text": "Do you drink bottled water?",
-      "info": "If you mainly drink tap water, tick no. Spanish tap water is safe in most cities.",
+      "info": "If you mainly drink tap water, tick no. Tap water is safe to drink in most places.",
       "options": {
         "13a": "Yes, we buy bottled water at home",
         "13b": "Sometimes I buy a bottle",

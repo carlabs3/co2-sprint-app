@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useSession } from '../context/SessionContext.jsx'
 import { applySessionLang } from '../utils/sessionLang.js'
 import { safeGet, safeSet } from '../utils/safeStorage.js'
+import { getReference } from '../utils/reference.js'
 
 function formatCode(val) {
   const clean = val.toUpperCase().replace(/[^A-Z0-9]/g, '')
@@ -201,17 +202,29 @@ export default function Home() {
       {/* ── STATS ────────────────────────────────────────────── */}
       <div className="stats">
         {[
-          { bg: '#fff',    numColor: '#0a0a0a', textColor: '#555', big: '4.7 t', text: t('home.stats.spainAvg') },
+          // Primera cifra por idioma: ES España 4,7 t (sin cambios);
+          // EN Irlanda (config) + fuente Eurostat.
+          {
+            bg: '#fff', numColor: '#0a0a0a', textColor: '#555',
+            big: i18n.language === 'en' ? `${getReference('en').total.toFixed(1)} t` : '4.7 t',
+            text: t('home.stats.spainAvg'),
+            source: i18n.language === 'en' ? t('step2Results.spain.source') : null,
+          },
           { bg: '#0a0a0a', numColor: '#fff',    textColor: 'rgba(255,255,255,0.6)', big: '2×', text: t('home.stats.double') },
           { bg: '#fff',    numColor: '#0a0a0a', textColor: '#555', big: "5'", text: t('home.stats.minutes') },
-        ].map(({ bg, numColor, textColor, big, text }, i) => (
-          <div key={big} className="stat" style={{ background: bg, borderRight: i < 2 ? '1px solid #e5e5e5' : 'none' }}>
+        ].map(({ bg, numColor, textColor, big, text, source }, i) => (
+          <div key={i} className="stat" style={{ background: bg, borderRight: i < 2 ? '1px solid #e5e5e5' : 'none' }}>
             <div style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 900, color: numColor, lineHeight: 1, marginBottom: 12 }}>
               {big}
             </div>
             <p style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em', color: textColor, lineHeight: 1.55, margin: 0 }}>
               {text}
             </p>
+            {source && (
+              <p style={{ fontSize: 10, color: '#aaa', margin: '8px 0 0', lineHeight: 1.4 }}>
+                {source}
+              </p>
+            )}
           </div>
         ))}
       </div>
